@@ -1,0 +1,26 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# R project
+*.Rproj
+
+# History files
+.Rhistory
+.Rapp.history
+
+# Session Data files
+.RData
+
+# knitr and R markdown default cache directories
+/*_cache/
+/cache/
+
+
