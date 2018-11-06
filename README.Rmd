@@ -2,9 +2,7 @@
 title: "Variable Stars - An optimized package to find patterns in variable stars"
 author: "Roberto Maestre"
 date: "10/24/2018"
-output:
-  html_document: default
-  pdf_document: default
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -130,7 +128,7 @@ In this case, we use the photometry of a pulsar star, in which timestamp the mag
 
 ```{r}
 # Read pulsar data
-dt.pulsar <- data.table(read.csv("../data/pulsar.tsv", sep = "\t"))
+dt.pulsar <- data.table(read.csv("data/pulsar.tsv", sep = "\t"))
 ggplot(aes(time, magnitude), data = dt.pulsar[sample(nrow(dt.pulsar), 1000),]) +
   geom_point() +
   geom_line() +
@@ -165,20 +163,4 @@ m <-
 autoplot(m, log = F) +
   scale_x_discrete(labels = c("DFT on a Pulsar star data")) +
   xlab("")
-```
-
-
-
-```{r, warning=F}
-df <- data.frame(read.csv2("~/Downloads/saldos_sample.csv", sep=";"))
-
-id <- 21
-x <- as.numeric(df[ ,id])
-t <- seq(1:length(x))
-dt <- data.frame(t,x)
-plot(dt); lines(dt);
-
-dt.spectrum <-
-  calculate_amplitudes(dt$t, dt$x)
-plot_spectrum(0, 1, dt.spectrum)
 ```
