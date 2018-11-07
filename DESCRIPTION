@@ -1,6 +1,6 @@
 Package: variableStars
 Type: Package
-Title: Efficient software to study spectrum patterns on variable stars
+Title: Efficient software to study spectrum patterns on variable stars.
 Version: 1.0
 Date: 2018-10-23
 Author: Roberto Maestre
@@ -9,3 +9,6 @@ Description: tbd
 License: GPL (>= 2)
 Imports: Rcpp (>= 0.12.18)
 LinkingTo: Rcpp, RcppArmadillo
+Suggests: knitr,
+    rmarkdown
+VignetteBuilder: knitr
