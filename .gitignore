@@ -8,20 +8,17 @@
 *.so
 *.dylib
 *.dll
-
 # R project
 *.Rproj
-
 # History files
 .Rhistory
 .Rapp.history
-
 # Session Data files
 .RData
-
 # knitr and R markdown default cache directories
 /*_cache/
 /cache/
-
-
+README\.Rmd
+NEWS\.md
 .Rproj.user
+inst/doc
