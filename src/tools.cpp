@@ -46,7 +46,6 @@ DataFrame apodization(arma::vec frequences, String filter) {
   } else if (filter == "cosine"){
     factor =  arma::cos((M_PI * frequencesCentered) / (2 * middle));
   } else if (filter == "gaussian"){
-    Rcout << arma::stddev(frequencesCentered);
     factor =  arma::exp(-0.5 * arma::pow(frequencesCentered/arma::stddev(frequencesCentered), 2));
   }
   else {
