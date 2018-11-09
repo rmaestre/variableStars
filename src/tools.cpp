@@ -39,22 +39,26 @@ DataFrame apodization(arma::vec frequences, String filter) {
   if (filter == "bartlett") {
     factor = 1 - arma::abs(frequencesCentered) / middle;
   } else if (filter == "blackman") {
-    factor = 21 / 50 + 0.5 * arma::cos(M_PI * frequencesCentered / middle) +
-      2 / 25 * arma::cos(2 * M_PI * frequencesCentered / middle);
-  } else if (filter == "connes"){
-    factor =  arma::pow(1 - arma::pow((frequencesCentered / middle), 2), 2);
-  } else if (filter == "cosine"){
-    factor =  arma::cos((M_PI * frequencesCentered) / (2 * middle));
-  } else if (filter == "gaussian"){
-    factor =  arma::exp(-0.5 * arma::pow(frequencesCentered/arma::stddev(frequencesCentered), 2));
-  }
-  else {
+    factor = 21.0 / 50.0 + 0.5 * arma::cos(M_PI * frequencesCentered / middle) +
+      2.0 / 25.0 * arma::cos(2 * M_PI * frequencesCentered / middle);
+  } else if (filter == "connes") {
+    factor = arma::pow(1 - arma::pow((frequencesCentered / middle), 2), 2);
+  } else if (filter == "cosine") {
+    factor = arma::cos((M_PI * frequencesCentered) / (2 * middle));
+  } else if (filter == "gaussian") {
+    factor = arma::exp(
+      -0.5 *
+        arma::pow(frequencesCentered / arma::stddev(frequencesCentered), 2));
+  } else if (filter == "hamming") {
+    factor = 27.0 / 50.0 +
+      23.0 / 50.0 * arma::cos(M_PI * frequencesCentered / middle);
+  } else {
     factor = 1;
   }
   
   // Calculated amplitudes based on the choosen filter
-  //amplitudes = amplitudes + 1;
-  //amplitudes = amplitudes.t() * factor;
+  // amplitudes = amplitudes + 1;
+  // amplitudes = amplitudes.t() * factor;
   
   // Return results
   List results;
