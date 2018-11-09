@@ -8,7 +8,8 @@ arma::vec abs_vec(arma::vec x) {
   arma::vec aux(x.n_elem);
   arma::vec::iterator it_out;  // Output iterator
   arma::vec::iterator it_in;   // Input iterator
-  for (it_in = x.begin(), it_out = aux.begin(); it_in < x.end(); ++it_in, ++it_out) {
+  for (it_in = x.begin(), it_out = aux.begin(); it_in < x.end();
+  ++it_in, ++it_out) {
     *it_out = std::abs(*it_in);
   }
   return aux;
@@ -16,42 +17,41 @@ arma::vec abs_vec(arma::vec x) {
 
 //! Create a vector as sequence of integers
 /*!
- \param int first integer
- \param int last integer
- \return A numeric vector with integer secuence
- */
+\param int first integer
+\param int last integer
+\return A numeric vector with integer secuence
+*/
 //[[Rcpp::export]]
 DataFrame apodization(arma::vec frequences, String filter) {
-  
   // Center frequencies
   arma::vec frequencesCentered(frequences.n_elem);
   arma::vec amplitudes(frequences.n_elem);
   arma::vec factor(frequences.n_elem);
-    
+  
   // Get values to center frequences
   double max = frequences.max();
   double min = frequences.min();
   double middle = (max - min) / 2;
-
+  
   frequencesCentered = frequences - min - middle;
-    
+  
   // Apply filter
-  if( filter == "bartlett" ) {
+  if (filter == "bartlett") {
     factor = 1 - abs_vec(frequencesCentered) / middle;
-  } else if( filter == "blackman" ) {
-    factor = 3;
+  } else if (filter == "blackman") {
+    factor = 21 / 50 + 0.5 * arma::cos(M_PI * frequencesCentered / middle) +
+      2 / 25 * arma::cos(2 * M_PI * frequencesCentered / middle);
   } else {
     factor = 1;
   }
   
   // Calculated amplitudes based on the choosen filter
-  amplitudes = amplitudes + 1;
-  amplitudes = amplitudes.t() * factor;
-
+  //amplitudes = amplitudes + 1;
+  //amplitudes = amplitudes.t() * factor;
+  
   // Return results
   List results;
   results["frequencesCentered"] = frequencesCentered;
-  results["amplitude"] = amplitudes;
-  results["factor"] = factor;
+  results["amplitude"] = factor;
   return DataFrame(results);
 }
