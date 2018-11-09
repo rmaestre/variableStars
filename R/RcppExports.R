@@ -21,3 +21,7 @@ calculate_amplitudes <- function(time, x) {
     .Call(`_variableStars_calculate_amplitudes`, time, x)
 }
 
+apodization <- function(frequences, filter) {
+    .Call(`_variableStars_apodization`, frequences, filter)
+}
+
