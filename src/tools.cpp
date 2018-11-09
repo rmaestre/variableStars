@@ -37,10 +37,12 @@ DataFrame apodization(arma::vec frequences, String filter) {
   
   // Apply filter
   if (filter == "bartlett") {
-    factor = 1 - abs_vec(frequencesCentered) / middle;
+    factor = 1 - arma::abs(frequencesCentered) / middle;
   } else if (filter == "blackman") {
     factor = 21 / 50 + 0.5 * arma::cos(M_PI * frequencesCentered / middle) +
       2 / 25 * arma::cos(2 * M_PI * frequencesCentered / middle);
+  } else if (filter == "connes"){
+    factor =  arma::pow(1 - arma::pow((frequencesCentered / middle), 2), 2);
   } else {
     factor = 1;
   }
