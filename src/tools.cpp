@@ -43,7 +43,10 @@ DataFrame apodization(arma::vec frequences, String filter) {
       2 / 25 * arma::cos(2 * M_PI * frequencesCentered / middle);
   } else if (filter == "connes"){
     factor =  arma::pow(1 - arma::pow((frequencesCentered / middle), 2), 2);
-  } else {
+  } else if (filter == "cosine"){
+    factor =  arma::cos((M_PI * frequencesCentered) / (2 * middle));
+  }
+  else {
     factor = 1;
   }
   
