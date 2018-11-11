@@ -53,8 +53,7 @@ DataFrame apodization(arma::vec frequences, String filter) {
     factor = 27.0 / 50.0 +
       23.0 / 50.0 * arma::cos(M_PI * frequencesCentered / middle);
   } else if (filter == "hanning") {
-    factor =
-      arma::pow(arma::cos((M_PI * frequencesCentered) / (2.0 * middle), 2);
+    factor = arma::pow(arma::cos((M_PI * frequencesCentered) / (2.0 * middle)), 2);
   } else {
     factor = 1;
   }
