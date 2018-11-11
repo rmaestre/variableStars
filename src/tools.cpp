@@ -33,6 +33,7 @@ DataFrame apodization(arma::vec frequences, String filter) {
   double min = frequences.min();
   double middle = (max - min) / 2;
   
+  // Center frequences
   frequencesCentered = frequences - min - middle;
   
   // Apply filter
@@ -53,14 +54,13 @@ DataFrame apodization(arma::vec frequences, String filter) {
     factor = 27.0 / 50.0 +
       23.0 / 50.0 * arma::cos(M_PI * frequencesCentered / middle);
   } else if (filter == "hanning") {
-    factor = arma::pow(arma::cos((M_PI * frequencesCentered) / (2.0 * middle)), 2);
+    factor =
+      arma::pow(arma::cos((M_PI * frequencesCentered) / (2.0 * middle)), 2);
+  } else if (filter == "welch") {
+    factor = 1 - arma::pow((frequencesCentered / middle), 2);
   } else {
     factor = 1;
   }
-  
-  // Calculated amplitudes based on the choosen filter
-  // amplitudes = amplitudes + 1;
-  // amplitudes = amplitudes.t() * factor;
   
   // Return results
   List results;
