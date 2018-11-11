@@ -3,28 +3,26 @@
 using namespace Rcpp;
 using namespace std;
 
-//! Create a vector as sequence of integers
+//! Apply a sort of filter on a centered frequences vector
 /*!
-\param int first integer
-\param int last integer
-\return A numeric vector with integer secuence
+\param arma:vec vector with frequences to be processed
+\param String sort of filter to be applied
+\return A dataframe with centered frequences and processed
 */
 //[[Rcpp::export]]
 DataFrame apodization(arma::vec frequences, String filter) {
-  // Center frequencies
+  // Data structures needed
   arma::vec frequencesCentered(frequences.n_elem);
   arma::vec amplitudes(frequences.n_elem);
   arma::vec factor(frequences.n_elem);
   
-  // Get values to center frequences
+  // Center frequencies
   double max = frequences.max();
   double min = frequences.min();
   double middle = (max - min) / 2;
-  
-  // Center frequences
   frequencesCentered = frequences - min - middle;
   
-  // Apply filter
+  // Apply filter on centered frequences
   if (filter == "bartlett") {
     factor = 1 - arma::abs(frequencesCentered) / middle;
   } else if (filter == "blackman") {
