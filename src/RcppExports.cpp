@@ -74,6 +74,18 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// histogram
+DataFrame histogram(arma::vec frequences, double dnu);
+RcppExport SEXP _variableStars_histogram(SEXP frequencesSEXP, SEXP dnuSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type frequences(frequencesSEXP);
+    Rcpp::traits::input_parameter< double >::type dnu(dnuSEXP);
+    rcpp_result_gen = Rcpp::wrap(histogram(frequences, dnu));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_variableStars_main", (DL_FUNC) &_variableStars_main, 0},
@@ -82,6 +94,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_variableStars_compute_fft", (DL_FUNC) &_variableStars_compute_fft, 1},
     {"_variableStars_calculate_amplitudes", (DL_FUNC) &_variableStars_calculate_amplitudes, 2},
     {"_variableStars_apodization", (DL_FUNC) &_variableStars_apodization, 2},
+    {"_variableStars_histogram", (DL_FUNC) &_variableStars_histogram, 2},
     {NULL, NULL, 0}
 };
 

@@ -25,3 +25,7 @@ apodization <- function(frequences, filter) {
     .Call(`_variableStars_apodization`, frequences, filter)
 }
 
+histogram <- function(frequences, dnu) {
+    .Call(`_variableStars_histogram`, frequences, dnu)
+}
+
