@@ -54,3 +54,47 @@ DataFrame apodization(arma::vec frequences, String filter) {
   results["amplitude"] = factor;
   return DataFrame(results);
 }
+
+int fact(int n) { return (n == 1 || n == 0) ? 1 : fact(n - 1) * n; }
+
+//! Apply a sort of filter on a centered frequences vector
+/*!
+\param arma:vec vector with frequences to be processed
+\param double the spectral resolution (dnu)
+\return A dataframe with centered frequences and processed
+*/
+//[[Rcpp::export]]
+DataFrame histogram(arma::vec frequences, double dnu) {
+  // Maximum value to look at the histogram
+  double freqf = 100;
+  double binSize = dnu * 0.015;
+  // Calculate all frequences differences
+  int n = frequences.n_elem;
+  int diagSupElements = n * (n - 1) / 2;
+  arma::vec diff(diagSupElements);  // Number of elements in the sup. diag.
+  diff -= 1;
+  NumericVector::iterator it_first, it_second, it_diff;
+  it_diff = diff.begin();  // output iterator
+  int countElements = 0;
+  // Double loop (n^2 complexity)
+  for (it_first = frequences.begin(); it_first < frequences.end(); it_first++) {
+    for (it_second = it_first;
+         it_second < frequences.end() & it_diff < diff.end(); it_second++) {
+      if (it_first != it_second) {  // Jump same elements
+        *it_diff =
+          std::abs(*it_second - *it_first);  // Save absolute difference
+        if (*it_diff != 0) {
+          it_diff++;        // Increase pointer
+          countElements++;  // Increase elements
+        }
+      }
+    }
+  }
+  // Remove unused memory
+  diff.resize(diagSupElements - (diagSupElements - countElements));
+  
+  // Return results
+  List results;
+  results["diff"] = diff;
+  return DataFrame(results);
+}
