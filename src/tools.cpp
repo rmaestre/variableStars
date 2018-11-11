@@ -3,18 +3,6 @@
 using namespace Rcpp;
 using namespace std;
 
-arma::vec abs_vec(arma::vec x) {
-  // Output as vector structure
-  arma::vec aux(x.n_elem);
-  arma::vec::iterator it_out;  // Output iterator
-  arma::vec::iterator it_in;   // Input iterator
-  for (it_in = x.begin(), it_out = aux.begin(); it_in < x.end();
-  ++it_in, ++it_out) {
-    *it_out = std::abs(*it_in);
-  }
-  return aux;
-}
-
 //! Create a vector as sequence of integers
 /*!
 \param int first integer
