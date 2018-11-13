@@ -55,8 +55,6 @@ DataFrame apodization(arma::vec frequences, String filter) {
   return DataFrame(results);
 }
 
-int fact(int n) { return (n == 1 || n == 0) ? 1 : fact(n - 1) * n; }
-
 //! Apply a sort of filter on a centered frequences vector
 /*!
 \param arma:vec vector with frequences to be processed
@@ -64,10 +62,7 @@ int fact(int n) { return (n == 1 || n == 0) ? 1 : fact(n - 1) * n; }
 \return A dataframe with centered frequences and processed
 */
 //[[Rcpp::export]]
-DataFrame histogram(arma::vec frequences, double dnu) {
-  // Maximum value to look at the histogram
-  double freqf = 100;
-  double binSize = dnu * 0.015;
+arma::vec differences(arma::vec frequences) {
   // Calculate all frequences differences
   int n = frequences.n_elem;
   int diagSupElements = n * (n - 1) / 2;
@@ -92,9 +87,32 @@ DataFrame histogram(arma::vec frequences, double dnu) {
   }
   // Remove unused memory
   diff.resize(diagSupElements - (diagSupElements - countElements));
+  // Return results
+  return diff;
+}
+
+
+//! Apply a sort of filter on a centered frequences vector
+/*!
+\param arma:vec vector with frequences to be processed
+\param double the spectral resolution (dnu)
+\return A dataframe with centered frequences and processed
+*/
+//[[Rcpp::export]]
+List diffHistogram(arma::vec frequences, double dnu) {
+  // Calculalate differences among frequences
+  arma::vec diffs = differences(frequences);
+  
+  // Histogram bin paramterns
+  double maxHistogramBin = 100; // Max value in histogram
+  double binSize = dnu * 0.015; // Bin length
+  // Generate space for bins for histogram
+  arma::vec bins = arma::regspace(0, binSize, maxHistogramBin);
   
   // Return results
   List results;
-  results["diff"] = diff;
-  return DataFrame(results);
+  results["diffs"] = diffs;
+  // Calculate histogram
+  results["histogram"] = List::create(_["bins"] = bins, _["values"]=arma::hist(diffs, bins)); 
+  return results;
 }
