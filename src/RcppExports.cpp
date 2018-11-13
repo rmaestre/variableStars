@@ -6,16 +6,6 @@
 
 using namespace Rcpp;
 
-// main
-int main();
-RcppExport SEXP _variableStars_main() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(main());
-    return rcpp_result_gen;
-END_RCPP
-}
 // seq_int
 NumericVector seq_int(int first, int last);
 RcppExport SEXP _variableStars_seq_int(SEXP firstSEXP, SEXP lastSEXP) {
@@ -74,27 +64,38 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// histogram
-DataFrame histogram(arma::vec frequences, double dnu);
-RcppExport SEXP _variableStars_histogram(SEXP frequencesSEXP, SEXP dnuSEXP) {
+// differences
+arma::vec differences(arma::vec frequences);
+RcppExport SEXP _variableStars_differences(SEXP frequencesSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type frequences(frequencesSEXP);
+    rcpp_result_gen = Rcpp::wrap(differences(frequences));
+    return rcpp_result_gen;
+END_RCPP
+}
+// diffHistogram
+List diffHistogram(arma::vec frequences, double dnu);
+RcppExport SEXP _variableStars_diffHistogram(SEXP frequencesSEXP, SEXP dnuSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type frequences(frequencesSEXP);
     Rcpp::traits::input_parameter< double >::type dnu(dnuSEXP);
-    rcpp_result_gen = Rcpp::wrap(histogram(frequences, dnu));
+    rcpp_result_gen = Rcpp::wrap(diffHistogram(frequences, dnu));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_variableStars_main", (DL_FUNC) &_variableStars_main, 0},
     {"_variableStars_seq_int", (DL_FUNC) &_variableStars_seq_int, 2},
     {"_variableStars_seq_rev", (DL_FUNC) &_variableStars_seq_rev, 1},
     {"_variableStars_compute_fft", (DL_FUNC) &_variableStars_compute_fft, 1},
     {"_variableStars_calculate_amplitudes", (DL_FUNC) &_variableStars_calculate_amplitudes, 2},
     {"_variableStars_apodization", (DL_FUNC) &_variableStars_apodization, 2},
-    {"_variableStars_histogram", (DL_FUNC) &_variableStars_histogram, 2},
+    {"_variableStars_differences", (DL_FUNC) &_variableStars_differences, 1},
+    {"_variableStars_diffHistogram", (DL_FUNC) &_variableStars_diffHistogram, 2},
     {NULL, NULL, 0}
 };
 
