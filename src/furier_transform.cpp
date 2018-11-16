@@ -183,8 +183,6 @@ List diffHistogram(arma::vec frequences, double dnu) {
   double binSize = dnu * 0.015;  // Bin length
   // Generate space for bins for histogram
   arma::vec bins = arma::regspace(0, binSize, maxHistogramBin);
-  Rcout << "binSize:" << binSize << " maxBin:" << maxHistogramBin << " (len"
-        << bins.n_elem << ")";
   // Return results
   List results;
   results["diffs"] = diffs;
