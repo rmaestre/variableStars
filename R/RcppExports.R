@@ -29,3 +29,19 @@ diffHistogram <- function(frequences, dnu) {
     .Call(`_variableStars_diffHistogram`, frequences, dnu)
 }
 
+ft <- function(x, filter) {
+    .Call(`_variableStars_ft`, x, filter)
+}
+
+adjacentDifferences <- function(x) {
+    .Call(`_variableStars_adjacentDifferences`, x)
+}
+
+findPeaks <- function(x) {
+    .Call(`_variableStars_findPeaks`, x)
+}
+
+go <- function(time, x, filter, g_regimen) {
+    .Call(`_variableStars_go`, time, x, filter, g_regimen)
+}
+
