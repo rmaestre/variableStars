@@ -292,11 +292,13 @@ List go(arma::vec time, arma::vec x, String filter, double g_regimen) {
   arma::vec diff = differences(frequency);
   
   // Histogram
-  List resHist = diffHistogram(diff, 19);
+  List _diffHistogram = diffHistogram(diff, 19);
   
-  return List::create(_["frequency"]=frequency, 
-                      _["amplitude"]=amplitude,
+  return List::create(_["photometry"] = 
+                        List::create(_["frequency"]=frequency, 
+                                     _["amplitude"]=amplitude),
                       _["ft"]=res,
-                      _["diff"] = diff,
-                      _["resHist"]  = resHist);
+                      _["diff"] = List::create(_["diffHistogram"]=_diffHistogram, 
+                                           _["diff"]=diff)
+                        );
 }
