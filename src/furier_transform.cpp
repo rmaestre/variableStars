@@ -99,10 +99,14 @@ arma::vec apodization(arma::vec frequences, String filter) {
   arma::vec factor(frequences.n_elem);
   
   // Center frequencies
+  if (frequences.n_elem == 0) {
+    throw std::range_error("apodization:: Frequences vector is empty");
+  }
   double max = frequences.max();
   double min = frequences.min();
   double middle = (max - min) / 2;
   frequencesCentered = frequences - min - middle;
+ 
   
   // Apply filter on centered frequences
   if (filter == "bartlett") {
@@ -244,7 +248,9 @@ arma::vec adjacentDifferences(arma::vec x) {
   arma::vec adjDiffs(x.n_elem);
   // Calculate diffs
   std::adjacent_difference(x.begin(), x.end(), adjDiffs.begin());
-  adjDiffs.shed_row(0); // Remove unused header
+  if (adjDiffs.n_elem > 0){
+    adjDiffs.shed_row(0); // Remove unused header
+  }
   return adjDiffs;
 }
 
