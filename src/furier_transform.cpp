@@ -93,21 +93,19 @@ DataFrame calculate_amplitudes(arma::vec time, arma::vec x) {
 */
 //[[Rcpp::export]]
 arma::vec apodization(arma::vec frequences, String filter) {
+  if (frequences.n_elem == 0) {
+    throw std::range_error("apodization:: Frequences vector is empty");
+  }
   // Data structures needed
   arma::vec frequencesCentered(frequences.n_elem);
   arma::vec amplitudes(frequences.n_elem);
   arma::vec factor(frequences.n_elem);
-  
   // Center frequencies
-  if (frequences.n_elem == 0) {
-    throw std::range_error("apodization:: Frequences vector is empty");
-  }
   double max = frequences.max();
   double min = frequences.min();
   double middle = (max - min) / 2;
   frequencesCentered = frequences - min - middle;
  
-  
   // Apply filter on centered frequences
   if (filter == "bartlett") {
     factor = 1 - arma::abs(frequencesCentered) / middle;
@@ -144,6 +142,10 @@ arma::vec apodization(arma::vec frequences, String filter) {
 */
 //[[Rcpp::export]]
 arma::vec differences(arma::vec frequences) {
+  if (frequences.n_elem == 0) {
+    throw std::range_error("differences:: Frequences vector is empty");
+  }
+
   // Calculate all frequences differences
   int n = frequences.n_elem;
   int diagSupElements = n * (n - 1) / 2;
