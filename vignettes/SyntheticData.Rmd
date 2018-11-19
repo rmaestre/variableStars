@@ -34,14 +34,31 @@ ggplot(aes(time, mmag), data = dt.test) +
   theme_bw()
 ```
 
+Calculate amplitures by FT
+
+```{r calculate, warning=F}
+# Calculate amplitudes and frequence
+dt.spectrum <- calculate_amplitudes(dt.test$time, dt.test$mmag)
+# Plot amplitudes
+plot_spectrum(-0.5, 0.5, dt.spectrum)
+# Save data
+# Save DF to disk
+write.table(dt.spectrum[c("frequency", "amplitude")], file = "/tmp/data.csv", 
+          sep = "\t",
+          quote = F, 
+          row.names = F, 
+          col.names = F)
+```
+
 
 Main procedure call
 
 ```{r calculate, warning=F}
-out <- go(dt.test$time,
-          dt.test$mmag,
+out <- go(dt.spectrum$frequency,
+          dt.spectrum$amplitude,
           filter = "uniform",
-          g_regimen = 0.1)
+          gRegimen = 0,
+          numFrequencies = 0)
 ```
 
 #### Fourier Transform on the photometry data

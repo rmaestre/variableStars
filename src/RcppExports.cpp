@@ -122,16 +122,17 @@ BEGIN_RCPP
 END_RCPP
 }
 // go
-List go(arma::vec time, arma::vec x, String filter, double g_regimen);
-RcppExport SEXP _variableStars_go(SEXP timeSEXP, SEXP xSEXP, SEXP filterSEXP, SEXP g_regimenSEXP) {
+List go(arma::vec frequency, arma::vec amplitude, String filter, double gRegimen, double numFrequencies);
+RcppExport SEXP _variableStars_go(SEXP frequencySEXP, SEXP amplitudeSEXP, SEXP filterSEXP, SEXP gRegimenSEXP, SEXP numFrequenciesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type time(timeSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type frequency(frequencySEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type amplitude(amplitudeSEXP);
     Rcpp::traits::input_parameter< String >::type filter(filterSEXP);
-    Rcpp::traits::input_parameter< double >::type g_regimen(g_regimenSEXP);
-    rcpp_result_gen = Rcpp::wrap(go(time, x, filter, g_regimen));
+    Rcpp::traits::input_parameter< double >::type gRegimen(gRegimenSEXP);
+    Rcpp::traits::input_parameter< double >::type numFrequencies(numFrequenciesSEXP);
+    rcpp_result_gen = Rcpp::wrap(go(frequency, amplitude, filter, gRegimen, numFrequencies));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -147,7 +148,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_variableStars_ft", (DL_FUNC) &_variableStars_ft, 2},
     {"_variableStars_adjacentDifferences", (DL_FUNC) &_variableStars_adjacentDifferences, 1},
     {"_variableStars_findPeaks", (DL_FUNC) &_variableStars_findPeaks, 1},
-    {"_variableStars_go", (DL_FUNC) &_variableStars_go, 4},
+    {"_variableStars_go", (DL_FUNC) &_variableStars_go, 5},
     {NULL, NULL, 0}
 };
 

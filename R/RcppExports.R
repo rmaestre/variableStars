@@ -41,7 +41,7 @@ findPeaks <- function(x) {
     .Call(`_variableStars_findPeaks`, x)
 }
 
-go <- function(time, x, filter, g_regimen) {
-    .Call(`_variableStars_go`, time, x, filter, g_regimen)
+go <- function(frequency, amplitude, filter, gRegimen = 0.0, numFrequencies = 30) {
+    .Call(`_variableStars_go`, frequency, amplitude, filter, gRegimen, numFrequencies)
 }
 
