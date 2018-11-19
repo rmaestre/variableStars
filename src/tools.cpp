@@ -269,7 +269,7 @@ arma::uvec findPeaks(arma::vec x) {
   // Vector with peaks
   arma::vec d = adjacentDifferences(arma::sign(adjacentDifferences(x)));
   // Return peaks index
-  return find(d < 0) + 2;
+  return find(d < 0) + 1;
 }
 
 //[[Rcpp::export]]
@@ -309,6 +309,7 @@ List go(arma::vec frequency, arma::vec amplitude, String filter,
     range[3] = frequency.n_elem;
   }
   
+  // Calculate FT
   List res = ft(frequency, filter);
   // Calculate the inverse frecuence
   arma::vec f = res["f"];
@@ -334,6 +335,7 @@ List go(arma::vec frequency, arma::vec amplitude, String filter,
                                            _["diff"]=diff),
                       _["localMax"] = localMax,
                       _["localMaxB"] = localMaxB,
-                      _["f"] = f
+                      _["f"] = f,
+                      _["fInv"] = fInv
                         );
 }
