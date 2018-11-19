@@ -217,9 +217,11 @@ List ft(arma::vec x, String filter) {
   // Calculate frequence differences
   arma::vec diff = differences(x);
   // Minimum difference
-  double minDiff = arma::min(diff);
+  //double minDiff = arma::min(diff);   --->¿Why is not the min?
+  double minDiff = 1.0;
   // Calculate delnu
   double delnu = (maxFreq - fNyquist) / unknow;
+
   arma::vec f = 1.0 / arma::regspace(minDiff, delnu, maxFreq);
   // Outer product
   arma::mat outerProduct = f * x.t();
