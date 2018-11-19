@@ -271,17 +271,13 @@ arma::uvec findPeaks(arma::vec x) {
 }
 
 //[[Rcpp::export]]
-List go(arma::vec time, arma::vec x, String filter, double g_regimen) {
-  // Calculate amplitudes
-  DataFrame freqAmp = calculate_amplitudes(time, x);
-  arma::vec amplitude = freqAmp["amplitude"];
-  arma::vec frequency = freqAmp["frequency"];
-  
+List go(arma::vec frequency, arma::vec amplitude, String filter, 
+        double gRegimen = 0.0, double numFrequencies = 30) {
   // Work in muHz
   frequency /= 0.0864;
   
   // Drop frequencies in g mode regimen
-  arma::uvec ids = find(frequency >= g_regimen);
+  arma::uvec ids = find(frequency > gRegimen);
   frequency = frequency.elem(ids);
   amplitude = amplitude.elem(ids);
   
@@ -289,6 +285,27 @@ List go(arma::vec time, arma::vec x, String filter, double g_regimen) {
   arma::uvec idsSort = sort_index(amplitude, "descend");
   frequency = frequency.elem(idsSort);
   amplitude = amplitude.elem(idsSort);
+  
+  // Check the frequencies vector of splitted elements
+  arma::vec range(3);
+  if (frequency.n_elem < numFrequencies){
+    range[0] = 1;
+    range.shed_rows(1, 2);
+  } else if (frequency.n_elem > numFrequencies & 
+             frequency.n_elem <= 2*numFrequencies) {
+    range[0] = numFrequencies;
+    range[1] = frequency.n_elem;
+    range.shed_row(2);
+  } else if (frequency.n_elem > 2*numFrequencies & 
+             frequency.n_elem <= 3*numFrequencies) {
+    range[0] = numFrequencies;
+    range[1] = 2*numFrequencies;
+    range[2] = frequency.n_elem;
+  } else {
+    range[0] = numFrequencies;
+    range[2] = 2*numFrequencies;
+    range[3] = frequency.n_elem;
+  }
   
   // Get the peaks
   arma::uvec peaksInd = findPeaks(amplitude);
