@@ -3,6 +3,9 @@ title: "Variable Stars - Main workflow with simple synthetic data"
 author: "Roberto Maestre"
 date: "11/16/2018"
 output: github_document
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}	  %\VignetteEngine{knitr::knitr}
+  %\VignetteIndexEntry{Using captioner}	  %\VignetteIndexEntry{Using captioner}
 ---
 
 ```{r setup, include=FALSE}
@@ -36,7 +39,7 @@ ggplot(aes(time, mmag), data = dt.test) +
 
 Calculate amplitures by FT
 
-```{r calculate, warning=F}
+```{r calculateEspectrum, warning=F}
 # Calculate amplitudes and frequence
 dt.spectrum <- calculate_amplitudes(dt.test$time, dt.test$mmag)
 # Plot amplitudes

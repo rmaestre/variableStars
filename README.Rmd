@@ -3,6 +3,9 @@ title: "Variable Stars - An optimized package to find patterns in variable stars
 author: "Roberto Maestre"
 date: "10/24/2018"
 output: github_document
+vignette: >
+  %\VignetteEngine{knitr::rmarkdown}	  %\VignetteEngine{knitr::knitr}
+  %\VignetteIndexEntry{Using captioner}	  %\VignetteIndexEntry{Using captioner}
 ---
 
 ```{r setup, include=FALSE}
