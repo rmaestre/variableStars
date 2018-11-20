@@ -270,9 +270,43 @@ arma::uvec findPeaks(arma::vec x) {
   return find(d < 0) + 1;
 }
 
+
+//! Calculate range splits of elements
+/*!
+\param nElements the number of elements in the frequency vector
+\param numFrequencies the selected number of frecuencies
+\return The vector with the ranges
+*/
+//[[Rcpp::export]]
+arma::vec calculateRange(int nElements, double numFrequencies){
+  // Check the frequencies vector of splitted elements
+  arma::vec range(3);
+  if (nElements < numFrequencies){
+    range[0] = nElements;
+    range.shed_rows(1, 2); // Release memory
+  } else if (nElements > numFrequencies & 
+    nElements <= 2*numFrequencies) {
+    range[0] = numFrequencies;
+    range[1] = nElements;
+    range.shed_row(2); // Release memory
+  } else if (nElements > 2*numFrequencies & 
+    nElements <= 3*numFrequencies) {
+    range[0] = numFrequencies;
+    range[1] = 2*numFrequencies;
+    range[2] = nElements;
+  } else {
+    range[0] = numFrequencies;
+    range[2] = 2*numFrequencies;
+    range[3] = nElements;
+  }
+  return range;
+}
+
 //[[Rcpp::export]]
 List go(arma::vec frequency, arma::vec amplitude, String filter, 
-        double gRegimen = 0.0, double numFrequencies = 30) {
+        double gRegimen, double numFrequencies,
+        double maxDnu, double minDnu, double dnuGuessError,
+        double dnuValue = -1, bool dnuEstimation = false) {
   // Work in muHz
   frequency /= 0.0864;
   
@@ -286,27 +320,9 @@ List go(arma::vec frequency, arma::vec amplitude, String filter,
   frequency = frequency.elem(idsSort);
   amplitude = amplitude.elem(idsSort);
   
-  // Check the frequencies vector of splitted elements
-  arma::vec range(3);
-  if (frequency.n_elem < numFrequencies){
-    range[0] = frequency.n_elem;
-    range.shed_rows(1, 2);
-  } else if (frequency.n_elem > numFrequencies & 
-             frequency.n_elem <= 2*numFrequencies) {
-    range[0] = numFrequencies;
-    range[1] = frequency.n_elem;
-    range.shed_row(2);
-  } else if (frequency.n_elem > 2*numFrequencies & 
-             frequency.n_elem <= 3*numFrequencies) {
-    range[0] = numFrequencies;
-    range[1] = 2*numFrequencies;
-    range[2] = frequency.n_elem;
-  } else {
-    range[0] = numFrequencies;
-    range[2] = 2*numFrequencies;
-    range[3] = frequency.n_elem;
-  }
-  
+  // Calculate the range
+  arma::vec range = calculateRange(frequency.n_elem, numFrequencies);
+
   // Loop over frequencies vector
   arma::vec::iterator numIt;
   for (numIt = range.begin(); numIt < range.end(); numIt++) {
@@ -332,26 +348,42 @@ List go(arma::vec frequency, arma::vec amplitude, String filter,
     
     // Get DNU on the peak
     arma::vec maxSel = fInv.elem(find(b == *std::max_element(localMaxB.begin(), localMaxB.end())));
+    double dnu = 0.0;
     double dnuPeak = maxSel(0); // Get the dnu on the peak
+    double dnuGuess = arma::min(frequencyGlobal) / 3.0;
     
-    // Todo::using the F0/Dnu estimation
-    double dnu = dnuPeak;
-    double dnuGuess = 0;
+    Rcout << "dnuValue:" << dnuValue;
+    Rcout << "dnuGuess:" << dnuGuess;
+    
+    // Check for an input Dnu value
+    if (dnuValue < 0) {
+      // Use the F0/Dnu estimation
+      if (dnuEstimation) {
+        if (dnuGuess<minDnu | dnuGuess>maxDnu | (arma::min(fInv) > dnuGuess + dnuGuessError)) {
+          dnu = dnuPeak;
+        } else {
+          dnu = arma::min(fInv.elem(peaksInd) - dnuGuess) + dnuGuess;
+        }
+      } else {
+        dnu = dnuPeak;
+        dnuGuess = 0.0;
+      }
+    }
     // -----------------------------------
     
-    // Histogram
+    // Histogram of differences
     List _diffHistogram = diffHistogram(frequencyGlobal , dnu);
     
+    // Return the output with all valuable elements
     return List::create(_["photometry"] = 
                         List::create(_["frequency"]=frequencyGlobal, 
                                      _["amplitude"]=amplitudeGlobal),
-                                     _["ft"]=res,
-                                     _["diff"] = List::create(_["diffHistogram"]=_diffHistogram),
-                                                          _["localMax"] = localMax,
-                                                          _["localMaxB"] = localMaxB,
-                                                          _["f"] = f,
-                                                          _["fInv"] = fInv,
-                                                          _["dnuPeak"] = dnuPeak
+                        _["ft"]=res,
+                        _["diffHistogram"] = _diffHistogram,
+                        _["f"] = res["f"], _["fInv"] = fInv,
+                        _["dnuPeak"] = dnuPeak,
+                        _["dnu"] = dnu,
+                        _["dnuGuess"] = dnuGuess
     );
   } // End range loop
 }
