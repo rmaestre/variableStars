@@ -13,13 +13,13 @@ using namespace std;
 //[[Rcpp::export]]
 NumericVector seq_int(int first, int last) {
   NumericVector y(abs(last - first) + 1);
-  iota(y.begin(), y.end(), first);
+  std::iota(y.begin(), y.end(), first);
   return y;
 }
 //[[Rcpp::export]]
 NumericVector seq_rev(NumericVector x) {
   NumericVector revX = clone<NumericVector>(x);
-  reverse(revX.begin(), revX.end());
+  std::reverse(revX.begin(), revX.end());
   return revX;
 }
 
@@ -320,6 +320,11 @@ List go(arma::vec frequency, arma::vec amplitude, String filter,
   arma::uvec peaksInd = findPeaks(b);
   arma::vec localMax = fInv.elem(peaksInd);
   arma::vec localMaxB = b.elem(peaksInd);
+  // Get 
+  Rcout << "max:" << max(localMaxB);
+  
+  
+  arma::vec dnuPeak = fInv.elem(b == max(localMaxB));
   
   // Differences
   arma::vec diff = differences(frequency);
@@ -336,6 +341,7 @@ List go(arma::vec frequency, arma::vec amplitude, String filter,
                       _["localMax"] = localMax,
                       _["localMaxB"] = localMaxB,
                       _["f"] = f,
-                      _["fInv"] = fInv
+                      _["fInv"] = fInv,
+                      _["dnuPeak"] = dnuPeak
                         );
 }
