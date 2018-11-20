@@ -3,7 +3,10 @@ Type: Package
 Title: Efficient software to study spectrum patterns on variable stars.
 Version: 1.0
 Date: 2018-10-23
-Author: Roberto Maestre
+Authors@R: c(
+    person("Roberto", "Maestre", email = "hadley@rstudio.com", role = "cre"),
+    person("Antonio", "García", email = "antonio.garciah@campusviu.es", role = "aut"),
+    person("Juan Carlos", "Suárez", email = "jcsuarez@iaa.es", role = "aut"))
 Maintainer: Roberto Maestre <rmaestre@gmail.com>
 Description: tbd
 License: GPL (>= 2)
