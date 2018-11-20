@@ -3,7 +3,7 @@ language: r
 sudo: false
 
 install:
-  - R -e "0" --args --bootstrap-packrat
+  - R -e 'install.packages(c("Rcpp", "RcppArmadillo", "knitr", "ggplot2", "rmarkdown", "testthat"))'
 
 warnings_are_errors: false
 
