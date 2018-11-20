@@ -23,3 +23,6 @@ cache:
 
 notifications:
   email: false
+
+before_script:
+  - Rscript -e "if (!require('knitr')) devtools::install_github('yihui/knitr')"
