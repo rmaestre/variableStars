@@ -1,15 +1,9 @@
----
-title: "Variable Stars - Main workflow with simple synthetic data"
-author: "Roberto Maestre"
-date: "11/16/2018"
-output:  rmarkdown::html_vignette
-vignette: >
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteIndexEntry{the title} 
----
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{Main workflow with simple synthetic data}
+-->
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
 library(variableStars)
 library(data.table)
 library(ggplot2)
