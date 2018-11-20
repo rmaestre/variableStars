@@ -1,7 +1,7 @@
-Variable Stars - Main workflow with simple synthetic data
+Synthetic data
 ================
 Roberto Maestre
-11/16/2018
+10/24/2018
 
 ### Synthetic data generation representing photometry
 
@@ -25,14 +25,38 @@ ggplot(aes(time, mmag), data = dt.test) +
 
 ![](SyntheticData_files/figure-markdown_github/dataGeneration-1.png)
 
+Calculate amplitures by FT
+
+``` r
+# Calculate amplitudes and frequence
+dt.spectrum <- calculate_amplitudes(dt.test$time, dt.test$mmag)
+# Plot amplitudes
+plot_spectrum(-0.5, 0.5, dt.spectrum)
+```
+
+![](SyntheticData_files/figure-markdown_github/calculateEspectrum-1.png)
+
+``` r
+# Save data
+# Save DF to disk
+write.table(dt.spectrum[c("frequency", "amplitude")], file = "/tmp/data.csv", 
+          sep = "\t",
+          quote = F, 
+          row.names = F, 
+          col.names = F)
+```
+
 Main procedure call
 
 ``` r
-out <- go(dt.test$time,
-          dt.test$mmag,
+out <- go(dt.spectrum$frequency,
+          dt.spectrum$amplitude,
           filter = "uniform",
-          g_regimen = 0.1)
+          gRegimen = 0,
+          numFrequencies = 0)
 ```
+
+    ## max:0.0499131
 
 #### Fourier Transform on the photometry data
 

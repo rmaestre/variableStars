@@ -1,35 +1,28 @@
----
-title: "Frecuences and amplitudes"
-author: "Roberto Maestre"
-date: "10/24/2018"
-output: github_document
----
+Frecuences and amplitudes
+================
+Roberto Maestre
+10/24/2018
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-library(variableStars)
-library(data.table)
-library(ggplot2)
-library(microbenchmark)
-```
-
-## Library Introduction
+Library Introduction
+--------------------
 
 Talk about variable stars ... (tbd)
 
-## Introduction
+Introduction
+------------
 
 The Fourier transform (FT) decomposes a function of time (a signal) into the frequencies that make it up. In Astrophysics, specially in Pulsars study, this technique suposes the main tool to study it patterns, and therefore, clasiffy this kind of stars. The main formula of Discrete Fourier Transform is:
 
-$$ F_n = \sum_{k=0}^{N-1} f_k \cdot e^{-2 \pi \cdot i \cdot n \cdot \frac{k}{N}}$$
+$$ F\_n = \\sum\_{k=0}^{N-1} f\_k \\cdot e^{-2 \\pi \\cdot i \\cdot n \\cdot \\frac{k}{N}}$$
 
-## Examples
+Examples
+--------
 
 ### 1. Simple signal. Sin.
 
 The first signal is the sin one. This signal is very clear and the period can be calculated visually.
 
-```{r sin}
+``` r
 x <- sin(seq(from = 0,
              to = 20,
              by = 0.05))
@@ -42,9 +35,11 @@ ggplot(aes(time, x), data = dt.test) +
   theme_bw()
 ```
 
+![](FequencesAmplitudes_files/figure-markdown_github/sin-1.png)
+
 We campute the FT, calculating the amplitudes.
 
-```{r sinspectrum, warning=F}
+``` r
 # Compute DFT
 dt.spectrum <- calculate_amplitudes(dt.test$time, dt.test$x)
 # Get max amplitude
@@ -53,13 +48,15 @@ maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude),]
 plot_spectrum(0, 0.05, dt.spectrum)
 ```
 
-Therefore, the period is $p=\frac{1}{F}$ = `r 1/maxAmplitude$frequency`
+![](FequencesAmplitudes_files/figure-markdown_github/sinspectrum-1.png)
+
+Therefore, the period is $p=\\frac{1}{F}$ = 133.6666667
 
 ### 2. A noisy signal example
 
 Another synthetic example, where a more noisy signal is provided is the next one:
 
-```{r noisySin}
+``` r
 ## noisy signal with amplitude modulation
 x <- seq(from = 0,
          to = 1,
@@ -77,9 +74,11 @@ ggplot(aes(time, x), data = dt.test) +
   theme_bw()
 ```
 
+![](FequencesAmplitudes_files/figure-markdown_github/noisySin-1.png)
+
 We use DFT to calculate the amplitude in each frecuency.
 
-```{r noisySinSpectrum, warning=F}
+``` r
 # Compute DFT
 dt.spectrum <- calculate_amplitudes(dt.test$time, dt.test$x)
 # Get max amplitude
@@ -88,14 +87,15 @@ maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude),]
 plot_spectrum(0, 0.5, dt.spectrum)
 ```
 
-Therefore, the period is $p=\frac{1}{F}$ = `r 1/maxAmplitude$frequency`
+![](FequencesAmplitudes_files/figure-markdown_github/noisySinSpectrum-1.png)
 
+Therefore, the period is $p=\\frac{1}{F}$ = 10
 
 ### 3. Real data from a pulsar star
 
 In this case, we use the photometry of a pulsar star, in which timestamp the magnitude of the pulsar is given. In this case, analize the patter in visually complex.
 
-```{r pulsar}
+``` r
 # Read pulsar data
 dt.pulsar <- data.table(read.csv("../data/pulsar.tsv", sep = "\t"))
 ggplot(aes(time, magnitude), data = dt.pulsar[sample(nrow(dt.pulsar), 1000),]) +
@@ -104,9 +104,11 @@ ggplot(aes(time, magnitude), data = dt.pulsar[sample(nrow(dt.pulsar), 1000),]) +
   theme_bw()
 ```
 
+![](FequencesAmplitudes_files/figure-markdown_github/pulsar-1.png)
+
 We use DFT to calculate the amplitude in each frecuency.
 
-```{r pulsarSpectrum, warning=F}
+``` r
 # Calculate
 dt.spectrum <-
   calculate_amplitudes(dt.pulsar$time, dt.pulsar$magnitude)
@@ -116,15 +118,16 @@ maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude),]
 plot_spectrum(20, 25, dt.spectrum)
 ```
 
+![](FequencesAmplitudes_files/figure-markdown_github/pulsarSpectrum-1.png)
 
-Therefore, the period of this pulsar is $p=\frac{1}{F}$ = `r 1/maxAmplitude$frequency`.
+Therefore, the period of this pulsar is $p=\\frac{1}{F}$ = 0.0437575.
 
+Benchmark
+---------
 
-## Benchmark
+A benchmark is proposed to show the performance achieved by made all calculations witn C++ and Armadillo (RcppArmadillo). We achieve an average value of 310 ms to compute a DFT on 43372 time values.
 
-A benchmark is proposed to show the performance achieved by made all calculations witn C++ and Armadillo (RcppArmadillo). We achieve an average value of $310 \text{ ms}$ to compute a DFT on `r nrow(dt.pulsar)` time values.
-
-```{r benchmark, warning=F, message=F, cache=F}
+``` r
 m <-
   microbenchmark(dt <-
                    calculate_amplitudes(dt.pulsar$time, dt.pulsar$magnitude),
@@ -133,3 +136,5 @@ autoplot(m, log = F) +
   scale_x_discrete(labels = c("DFT on a Pulsar star data")) +
   xlab("")
 ```
+
+![](FequencesAmplitudes_files/figure-markdown_github/benchmark-1.png)

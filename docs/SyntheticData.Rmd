@@ -1,7 +1,9 @@
-<!--
-%\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{Main workflow with simple synthetic data}
--->
+---
+title: "Synthetic data"
+author: "Roberto Maestre"
+date: "10/24/2018"
+output: github_document
+---
 
 ```{r setup, include=FALSE}
 library(variableStars)
