@@ -3,12 +3,9 @@ title: "Finding patterns in variable stars"
 author: "Roberto Maestre"
 date: "10/24/2018"
 output: github_document
-vignette: >
-  %\VignetteEngine{knitr::rmarkdown}	  %\VignetteEngine{knitr::knitr}
-  %\VignetteIndexEntry{Using captioner}	  %\VignetteIndexEntry{Using captioner}
 ---
 
-[![Build Status](https://travis-ci.com/rmaestre/variableStars.svg?branch=master)](https://travis-ci.com/rmaestre/variableStars)
+[![Build Status](https://travis-ci.org/rmaestre/variableStars.svg?branch=master)](https://travis-ci.com/rmaestre/variableStars)
 
 
 ## Introduction
