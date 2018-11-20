@@ -4,14 +4,6 @@
 -->
 
 ```{r setup, include=FALSE}
-library(variableStars)
-library(data.table)
-library(ggplot2)
-library(microbenchmark)
-```
-
-
-```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(variableStars)
 library(data.table)
@@ -103,7 +95,7 @@ In this case, we use the photometry of a pulsar star, in which timestamp the mag
 
 ```{r pulsar}
 # Read pulsar data
-dt.pulsar <- data.table(read.csv("data/pulsar.tsv", sep = "\t"))
+dt.pulsar <- data.table(read.csv("../data/pulsar.tsv", sep = "\t"))
 ggplot(aes(time, magnitude), data = dt.pulsar[sample(nrow(dt.pulsar), 1000),]) +
   geom_point() +
   geom_line() +

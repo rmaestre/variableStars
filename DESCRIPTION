@@ -11,4 +11,3 @@ Imports: Rcpp (>= 0.12.18)
 LinkingTo: Rcpp, RcppArmadillo
 Suggests: knitr,
     rmarkdown
-VignetteBuilder: knitr
