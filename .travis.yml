@@ -15,6 +15,10 @@ addons:
       - gcc-4.9
       - g++-4.9
 
+r_packages:
+ - devtools
+ - knitr
+
 cache:
   packages: true
   directories:
