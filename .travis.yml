@@ -1,4 +1,4 @@
-test_dir('tests')language: r
+language: r
 
 sudo: false
 
