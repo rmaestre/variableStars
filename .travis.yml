@@ -5,6 +5,9 @@ sudo: false
 install:
   - R -e 'install.packages(c("Rcpp", "RcppArmadillo", "knitr", "ggplot2", "rmarkdown", "testthat"))'
 
+script: 
+  - Rscript -e "library(testthat);invisible(source_dir('./',env=globalenv()));test_dir('tests');test_dir('tests',reporter='stop')"
+
 warnings_are_errors: false
 
 addons:
