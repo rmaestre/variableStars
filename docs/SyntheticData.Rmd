@@ -53,18 +53,36 @@ write.table(dt.spectrum[c("frequency", "amplitude")], file = "/tmp/data.csv",
 Main procedure call
 
 ```{r calculate, warning=F}
-out <- go(dt.spectrum$frequency,
-          dt.spectrum$amplitude,
-          filter = "uniform",
-          gRegimen = 0,
-          numFrequencies = 0)
+out <- go(
+  dt.spectrum$frequency,
+  dt.spectrum$amplitude,
+  filter = "uniform",
+  gRegimen = 0,
+  numFrequencies = 30
+)
 ```
+
+
+#### Fourier Transform on the photometry data
+
+```{r apodization, warning=F}
+# Plot frecuency and amplitude
+ggplot(aes(x = frequences, y = amplitude), 
+       data = data.frame("frequences"=out$ft$frequences, "amplitude"=out$ft$amp)) +
+  geom_point() +
+  geom_line() +
+  ggtitle("Apodization- Frequences and amplitudes") +
+  theme_bw()
+```
+
+
 
 #### Fourier Transform on the photometry data
 
 ```{r ftPhotometry, warning=F}
 # Plot frecuency and amplitude
-ggplot(aes(x = frequency, y = amplitude), data = data.frame(out$photometry)) +
+ggplot(aes(x = frequency, y = amplitude),
+       data = data.frame(out$photometry)) +
   geom_point() +
   geom_line() +
   ggtitle("FT on the photometry data") +

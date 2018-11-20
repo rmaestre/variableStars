@@ -221,7 +221,6 @@ List ft(arma::vec x, String filter) {
   double minDiff = 1.0;
   // Calculate delnu
   double delnu = (maxFreq - fNyquist) / unknow;
-
   arma::vec f = 1.0 / arma::regspace(minDiff, delnu, maxFreq);
   // Outer product
   arma::mat outerProduct = f * x.t();
@@ -233,9 +232,8 @@ List ft(arma::vec x, String filter) {
   arma::mat powerSpectrum = (arma::pow(_real, 2) + arma::pow(_imag, 2)) /
     std::pow(n, 2);
   // Return results
-  return List::create(_["real"] = _real,
-                      _["imag"] = _imag,
-                      _["delnu"] = delnu, 
+  return List::create(_["amp"] = amp,
+                      _["frequences"] = x,
                       _["f"] = f, 
                       _["powerSpectrum"] = powerSpectrum,
                       _["powerSpectrumInverse"] = 1 / powerSpectrum);
@@ -291,7 +289,7 @@ List go(arma::vec frequency, arma::vec amplitude, String filter,
   // Check the frequencies vector of splitted elements
   arma::vec range(3);
   if (frequency.n_elem < numFrequencies){
-    range[0] = 1;
+    range[0] = frequency.n_elem;
     range.shed_rows(1, 2);
   } else if (frequency.n_elem > numFrequencies & 
              frequency.n_elem <= 2*numFrequencies) {
@@ -309,39 +307,51 @@ List go(arma::vec frequency, arma::vec amplitude, String filter,
     range[3] = frequency.n_elem;
   }
   
-  // Calculate FT
-  List res = ft(frequency, filter);
-  // Calculate the inverse frecuence
-  arma::vec f = res["f"];
-  arma::vec fInv = 1.0 / f;
-  arma::vec b = res["powerSpectrum"];
-  
-  // Get the peaks
-  arma::uvec peaksInd = findPeaks(b);
-  arma::vec localMax = fInv.elem(peaksInd);
-  arma::vec localMaxB = b.elem(peaksInd);
-  // Get 
-  Rcout << "max:" << max(localMaxB);
-  
-  
-  arma::vec dnuPeak = fInv.elem(b == max(localMaxB));
-  
-  // Differences
-  arma::vec diff = differences(frequency);
-  
-  // Histogram
-  List _diffHistogram = diffHistogram(diff, 19);
-  
-  return List::create(_["photometry"] = 
-                        List::create(_["frequency"]=frequency, 
-                                     _["amplitude"]=amplitude),
-                      _["ft"]=res,
-                      _["diff"] = List::create(_["diffHistogram"]=_diffHistogram, 
-                                           _["diff"]=diff),
-                      _["localMax"] = localMax,
-                      _["localMaxB"] = localMaxB,
-                      _["f"] = f,
-                      _["fInv"] = fInv,
-                      _["dnuPeak"] = dnuPeak
-                        );
+  // Loop over frequencies vector
+  arma::vec::iterator numIt;
+  for (numIt = range.begin(); numIt < range.end(); numIt++) {
+    
+    // Calculate the range for subselecting frecuences
+    arma::uvec pos(*numIt);
+    std::iota(pos.begin(), pos.end(), 0);
+    // Loop subselection of frecuences and amplitudes
+    arma::vec frequencyGlobal = frequency.elem(pos);
+    arma::vec  amplitudeGlobal = amplitude.elem(pos);
+
+    // Calculate FT
+    List res = ft(frequencyGlobal, filter);
+    // Calculate the inverse frecuence
+    arma::vec f = res["f"];
+    arma::vec fInv = 1.0 / f;
+    arma::vec b = res["powerSpectrum"];
+    
+    // Get the peaks
+    arma::uvec peaksInd = findPeaks(b);
+    arma::vec localMax = fInv.elem(peaksInd);
+    arma::vec localMaxB = b.elem(peaksInd);
+    
+    // Get DNU on the peak
+    arma::vec maxSel = fInv.elem(find(b == *std::max_element(localMaxB.begin(), localMaxB.end())));
+    double dnuPeak = maxSel(0); // Get the dnu on the peak
+    
+    // Todo::using the F0/Dnu estimation
+    double dnu = dnuPeak;
+    double dnuGuess = 0;
+    // -----------------------------------
+    
+    // Histogram
+    List _diffHistogram = diffHistogram(frequencyGlobal , dnu);
+    
+    return List::create(_["photometry"] = 
+                        List::create(_["frequency"]=frequencyGlobal, 
+                                     _["amplitude"]=amplitudeGlobal),
+                                     _["ft"]=res,
+                                     _["diff"] = List::create(_["diffHistogram"]=_diffHistogram),
+                                                          _["localMax"] = localMax,
+                                                          _["localMaxB"] = localMaxB,
+                                                          _["f"] = f,
+                                                          _["fInv"] = fInv,
+                                                          _["dnuPeak"] = dnuPeak
+    );
+  } // End range loop
 }
