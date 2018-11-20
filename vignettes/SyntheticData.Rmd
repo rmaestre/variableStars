@@ -2,10 +2,10 @@
 title: "Variable Stars - Main workflow with simple synthetic data"
 author: "Roberto Maestre"
 date: "11/16/2018"
-output: github_document
+output:  rmarkdown::html_vignette
 vignette: >
-  %\VignetteEngine{knitr::rmarkdown}	  %\VignetteEngine{knitr::knitr}
-  %\VignetteIndexEntry{Using captioner}	  %\VignetteIndexEntry{Using captioner}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{the title} 
 ---
 
 ```{r setup, include=FALSE}
