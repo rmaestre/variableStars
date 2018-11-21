@@ -35,7 +35,7 @@ ggplot(aes(time, x), data = dt.test) +
   theme_bw()
 ```
 
-![](FequencesAmplitudes_files/figure-markdown_github/sin-1.png)
+![](Photometry_files/figure-markdown_github/sin-1.png)
 
 We campute the FT, calculating the amplitudes.
 
@@ -48,7 +48,7 @@ maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude),]
 plot_spectrum(0, 0.05, dt.spectrum)
 ```
 
-![](FequencesAmplitudes_files/figure-markdown_github/sinspectrum-1.png)
+![](Photometry_files/figure-markdown_github/sinspectrum-1.png)
 
 Therefore, the period is $p=\\frac{1}{F}$ = 133.6666667
 
@@ -74,7 +74,7 @@ ggplot(aes(time, x), data = dt.test) +
   theme_bw()
 ```
 
-![](FequencesAmplitudes_files/figure-markdown_github/noisySin-1.png)
+![](Photometry_files/figure-markdown_github/noisySin-1.png)
 
 We use DFT to calculate the amplitude in each frecuency.
 
@@ -87,7 +87,7 @@ maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude),]
 plot_spectrum(0, 0.5, dt.spectrum)
 ```
 
-![](FequencesAmplitudes_files/figure-markdown_github/noisySinSpectrum-1.png)
+![](Photometry_files/figure-markdown_github/noisySinSpectrum-1.png)
 
 Therefore, the period is $p=\\frac{1}{F}$ = 10
 
@@ -104,7 +104,7 @@ ggplot(aes(time, mmag), data = dt.pulsar[sample(nrow(dt.pulsar), 1000),]) +
   theme_bw()
 ```
 
-![](FequencesAmplitudes_files/figure-markdown_github/pulsar-1.png)
+![](Photometry_files/figure-markdown_github/pulsar-1.png)
 
 We use DFT to calculate the amplitude in each frecuency.
 
@@ -118,7 +118,7 @@ maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude),]
 plot_spectrum(20, 25, dt.spectrum)
 ```
 
-![](FequencesAmplitudes_files/figure-markdown_github/pulsarSpectrum-1.png)
+![](Photometry_files/figure-markdown_github/pulsarSpectrum-1.png)
 
 Therefore, the period of this pulsar is $p=\\frac{1}{F}$ = 0.0437575.
 
@@ -137,4 +137,4 @@ autoplot(m, log = F) +
   xlab("")
 ```
 
-![](FequencesAmplitudes_files/figure-markdown_github/benchmark-1.png)
+![](Photometry_files/figure-markdown_github/benchmark-1.png)

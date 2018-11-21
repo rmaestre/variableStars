@@ -61,13 +61,13 @@ ggplot(aes(time, mmag), data = dt.plot) +
     theme_bw()
 ```
 
-![](SyntheticData_files/figure-markdown_github/dataGeneration-1.png)
+![](Experiments_files/figure-markdown_github/dataGeneration-1.png)
 
 ``` r
 rm(dt.plot) # Drop memory
 ```
 
-#### Frequences an Amplitudes for the photometry
+#### Frequences and Amplitudes on photometry data
 
 ``` r
 # Calculate amplitudes and frequences
@@ -80,7 +80,7 @@ plot_spectrum(maxAmplitude$frequency - 1.5,
               dt.spectrum)
 ```
 
-![](SyntheticData_files/figure-markdown_github/calculateEspectrum-1.png)
+![](Experiments_files/figure-markdown_github/calculateEspectrum-1.png)
 
 ``` r
 # Save Data to disk (to be replicated)
@@ -96,6 +96,8 @@ write.table(
 
 Experiment execution
 --------------------
+
+process is the main method on the variableStars package to compute and estimate all parameters
 
 ``` r
 result <- process(
@@ -157,7 +159,7 @@ ggplot(
   theme_bw()
 ```
 
-![](SyntheticData_files/figure-markdown_github/apodization-1.png)
+![](Experiments_files/figure-markdown_github/apodization-1.png)
 
 #### FT - Power Spectrum
 
@@ -173,7 +175,7 @@ ggplot(aes(x = f, y = powerSpectrum), data = dt) +
   theme_bw()
 ```
 
-![](SyntheticData_files/figure-markdown_github/ftPower-1.png)
+![](Experiments_files/figure-markdown_github/ftPower-1.png)
 
 #### Histogram fo differences.
 
@@ -187,4 +189,4 @@ ggplot(aes(x = bins, y = values), data = dt[dt$values > 0,]) +
   theme_bw()
 ```
 
-![](SyntheticData_files/figure-markdown_github/diffsHistogram-1.png)
+![](Experiments_files/figure-markdown_github/diffsHistogram-1.png)
