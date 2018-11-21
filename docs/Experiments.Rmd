@@ -39,7 +39,7 @@ Choose:
  * dataFlag = F, to use a real pulsar photometry
 
 ```{r flag}
-dataFlag = F
+dataFlag = T
 ```
 
 ## Data generation

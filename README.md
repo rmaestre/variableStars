@@ -13,4 +13,4 @@ Variable Star package provides the main funtions to analized patterns on variabl
 Example of use on a pulsar data
 -------------------------------
 
-Please, find [here](docs/Experiments.md)
+Please, find [here](docs/Experiments.md) the main execution of the complete package procedure.
