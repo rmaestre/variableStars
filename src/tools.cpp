@@ -1,5 +1,4 @@
-#include <RcppArmadillo.h> 
-#include <Rcpp.h>
+#include < RcppArmadillo.h > #include < Rcpp.h >
 
 using namespace Rcpp;
 using namespace std;
@@ -299,26 +298,66 @@ arma::ivec calculateRange(int nElements, int numFrequencies) {
   return range;
 }
 
+template < typename T >
+void printVectorValues(const std::vector < T > & v, string msg, int limit) {
+  typename std::vector < T > ::iterator it;
+  Rcout << msg;
+  int c = 0;
+  for (it = v.begin(); it < v.end() && c < limit; it++, c++) {
+    Rcout << "" << * it;
+  }
+  Rcout << "... \n";
+}
+
 //[[Rcpp::export]]
 List process(arma::vec frequency, arma::vec amplitude, String filter,
              double gRegimen, double numFrequencies,
              double maxDnu, double minDnu, double dnuGuessError,
-             double dnuValue = -1, bool dnuEstimation = false) {
+             double dnuValue = -1, bool dnuEstimation = false,
+             bool debug = false) {
   // Work in muHz
   frequency /= 0.0864;
+  
+  if (debug) {
+    Rcout << "::: Debug information :::" << "\n\n";
+    Rcout << "Number of frequences to be processed: " << frequency.n_elem << "\n";
+  }
   
   // Drop frequencies in g mode regimen
   arma::uvec ids = find(frequency > gRegimen);
   frequency = frequency.elem(ids);
   amplitude = amplitude.elem(ids);
   
+  if (debug) {
+    Rcout << "Number of frequences after drop the g regimen: " << frequency.n_elem << "\n";
+  }
+  
   // Sort frecuencies by amplitude
   arma::uvec idsSort = sort_index(amplitude, "descend");
   frequency = frequency.elem(idsSort);
   amplitude = amplitude.elem(idsSort);
   
+  if (debug) {
+    int c = 0;
+    Rcout << "Sorted frecuences: ";
+    for (arma::vec::iterator it = frequency.begin(); it < frequency.end() && c < 5; it++, c++) {
+      Rcout << " " << * it;
+    }
+    Rcout << "\n";
+  }
+  
   // Calculate the range
   arma::ivec range = calculateRange(frequency.n_elem, numFrequencies);
+  
+  if (debug) {
+    int c = 0;
+    Rcout << "Range: ";
+    for (arma::ivec::iterator it = range.begin(); it < range.end() && c < 5; it++, c++) {
+      Rcout << " " << * it;
+    }
+    Rcout << "\n";
+  }
+  
   // Data sctutures
   arma::vec frequencyGlobal, amplitudeGlobal, f, fInv, b;
   List res, _diffHistogram;
@@ -328,8 +367,11 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
   arma::ivec::iterator numIt;
   bool first = true;
   for (numIt = range.begin(); numIt < range.end(); numIt++) {
+    if (debug) {
+      Rcout << " Iteration over range: " << * numIt << "\n";
+    }
     if (first) {
-      first = false;
+      first = false; // Calculations only with the N first sorted frequencies
       // Calculate the range for subselecting frecuences
       arma::uvec pos( * numIt);
       std::iota(pos.begin(), pos.end(), 0);
@@ -337,6 +379,23 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
       // Loop subselection of frecuences and amplitudes
       frequencyGlobal = frequency.elem(pos);
       amplitudeGlobal = amplitude.elem(pos);
+      
+      if (debug) {
+        Rcout << "   Frequencies selected: " << frequencyGlobal.n_elem << "\n";
+        Rcout << "     ";
+        int c = 0;
+        for (arma::vec::iterator it = frequencyGlobal.begin(); it < frequencyGlobal.end(); it++, c++) {
+          Rcout << " " << * it;
+        }
+        Rcout << "\n";
+        Rcout << "   Amplitudes selected:  " << amplitudeGlobal.n_elem << "\n";
+        Rcout << "     ";
+        c = 0;
+        for (arma::vec::iterator it = amplitudeGlobal.begin(); it < amplitudeGlobal.end(); it++, c++) {
+          Rcout << " " << * it;
+        }
+        Rcout << "\n";
+      }
       
       // Calculate FT
       res = ft(frequencyGlobal, filter);
@@ -369,11 +428,22 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
           dnuGuess = 0.0;
         }
       }
+      if (debug) {
+        Rcout << "    Dnu: " << dnu << "\n";
+        Rcout << "    Dnu Peak: " << dnuPeak << "\n";
+        Rcout << "    Dnu Guess: " << dnuGuess << "\n";
+      }
+      
       // Histogram of differences
       _diffHistogram = diffHistogram(frequencyGlobal, dnu);
-      
+    } else {
+      if (debug) {
+        Rcout << "    Nothing to do" << "\n";
+      }
     } // End first iteration
   } // End range loop
+  
+  // Calculated the connected ind
   
   // Return the output with all valuable elements
   return List::create(_["photometry"] =
