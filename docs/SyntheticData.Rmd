@@ -1,8 +1,8 @@
 ---
-title: "Synthetic data"
+title: "Experiments"
 author: "Roberto Maestre"
 date: "10/24/2018"
-output: github_document
+resultput: github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -13,115 +13,153 @@ library(microbenchmark)
 ```
 
 
-### Synthetic data generation representing photometry
+## Experiment configuration
 
-This first example is used to check the main procedure workflow results.
+#### Parameters for execution
+
+```{r parameters}
+paramters = list(
+  "filter" = "gaussian",
+  "gRegimen" = 0,
+  "minDnu" = 15,
+  "maxDnu" = 95,
+  "dnuValue" = -1,
+  "dnuGuessError" = 10,
+  "dnuEstimation" = TRUE,
+  "numFrequencies" = 30,
+  "debug" = TRUE)
+```
+
+#### Data source
+
+Choose: 
+
+ * dataFlag = T, to use synthetic data generated or,
+
+ * dataFlag = F, to use a real pulsar photometry
+
+```{r flag}
+dataFlag = F
+```
+
+## Data generation
+
 
 ```{r dataGeneration}
-# Linear space with equal separation
-x <- sin(seq(from = 0,
-         to = 100,
-         by = 5))
-# Add secuential times
-dt.test <-
-  data.frame("time" = seq(from = 1, to = length(x)), "mmag" = x)
+# Generate synthetic data or read pulsar data
+if (dataFlag) {
+  x <- sin(seq(from = 0,
+               to = 100,
+               by = 1))
+  dt <-
+    data.frame("time" = seq(from = 1, to = length(x)), "mmag" = x)
+} else {
+  # Read pulsar data
+  dt <- data.table(read.csv("../data/pulsar.tsv", sep = "\t"))
+}
 
-# Plot
-ggplot(aes(time, mmag), data = dt.test) +
-  geom_point() +
-  geom_line() +
-  theme_bw()
+# Sampling for large file
+dt.plot <- dt
+if(dim(dt)[1]>1000) {
+  dt.plot <- dt[sample(nrow(dt), 1000),]
+}
+# Plot photometry
+ggplot(aes(time, mmag), data = dt.plot) +
+    geom_point() +
+    geom_line() +
+    theme_bw()
+rm(dt.plot) # Drop memory
 ```
 
-Calculate amplitures by FT
+#### Frequences an Amplitudes for the photometry
 
 ```{r calculateEspectrum, warning=F}
-# Calculate amplitudes and frequence
-dt.spectrum <- calculate_amplitudes(dt.test$time, dt.test$mmag)
+# Calculate amplitudes and frequences
+dt.spectrum <- calculate_amplitudes(dt$time, dt$mmag)
+# Get max amplitude
+maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude), ]
 # Plot amplitudes
-plot_spectrum(-0.5, 0.5, dt.spectrum)
-# Save data
-# Save DF to disk
-write.table(dt.spectrum[c("frequency", "amplitude")], file = "/tmp/data.csv", 
-          sep = "\t",
-          quote = F, 
-          row.names = F, 
-          col.names = F)
-```
-
-
-Main procedure call
-
-```{r calculate, warning=F}
-out <- go(
-  dt.spectrum$frequency,
-  dt.spectrum$amplitude,
-  filter = "uniform",
-  gRegimen = 0,
-  numFrequencies = 30
+plot_spectrum(maxAmplitude$frequency - 1.5,
+              maxAmplitude$frequency + 1.5,
+              dt.spectrum)
+# Save Data to disk (to be replicated)
+write.table(
+  dt.spectrum[c("frequency", "amplitude")],
+  file = "/tmp/data.csv",
+  sep = "\t",
+  quote = F,
+  row.names = F,
+  col.names = F
 )
 ```
 
+##  Experiment execution
 
-#### Fourier Transform on the photometry data
+```{r calculate, warning=F}
+result <- process(
+  dt.spectrum$frequency,
+  dt.spectrum$amplitude,
+  filter = paramters$filter,
+  gRegimen = paramters$gRegimen,
+  minDnu = paramters$minDnu,
+  maxDnu = paramters$maxDnu,
+  dnuValue = paramters$dnuValue,
+  dnuGuessError = paramters$dnuGuessError,
+  dnuEstimation = paramters$dnuEstimation,
+  numFrequencies = paramters$numFrequencies,
+  debug = paramters$debug
+)
+```
+
+#### Main results
+
+* **Dnu** (```result$dnu```) = `r result$dnu`.
+* **DnuGuess** ```(result$dnuGuess```) = `r result$dnuGuess`.
+* **DnuPeak** (```result$dnuPeak```) = `r result$dnuPeak`.
+* **Frequency** (```result$photometry$frequency```) = `r head(c(result$photometry$frequency), 25)`...
+* **Amplitude** (```result$photometry$amplitude```) = `r head(c(result$photometry$amplitude), 25)`...
+* **Diffs** (```result$diffHistogram$diffs```) = `r head(c(result$diffHistogram$diffs), 25)`...
+
+#### Apodization
+
 
 ```{r apodization, warning=F}
 # Plot frecuency and amplitude
-ggplot(aes(x = frequences, y = amplitude), 
-       data = data.frame("frequences"=out$ft$frequences, "amplitude"=out$ft$amp)) +
+ggplot(
+  aes(x = frequences, y = amplitude),
+  data = data.frame(
+    "frequences" = result$ft$frequences,
+    "amplitude" = result$ft$amp
+  )
+) +
   geom_point() +
   geom_line() +
   ggtitle("Apodization- Frequences and amplitudes") +
   theme_bw()
 ```
 
-
-
-#### Fourier Transform on the photometry data
-
-```{r ftPhotometry, warning=F}
-# Plot frecuency and amplitude
-ggplot(aes(x = frequency, y = amplitude),
-       data = data.frame(out$photometry)) +
-  geom_point() +
-  geom_line() +
-  ggtitle("FT on the photometry data") +
-  theme_bw()
-```
-
+#### FT - Power Spectrum
 
 ```{r ftPower, warning=F}
 # Plot frecuency and amplitude
 dt <-
-  data.frame("f" = out$ft$f,
-             "powerSpectrum" = out$ft$powerSpectrum)
+  data.frame("f" = result$ft$f,
+             "powerSpectrum" = result$ft$powerSpectrum)
 ggplot(aes(x = f, y = powerSpectrum), data = dt) +
   geom_point() +
   geom_line() +
-  ggtitle("FT - Object method. Power Spectrum") +
+  ggtitle("FT - Power Spectrum") +
   theme_bw()
 ```
 
-```{r ftPowerInverse, warning=F}
-# Plot frecuency and amplitude
-ggplot(
-  aes(x = f, y = powerSpectrum),
-  data = data.frame(
-    "f" = out$ft$f,
-    "powerSpectrum" = out$ft$powerSpectrumInverse
-  )
-) +
-  geom_point() +
-  geom_line() +
-  ggtitle("FT - Object method. Inverse power Spectrum") +
-  theme_bw()
-```
+####  Histogram fo differences. 
 
+We only show bins with >0 values
 
 
 ```{r diffsHistogram, warning=F}
-dt <- data.frame(out$diff$diffHistogram$histogram)
-ggplot(aes(x = bins, y = values), data = dt[dt$values > 0, ]) +
+dt <- data.frame(result$diffHistogram$histogram)
+ggplot(aes(x = bins, y = values), data = dt[dt$values > 0,]) +
   geom_bar(stat = "identity") +
   ggtitle("Histogram of differences") +
   theme_bw()

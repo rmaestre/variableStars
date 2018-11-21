@@ -9,9 +9,9 @@ This first example is used to check the main procedure workflow results.
 
 ``` r
 # Linear space with equal separation
-x <- sin(seq(from = 0,
+x <- seq(from = 0,
          to = 100,
-         by = 5))
+         by = 5)
 # Add secuential times
 dt.test <-
   data.frame("time" = seq(from = 1, to = length(x)), "mmag" = x)
@@ -52,11 +52,20 @@ Main procedure call
 out <- go(
   dt.spectrum$frequency,
   dt.spectrum$amplitude,
-  filter = "uniform",
+  filter = "hanning",
   gRegimen = 0,
+  minDnu = 15,
+  maxDnu = 95,
+  dnuValue = -1,
+  dnuGuessError = 10,
+  dnuEstimation = T,
   numFrequencies = 30
 )
 ```
+
+    ## dnuValue:-1dnuGuess:1.2757e-3101 
+    ## 2 
+    ## 3
 
 #### Fourier Transform on the photometry data
 
@@ -118,7 +127,7 @@ ggplot(
 ![](SyntheticData_files/figure-markdown_github/ftPowerInverse-1.png)
 
 ``` r
-dt <- data.frame(out$diff$diffHistogram$histogram)
+dt <- data.frame(out$diffHistogram$histogram)
 ggplot(aes(x = bins, y = values), data = dt[dt$values > 0, ]) +
   geom_bar(stat = "identity") +
   ggtitle("Histogram of differences") +

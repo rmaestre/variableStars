@@ -1,4 +1,4 @@
-Frecuences and amplitudes
+Frequences and amplitudes
 ================
 Roberto Maestre
 10/24/2018
@@ -98,7 +98,7 @@ In this case, we use the photometry of a pulsar star, in which timestamp the mag
 ``` r
 # Read pulsar data
 dt.pulsar <- data.table(read.csv("../data/pulsar.tsv", sep = "\t"))
-ggplot(aes(time, magnitude), data = dt.pulsar[sample(nrow(dt.pulsar), 1000),]) +
+ggplot(aes(time, mmag), data = dt.pulsar[sample(nrow(dt.pulsar), 1000),]) +
   geom_point() +
   geom_line() +
   theme_bw()
@@ -111,7 +111,7 @@ We use DFT to calculate the amplitude in each frecuency.
 ``` r
 # Calculate
 dt.spectrum <-
-  calculate_amplitudes(dt.pulsar$time, dt.pulsar$magnitude)
+  calculate_amplitudes(dt.pulsar$time, dt.pulsar$mmag)
 # Get max amplitude
 maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude),]
 # Plot amplitudes
@@ -130,8 +130,8 @@ A benchmark is proposed to show the performance achieved by made all calculation
 ``` r
 m <-
   microbenchmark(dt <-
-                   calculate_amplitudes(dt.pulsar$time, dt.pulsar$magnitude),
-                 times = 30)
+                   calculate_amplitudes(dt.pulsar$time, dt.pulsar$mmag),
+                 times = 50)
 autoplot(m, log = F) +
   scale_x_discrete(labels = c("DFT on a Pulsar star data")) +
   xlab("")

@@ -41,7 +41,11 @@ findPeaks <- function(x) {
     .Call(`_variableStars_findPeaks`, x)
 }
 
-go <- function(frequency, amplitude, filter, gRegimen = 0.0, numFrequencies = 30) {
-    .Call(`_variableStars_go`, frequency, amplitude, filter, gRegimen, numFrequencies)
+calculateRange <- function(nElements, numFrequencies) {
+    .Call(`_variableStars_calculateRange`, nElements, numFrequencies)
+}
+
+process <- function(frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue = -1, dnuEstimation = FALSE, debug = FALSE) {
+    .Call(`_variableStars_process`, frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue, dnuEstimation, debug)
 }
 
