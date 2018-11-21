@@ -9,3 +9,8 @@ Introduction
 ------------
 
 Variable Star package provides the main funtions to analized patterns on variable stars (tbd). All funcionalities are programmed in Cpp using RcppArmadillo integrated thorugh Rcpp.
+
+Example of use on a pulsar data
+-------------------------------
+
+Please, find [here](docs/Experiments.md)
