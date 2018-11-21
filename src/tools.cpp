@@ -275,35 +275,35 @@ arma::uvec findPeaks(arma::vec x) {
 /*!
 \param nElements the number of elements in the frequency vector
 \param numFrequencies the selected number of frecuencies
-\return The vector with the ranges
+\return The vector with the ranges in integer format
 */
 //[[Rcpp::export]]
-arma::vec calculateRange(int nElements, double numFrequencies){
+arma::ivec calculateRange(int nElements, int numFrequencies){
   // Check the frequencies vector of splitted elements
-  arma::vec range(3);
+  arma::ivec range(3);
   if (nElements < numFrequencies){
-    range[0] = nElements;
+    range(0) = nElements;
     range.shed_rows(1, 2); // Release memory
   } else if (nElements > numFrequencies & 
     nElements <= 2*numFrequencies) {
-    range[0] = numFrequencies;
-    range[1] = nElements;
+    range(0) = numFrequencies;
+    range(1) = nElements;
     range.shed_row(2); // Release memory
   } else if (nElements > 2*numFrequencies & 
     nElements <= 3*numFrequencies) {
-    range[0] = numFrequencies;
-    range[1] = 2*numFrequencies;
-    range[2] = nElements;
+    range(0) = numFrequencies;
+    range(1) = 2*numFrequencies;
+    range(2) = nElements;
   } else {
-    range[0] = numFrequencies;
-    range[2] = 2*numFrequencies;
-    range[3] = nElements;
+    range(0) = numFrequencies;
+    range(1) = 2*numFrequencies;
+    range(2) = 3*nElements;
   }
   return range;
 }
 
 //[[Rcpp::export]]
-List go(arma::vec frequency, arma::vec amplitude, String filter, 
+List process(arma::vec frequency, arma::vec amplitude, String filter, 
         double gRegimen, double numFrequencies,
         double maxDnu, double minDnu, double dnuGuessError,
         double dnuValue = -1, bool dnuEstimation = false) {
@@ -321,21 +321,33 @@ List go(arma::vec frequency, arma::vec amplitude, String filter,
   amplitude = amplitude.elem(idsSort);
   
   // Calculate the range
-  arma::vec range = calculateRange(frequency.n_elem, numFrequencies);
-
+  arma::ivec range = calculateRange(frequency.n_elem, numFrequencies);
+  
   // Loop over frequencies vector
-  arma::vec::iterator numIt;
+  arma::ivec::iterator numIt;
   for (numIt = range.begin(); numIt < range.end(); numIt++) {
+    
+    Rcout << "1";
     
     // Calculate the range for subselecting frecuences
     arma::uvec pos(*numIt);
     std::iota(pos.begin(), pos.end(), 0);
+    
+    Rcout << "2";
     // Loop subselection of frecuences and amplitudes
     arma::vec frequencyGlobal = frequency.elem(pos);
+    
+    Rcout << "3";
+    
     arma::vec  amplitudeGlobal = amplitude.elem(pos);
+    
+    Rcout << "4";
 
     // Calculate FT
     List res = ft(frequencyGlobal, filter);
+    
+    Rcout << "5";
+    
     // Calculate the inverse frecuence
     arma::vec f = res["f"];
     arma::vec fInv = 1.0 / f;
@@ -351,10 +363,6 @@ List go(arma::vec frequency, arma::vec amplitude, String filter,
     double dnu = 0.0;
     double dnuPeak = maxSel(0); // Get the dnu on the peak
     double dnuGuess = arma::min(frequencyGlobal) / 3.0;
-    
-    Rcout << "dnuValue:" << dnuValue;
-    Rcout << "dnuGuess:" << dnuGuess;
-    
     // Check for an input Dnu value
     if (dnuValue < 0) {
       // Use the F0/Dnu estimation
