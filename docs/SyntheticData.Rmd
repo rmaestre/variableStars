@@ -13,7 +13,6 @@ library(microbenchmark)
 ```
 
 
-
 ## Experiment configuration
 
 #### Parameters for execution
@@ -26,8 +25,9 @@ paramters = list(
   "maxDnu" = 95,
   "dnuValue" = -1,
   "dnuGuessError" = 10,
-  "dnuEstimation" = T,
-  "numFrequencies" = 50)
+  "dnuEstimation" = TRUE,
+  "numFrequencies" = 30,
+  "debug" = TRUE)
 ```
 
 #### Data source
@@ -106,7 +106,8 @@ result <- process(
   dnuValue = paramters$dnuValue,
   dnuGuessError = paramters$dnuGuessError,
   dnuEstimation = paramters$dnuEstimation,
-  numFrequencies = 50
+  numFrequencies = paramters$numFrequencies,
+  debug = paramters$debug
 )
 ```
 
