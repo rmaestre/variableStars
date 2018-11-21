@@ -2,7 +2,7 @@
 title: "Experiments"
 author: "Roberto Maestre"
 date: "10/24/2018"
-resultput: github_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
