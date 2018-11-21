@@ -122,20 +122,20 @@ BEGIN_RCPP
 END_RCPP
 }
 // calculateRange
-arma::vec calculateRange(int nElements, double numFrequencies);
+arma::ivec calculateRange(int nElements, int numFrequencies);
 RcppExport SEXP _variableStars_calculateRange(SEXP nElementsSEXP, SEXP numFrequenciesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< int >::type nElements(nElementsSEXP);
-    Rcpp::traits::input_parameter< double >::type numFrequencies(numFrequenciesSEXP);
+    Rcpp::traits::input_parameter< int >::type numFrequencies(numFrequenciesSEXP);
     rcpp_result_gen = Rcpp::wrap(calculateRange(nElements, numFrequencies));
     return rcpp_result_gen;
 END_RCPP
 }
-// go
-List go(arma::vec frequency, arma::vec amplitude, String filter, double gRegimen, double numFrequencies, double maxDnu, double minDnu, double dnuGuessError, double dnuValue, bool dnuEstimation);
-RcppExport SEXP _variableStars_go(SEXP frequencySEXP, SEXP amplitudeSEXP, SEXP filterSEXP, SEXP gRegimenSEXP, SEXP numFrequenciesSEXP, SEXP maxDnuSEXP, SEXP minDnuSEXP, SEXP dnuGuessErrorSEXP, SEXP dnuValueSEXP, SEXP dnuEstimationSEXP) {
+// process
+List process(arma::vec frequency, arma::vec amplitude, String filter, double gRegimen, double numFrequencies, double maxDnu, double minDnu, double dnuGuessError, double dnuValue, bool dnuEstimation);
+RcppExport SEXP _variableStars_process(SEXP frequencySEXP, SEXP amplitudeSEXP, SEXP filterSEXP, SEXP gRegimenSEXP, SEXP numFrequenciesSEXP, SEXP maxDnuSEXP, SEXP minDnuSEXP, SEXP dnuGuessErrorSEXP, SEXP dnuValueSEXP, SEXP dnuEstimationSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -149,7 +149,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type dnuGuessError(dnuGuessErrorSEXP);
     Rcpp::traits::input_parameter< double >::type dnuValue(dnuValueSEXP);
     Rcpp::traits::input_parameter< bool >::type dnuEstimation(dnuEstimationSEXP);
-    rcpp_result_gen = Rcpp::wrap(go(frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue, dnuEstimation));
+    rcpp_result_gen = Rcpp::wrap(process(frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue, dnuEstimation));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -166,7 +166,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_variableStars_adjacentDifferences", (DL_FUNC) &_variableStars_adjacentDifferences, 1},
     {"_variableStars_findPeaks", (DL_FUNC) &_variableStars_findPeaks, 1},
     {"_variableStars_calculateRange", (DL_FUNC) &_variableStars_calculateRange, 2},
-    {"_variableStars_go", (DL_FUNC) &_variableStars_go, 10},
+    {"_variableStars_process", (DL_FUNC) &_variableStars_process, 10},
     {NULL, NULL, 0}
 };
 

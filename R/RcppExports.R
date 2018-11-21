@@ -45,7 +45,7 @@ calculateRange <- function(nElements, numFrequencies) {
     .Call(`_variableStars_calculateRange`, nElements, numFrequencies)
 }
 
-go <- function(frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue = -1, dnuEstimation = FALSE) {
-    .Call(`_variableStars_go`, frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue, dnuEstimation)
+process <- function(frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue = -1, dnuEstimation = FALSE) {
+    .Call(`_variableStars_process`, frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue, dnuEstimation)
 }
 
