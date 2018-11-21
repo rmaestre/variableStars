@@ -1,4 +1,4 @@
-#include <RcppArmadillo.h>
+#include <RcppArmadillo.h> 
 #include <Rcpp.h>
 
 using namespace Rcpp;
@@ -18,7 +18,7 @@ NumericVector seq_int(int first, int last) {
 }
 //[[Rcpp::export]]
 NumericVector seq_rev(NumericVector x) {
-  NumericVector revX = clone<NumericVector>(x);
+  NumericVector revX = clone < NumericVector > (x);
   std::reverse(revX.begin(), revX.end());
   return revX;
 }
@@ -29,7 +29,9 @@ NumericVector seq_rev(NumericVector x) {
 \return The Discrete Fourier Transform
 */
 //[[Rcpp::export]]
-arma::cx_vec compute_fft(arma::vec x) { return arma::fft(x); }
+arma::cx_vec compute_fft(arma::vec x) {
+  return arma::fft(x);
+}
 
 //! Computing Discrete Fourier Transform and return the calculated amplitudes
 /*!
@@ -48,7 +50,7 @@ DataFrame calculate_amplitudes(arma::vec time, arma::vec x) {
   NumericVector freq2 = seq_rev(freq1 * -1);
   // Delta and fNyquist
   double delta = time[2] - time[1];
-  double fNyquist = (double)1 / 2 / delta;
+  double fNyquist = (double) 1 / 2 / delta;
   // Vector concatenation
   for (int i = 0; i < n && i < frequency.length(); i++) {
     if (i < n / 2) {
@@ -60,7 +62,7 @@ DataFrame calculate_amplitudes(arma::vec time, arma::vec x) {
   frequency = fNyquist * frequency / (n / 2.0);
   
   // Fourier transformation
-  arma::cx_vec furierTt = compute_fft(x);  // Use Fast Fourier Transform (fft)
+  arma::cx_vec furierTt = compute_fft(x); // Use Fast Fourier Transform (fft)
   // Get values
   furierTt = furierTt.submat(1, 0, (n / 2), 0);
   // Calculate amplitude getting modules
@@ -68,13 +70,12 @@ DataFrame calculate_amplitudes(arma::vec time, arma::vec x) {
   NumericVector::iterator out_amp;
   NumericVector phases(n);
   NumericVector::iterator out_pha;
-  arma::cx_vec::iterator it;  // Get iterator over the complex vector
+  arma::cx_vec::iterator it; // Get iterator over the complex vector
   for (it = furierTt.begin(), out_amp = amplitudes.begin(),
-       out_pha = phases.begin();
-       it < furierTt.end(); ++it, ++out_amp, ++out_pha) {
-    complex<double> cx = *it;
-    *out_amp = (sqrt(pow(real(cx), 2) + pow(imag(cx), 2)) / furierTt.n_elem);
-    *out_pha = atan(imag(cx) / real(cx));
+       out_pha = phases.begin(); it < furierTt.end(); ++it, ++out_amp, ++out_pha) {
+    complex < double > cx = * it;
+    * out_amp = (sqrt(pow(real(cx), 2) + pow(imag(cx), 2)) / furierTt.n_elem);
+    * out_pha = atan(imag(cx) / real(cx));
   }
   
   // Return results
@@ -105,7 +106,7 @@ arma::vec apodization(arma::vec frequences, String filter) {
   double min = frequences.min();
   double middle = (max - min) / 2;
   frequencesCentered = frequences - min - middle;
- 
+  
   // Apply filter on centered frequences
   if (filter == "bartlett") {
     factor = 1 - arma::abs(frequencesCentered) / middle;
@@ -117,9 +118,8 @@ arma::vec apodization(arma::vec frequences, String filter) {
   } else if (filter == "cosine") {
     factor = arma::cos((M_PI * frequencesCentered) / (2.0 * middle));
   } else if (filter == "gaussian") {
-    factor = arma::exp(
-      -0.5 *
-        arma::pow(frequencesCentered / arma::stddev(frequencesCentered), 2));
+    factor = arma::exp(-0.5 *
+      arma::pow(frequencesCentered / arma::stddev(frequencesCentered), 2));
   } else if (filter == "hamming") {
     factor = 27.0 / 50.0 +
       23.0 / 50.0 * arma::cos(M_PI * frequencesCentered / middle);
@@ -145,24 +145,23 @@ arma::vec differences(arma::vec frequences) {
   if (frequences.n_elem == 0) {
     throw std::range_error("differences:: Frequences vector is empty");
   }
-
+  
   // Calculate all frequences differences
   int n = frequences.n_elem;
   int diagSupElements = n * (n - 1) / 2;
-  arma::vec diff(diagSupElements);  // Number of elements in the sup. diag.
+  arma::vec diff(diagSupElements); // Number of elements in the sup. diag.
   NumericVector::iterator it_first, it_second, it_diff;
-  it_diff = diff.begin();  // output iterator
+  it_diff = diff.begin(); // output iterator
   int countElements = 0;
   // Double loop (n^2 complexity)
   for (it_first = frequences.begin(); it_first < frequences.end(); it_first++) {
-    for (it_second = it_first;
-         it_second < frequences.end() & it_diff < diff.end(); it_second++) {
-      if (it_first != it_second) {  // Jump same elements
-        *it_diff =
-          std::abs(*it_second - *it_first);  // Save absolute difference
-        if (*it_diff != 0) {
-          it_diff++;        // Increase pointer
-          countElements++;  // Increase elements
+    for (it_second = it_first; it_second < frequences.end() & it_diff < diff.end(); it_second++) {
+      if (it_first != it_second) { // Jump same elements
+        * it_diff =
+          std::abs( * it_second - * it_first); // Save absolute difference
+        if ( * it_diff != 0) {
+          it_diff++; // Increase pointer
+          countElements++; // Increase elements
         }
       }
     }
@@ -185,8 +184,8 @@ List diffHistogram(arma::vec frequences, double dnu) {
   arma::vec diffs = differences(frequences);
   
   // Histogram bin paramterns
-  double maxHistogramBin = 100;  // Max value in histogram
-  double binSize = dnu * 0.015;  // Bin length
+  double maxHistogramBin = 100; // Max value in histogram
+  double binSize = dnu * 0.015; // Bin length
   // Generate space for bins for histogram
   arma::vec bins = arma::regspace(0, binSize, maxHistogramBin);
   // Return results
@@ -207,9 +206,9 @@ List diffHistogram(arma::vec frequences, double dnu) {
 //[[Rcpp::export]]
 List ft(arma::vec x, String filter) {
   // Paramters
-  const double maxFreq = 100.0;  // max value for FT computing
-  const double fNyquist = 1;    // fNyquist value
-  const double unknow = 10000;  // ??? Numero de puntos
+  const double maxFreq = 100.0; // max value for FT computing
+  const double fNyquist = 1; // fNyquist value
+  const double unknow = 10000; // ??? Numero de puntos
   const int n = x.n_rows; // Frequences number
   
   // Frequencies apodization
@@ -234,7 +233,7 @@ List ft(arma::vec x, String filter) {
   // Return results
   return List::create(_["amp"] = amp,
                       _["frequences"] = x,
-                      _["f"] = f, 
+                      _["f"] = f,
                       _["powerSpectrum"] = powerSpectrum,
                       _["powerSpectrumInverse"] = 1 / powerSpectrum);
 }
@@ -250,12 +249,11 @@ arma::vec adjacentDifferences(arma::vec x) {
   arma::vec adjDiffs(x.n_elem);
   // Calculate diffs
   std::adjacent_difference(x.begin(), x.end(), adjDiffs.begin());
-  if (adjDiffs.n_elem > 0){
+  if (adjDiffs.n_elem > 0) {
     adjDiffs.shed_row(0); // Remove unused header
   }
   return adjDiffs;
 }
-
 
 //! Find peaks from a numeric vector
 /*!
@@ -270,7 +268,6 @@ arma::uvec findPeaks(arma::vec x) {
   return find(d < 0) + 1;
 }
 
-
 //! Calculate range splits of elements
 /*!
 \param nElements the number of elements in the frequency vector
@@ -278,35 +275,35 @@ arma::uvec findPeaks(arma::vec x) {
 \return The vector with the ranges in integer format
 */
 //[[Rcpp::export]]
-arma::ivec calculateRange(int nElements, int numFrequencies){
+arma::ivec calculateRange(int nElements, int numFrequencies) {
   // Check the frequencies vector of splitted elements
   arma::ivec range(3);
-  if (nElements < numFrequencies){
+  if (nElements < numFrequencies) {
     range(0) = nElements;
     range.shed_rows(1, 2); // Release memory
-  } else if (nElements > numFrequencies & 
-    nElements <= 2*numFrequencies) {
+  } else if (nElements > numFrequencies &
+    nElements <= 2 * numFrequencies) {
     range(0) = numFrequencies;
     range(1) = nElements;
     range.shed_row(2); // Release memory
-  } else if (nElements > 2*numFrequencies & 
-    nElements <= 3*numFrequencies) {
+  } else if (nElements > 2 * numFrequencies &
+    nElements <= 3 * numFrequencies) {
     range(0) = numFrequencies;
-    range(1) = 2*numFrequencies;
+    range(1) = 2 * numFrequencies;
     range(2) = nElements;
   } else {
     range(0) = numFrequencies;
-    range(1) = 2*numFrequencies;
-    range(2) = 3*nElements;
+    range(1) = 2 * numFrequencies;
+    range(2) = 3 * nElements;
   }
   return range;
 }
 
 //[[Rcpp::export]]
-List process(arma::vec frequency, arma::vec amplitude, String filter, 
-        double gRegimen, double numFrequencies,
-        double maxDnu, double minDnu, double dnuGuessError,
-        double dnuValue = -1, bool dnuEstimation = false) {
+List process(arma::vec frequency, arma::vec amplitude, String filter,
+             double gRegimen, double numFrequencies,
+             double maxDnu, double minDnu, double dnuGuessError,
+             double dnuValue = -1, bool dnuEstimation = false) {
   // Work in muHz
   frequency /= 0.0864;
   
@@ -322,76 +319,72 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
   
   // Calculate the range
   arma::ivec range = calculateRange(frequency.n_elem, numFrequencies);
+  // Data sctutures
+  arma::vec frequencyGlobal, amplitudeGlobal, f, fInv, b;
+  List res, _diffHistogram;
+  double dnu, dnuPeak, dnuGuess;
   
   // Loop over frequencies vector
   arma::ivec::iterator numIt;
+  bool first = true;
   for (numIt = range.begin(); numIt < range.end(); numIt++) {
-    
-    Rcout << "1";
-    
-    // Calculate the range for subselecting frecuences
-    arma::uvec pos(*numIt);
-    std::iota(pos.begin(), pos.end(), 0);
-    
-    Rcout << "2";
-    // Loop subselection of frecuences and amplitudes
-    arma::vec frequencyGlobal = frequency.elem(pos);
-    
-    Rcout << "3";
-    
-    arma::vec  amplitudeGlobal = amplitude.elem(pos);
-    
-    Rcout << "4";
-
-    // Calculate FT
-    List res = ft(frequencyGlobal, filter);
-    
-    Rcout << "5";
-    
-    // Calculate the inverse frecuence
-    arma::vec f = res["f"];
-    arma::vec fInv = 1.0 / f;
-    arma::vec b = res["powerSpectrum"];
-    
-    // Get the peaks
-    arma::uvec peaksInd = findPeaks(b);
-    arma::vec localMax = fInv.elem(peaksInd);
-    arma::vec localMaxB = b.elem(peaksInd);
-    
-    // Get DNU on the peak
-    arma::vec maxSel = fInv.elem(find(b == *std::max_element(localMaxB.begin(), localMaxB.end())));
-    double dnu = 0.0;
-    double dnuPeak = maxSel(0); // Get the dnu on the peak
-    double dnuGuess = arma::min(frequencyGlobal) / 3.0;
-    // Check for an input Dnu value
-    if (dnuValue < 0) {
-      // Use the F0/Dnu estimation
-      if (dnuEstimation) {
-        if (dnuGuess<minDnu | dnuGuess>maxDnu | (arma::min(fInv) > dnuGuess + dnuGuessError)) {
-          dnu = dnuPeak;
+    if (first) {
+      first = false;
+      // Calculate the range for subselecting frecuences
+      arma::uvec pos( * numIt);
+      std::iota(pos.begin(), pos.end(), 0);
+      
+      // Loop subselection of frecuences and amplitudes
+      frequencyGlobal = frequency.elem(pos);
+      amplitudeGlobal = amplitude.elem(pos);
+      
+      // Calculate FT
+      res = ft(frequencyGlobal, filter);
+      // Calculate the inverse frecuence
+      f = as < arma::vec > (res["f"]);
+      fInv = 1.0 / f;
+      b = as < arma::vec > (res["powerSpectrum"]);
+      
+      // Get the peaks
+      arma::uvec peaksInd = findPeaks(b);
+      arma::vec localMax = fInv.elem(peaksInd);
+      arma::vec localMaxB = b.elem(peaksInd);
+      
+      // Get DNU on the peak
+      arma::vec maxSel = fInv.elem(find(b == * std::max_element(localMaxB.begin(), localMaxB.end())));
+      dnu = 0.0;
+      dnuPeak = maxSel(0); // Get the dnu on the peak
+      dnuGuess = arma::min(frequencyGlobal) / 3.0;
+      // Check for an input Dnu value
+      if (dnuValue < 0) {
+        // Use the F0/Dnu estimation
+        if (dnuEstimation) {
+          if (dnuGuess < minDnu | dnuGuess > maxDnu | (arma::min(fInv) > dnuGuess + dnuGuessError)) {
+            dnu = dnuPeak;
+          } else {
+            dnu = arma::min(fInv.elem(peaksInd) - dnuGuess) + dnuGuess;
+          }
         } else {
-          dnu = arma::min(fInv.elem(peaksInd) - dnuGuess) + dnuGuess;
+          dnu = dnuPeak;
+          dnuGuess = 0.0;
         }
-      } else {
-        dnu = dnuPeak;
-        dnuGuess = 0.0;
       }
-    }
-    // -----------------------------------
-    
-    // Histogram of differences
-    List _diffHistogram = diffHistogram(frequencyGlobal , dnu);
-    
-    // Return the output with all valuable elements
-    return List::create(_["photometry"] = 
-                        List::create(_["frequency"]=frequencyGlobal, 
-                                     _["amplitude"]=amplitudeGlobal),
-                        _["ft"]=res,
-                        _["diffHistogram"] = _diffHistogram,
-                        _["f"] = res["f"], _["fInv"] = fInv,
-                        _["dnuPeak"] = dnuPeak,
-                        _["dnu"] = dnu,
-                        _["dnuGuess"] = dnuGuess
-    );
+      // Histogram of differences
+      _diffHistogram = diffHistogram(frequencyGlobal, dnu);
+      
+    } // End first iteration
   } // End range loop
+  
+  // Return the output with all valuable elements
+  return List::create(_["photometry"] =
+                      List::create(_["frequency"] = frequency,
+                                   _["amplitude"] = amplitude),
+                                   _["ft"] = res,
+                                   _["diffHistogram"] = _diffHistogram,
+                                   _["f"] = res["f"],
+                                               _["fInv"] = fInv,
+                                               _["dnuPeak"] = dnuPeak,
+                                               _["dnu"] = dnu,
+                                               _["dnuGuess"] = dnuGuess
+  );
 }
