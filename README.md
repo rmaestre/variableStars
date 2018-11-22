@@ -1,4 +1,4 @@
-## Variable Stars [![Build Status] [![Build Status](https://travis-ci.org/rmaestre/variableStars.svg?branch=master)](https://travis-ci.com/rmaestre/variableStars)
+## Variable Stars [![Build Status](https://travis-ci.org/rmaestre/variableStars.svg?branch=master)](https://travis-ci.com/rmaestre/variableStars)
 
 ### Finding patterns on variable stars
 
