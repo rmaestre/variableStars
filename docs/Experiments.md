@@ -117,9 +117,9 @@ result <- process(
 
     ## ::: Debug information :::
     ## Number of frequences to be processed: 101
-    ## Number of frequences after drop the g regimen: 50
+    ## Number of frequences after drop the g regimen: 51
     ## Sorted frecuences:  1.83352 1.94811 1.71892 2.06271 1.60433
-    ## Range:  30 50
+    ## Range:  30 51
     ##  Iteration over range: 30
     ##    Frequencies selected: 30
     ##       1.83352 1.94811 1.71892 2.06271 1.60433 2.1773 1.48973 2.2919 2.40649 1.37514 2.52109 2.63568 1.26054 2.75028 2.86487 2.97946 1.14595 3.09406 3.20865 3.32325 1.03135 3.43784 3.55244 3.66703 3.78163 0.916758 3.89622 4.01082 4.12541 4.24001
@@ -128,7 +128,7 @@ result <- process(
     ##     Dnu: 2.0098
     ##     Dnu Peak: 2.0098
     ##     Dnu Guess: 0.305586
-    ##  Iteration over range: 50
+    ##  Iteration over range: 51
     ##     Nothing to do
 
 #### Main results

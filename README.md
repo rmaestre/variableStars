@@ -14,3 +14,10 @@ Example of use on a pulsar data
 -------------------------------
 
 Please, find [here](docs/Experiments.md) the main execution of the complete package procedure.
+
+Main Workflow
+-------------
+
+[![Workflow](docs/figures/workflow.png)](docs/figures/workflow.png)
+
+(The pulsar in the Crab Nebula is composed by images taken by Hubble (red) and Chandra X-Ray(blue))
