@@ -1,9 +1,5 @@
-Finding patterns in variable stars
-================
-Roberto Maestre
-10/24/2018
 
-[![Build Status](https://travis-ci.org/rmaestre/variableStars.svg?branch=master)](https://travis-ci.com/rmaestre/variableStars)
+[![Build Status](https://travis-ci.org/rmaestre/variableStars.svg?branch=master)](https://travis-ci.org/rmaestre/variableStars)
 
 Introduction
 ------------
