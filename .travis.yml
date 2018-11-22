@@ -3,7 +3,7 @@ language: r
 sudo: false
 
 install:
-  - R -e 'install.packages(c("Rcpp", "RcppArmadillo", "knitr", "ggplot2", "rmarkdown", "testthat"))'
+  - R -e 'install.packages(c("Rcpp", "devtools", "RcppArmadillo", "knitr", "ggplot2", "rmarkdown", "testthat"))'
 
 script: 
  - Rscript -e 'devtools::install();devtools::test()'
