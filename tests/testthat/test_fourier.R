@@ -1,5 +1,7 @@
-context("Fourier transform")
+library(testthat)
 library(variableStars)
+
+context("Fourier transform")
 
 test_that("compute_ftt returns the same length that the input vector", {
   for (i in seq(1, 100)) {

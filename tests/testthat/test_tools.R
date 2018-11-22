@@ -1,5 +1,5 @@
+library(testthat)
 library(variableStars)
-
 
 context("Differences tools")
 
