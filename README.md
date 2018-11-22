@@ -10,7 +10,6 @@ Please, find [here](docs/Experiments.md) the main execution of the complete pack
 
 ###  Main Workflow
 
-
-[![Workflow](docs/figures/workflow.png)](docs/figures/workflow.png)
+<img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/workflow.png" width="600"/>
 
 (The pulsar in the Crab Nebula is composed by images taken by Hubble (red) and Chandra X-Ray(blue))
