@@ -5,13 +5,15 @@ Version: 1.0
 Date: 2018-10-23
 Authors@R: c(
     person("Roberto", "Maestre", email = "hadley@rstudio.com", role = "cre"),
-    person("Antonio", "García", email = "antonio.garciah@campusviu.es", role = "aut"),
-    person("Juan Carlos", "Suárez", email = "jcsuarez@iaa.es", role = "aut"))
+    person("Antonio", "Garcia", email = "antonio.garciah@campusviu.es", role = "aut"),
+    person("Juan Carlos", "Suarez", email = "jcsuarez@iaa.es", role = "aut"))
 Maintainer: Roberto Maestre <rmaestre@gmail.com>
 Description: tbd
 License: GPL (>= 2)
 Imports: Rcpp (>= 0.12.18)
 LinkingTo: Rcpp, RcppArmadillo
 Suggests: knitr,
-    rmarkdown
+    rmarkdown,
+    roxygen2
 SystemRequirements: C++11
+RoxygenNote: 6.1.1

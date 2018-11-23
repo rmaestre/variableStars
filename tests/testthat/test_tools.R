@@ -1,6 +1,3 @@
-library(testthat)
-library(variableStars)
-
 context("Differences tools")
 
 test_that("differences returns an error with an empty vector", {

@@ -4,50 +4,109 @@
 using namespace Rcpp;
 using namespace std;
 
-//! Create a vector as sequence of integers
-/*!
-\param int first integer
-\param int last integer
-\return A numeric vector with integer secuence
-*/
+template<typename T>
+void printVector(const T& t, int limit) {
+  if (limit > t.size()) {
+    limit = t.size();
+  }
+    std::copy(t.cbegin(), t.cbegin() + limit, 
+              std::ostream_iterator<typename T::value_type>(Rcout, ", "));
+}
+
+//' Create a vector as sequence of integers
+//'
+//' This function helps to create a vector with a secuence
+//' of integers equally separated
+//'
+//' @param first The first element of the sequence
+//' @param last The last element of the sequence
+//' @return A numeric vector with the whole secuence of integers
+//' @author Roberto Maestre
+//' @examples
+//' \dontrun{
+//' # simple call:
+//' seqIntegers(1,10)
+//' # simple call with negative numbers
+//' seqIntegers(-10,10)
+//' }
+//' @export
 //[[Rcpp::export]]
-NumericVector seq_int(int first, int last) {
+NumericVector seqIntegers(int first, int last) {
+  if (first>=last) {
+    throw std::range_error("seqIntegers:: First element should be greater that the last one");
+  }
   NumericVector y(abs(last - first) + 1);
   std::iota(y.begin(), y.end(), first);
   return y;
 }
+
+//' Revert the order of an input vector
+//'
+//' Revert the order of the elements an input vector
+//'
+//' @param vector Numerix vector to be reversed
+//' @return A numeric vector with elements in reverse mode
+//' @author Roberto Maestre
+//' @examples
+//' \dontrun{
+//' # simple call:
+//' vectorRev(c(1,2,3,4,5,6))
+//' # simple call with negative nummbers
+//' vectorRev(c(1,-2,3,-4,5,-6))
+//' }
+//' @export
 //[[Rcpp::export]]
-NumericVector seq_rev(NumericVector x) {
-  NumericVector revX = clone < NumericVector > (x);
-  std::reverse(revX.begin(), revX.end());
-  return revX;
+NumericVector vectorRev(NumericVector vector) {
+  NumericVector revV = clone < NumericVector > (vector);
+  std::reverse(revV.begin(), revV.end());
+  return revV;
 }
 
-//! Computing Fast Discrete Fourier Transform
-/*!
-\param x a vector with time series
-\return The Discrete Fourier Transform
-*/
+
+//' Fast Fourier Transform
+//'
+//' Compute the discrete fourier transform using the 
+//' the fast FT algorithm provided by the Armadillo library
+//'
+//' @param v Armadillo vector with numeric elements
+//' @return A complex vector with the FT result
+//' @author Roberto Maestre
+//' @examples
+//' \dontrun{
+//' # simple call:
+//' computeFft(sin(seq(1:100)))
+//' }
+//' @export
 //[[Rcpp::export]]
-arma::cx_vec compute_fft(arma::vec x) {
-  return arma::fft(x);
+arma::cx_vec computeFft(arma::vec v) {
+  return arma::fft(v);
 }
 
-//! Computing Discrete Fourier Transform and return the calculated amplitudes
-/*!
-\param x a vector with time series
-\param totTime an integer representing the total time to calculate frecuencies
-\return The amplitudes
-*/
+//' Calculate the spectrum from a given vector
+//'
+//' Calculate frequency, amplitude and phase from a given vector
+//' using the Fast Fourier Tramsform algorithm.
+//'
+//' @param time Armadillo vector representing the meassurements time
+//' @param x Armadillo vector with numeric elements
+//' @return A complex vector with the calculated spectrum
+//' @author Roberto Maestre
+//' @examples
+//' \dontrun{
+//' # simple call:
+//' sample <- sin(seq(1:100))
+//' calculateSpectrum(seq(1:length(sample)),sample)
+//' }
+//' @export
 //[[Rcpp::export]]
-DataFrame calculate_amplitudes(arma::vec time, arma::vec x) {
+List calculateSpectrum(arma::vec time, arma::vec x) {
   // Constants from data input
   int n = x.n_rows;
   
   // Calculate frequency
-  NumericVector frequency = seq_int(1, n);
-  NumericVector freq1 = seq_int(1, n / 2);
-  NumericVector freq2 = seq_rev(freq1 * -1);
+  NumericVector frequency = seqIntegers(1, n);
+  NumericVector freq1 = seqIntegers(1, n / 2);
+  NumericVector freq2 = vectorRev(freq1 * -1);
   // Delta and fNyquist
   double delta = time[2] - time[1];
   double fNyquist = (double) 1 / 2 / delta;
@@ -62,7 +121,7 @@ DataFrame calculate_amplitudes(arma::vec time, arma::vec x) {
   frequency = fNyquist * frequency / (n / 2.0);
   
   // Fourier transformation
-  arma::cx_vec furierTt = compute_fft(x); // Use Fast Fourier Transform (fft)
+  arma::cx_vec furierTt = computeFft(x); // Use Fast Fourier Transform (fft)
   // Get values
   furierTt = furierTt.submat(1, 0, (n / 2), 0);
   // Calculate amplitude getting modules
@@ -77,21 +136,31 @@ DataFrame calculate_amplitudes(arma::vec time, arma::vec x) {
     * out_amp = (sqrt(pow(real(cx), 2) + pow(imag(cx), 2)) / furierTt.n_elem);
     * out_pha = atan(imag(cx) / real(cx));
   }
-  
   // Return results
-  List results;
-  results["amplitude"] = amplitudes;
-  results["phase"] = phases;
-  results["frequency"] = frequency;
-  return DataFrame(results);
+  return List::create(_["amplitude"] = amplitudes,
+                      _["phase"] = phases,
+                      _["frequency"] = frequency);
 }
 
-//! Apply a sort of filter on a centered frequences vector
-/*!
-\param arma:vec vector with frequences to be processed
-\param String sort of filter to be applied
-\return A dataframe with centered frequences and processed
-*/
+//' Apodization
+//'
+//' Apodization, tapering or window function is a function 
+//' used to smoothly bring a sampled signal down to zero at the edges 
+//' of the sampled region
+//'
+//' @param frequences Armadillo vector with frequences
+//' @param filter A string with a specific filter (bartlett, blackman,
+//' connes, cosine, gaussian, hamming, hanning, welch or uniform by-default)
+//' @return The apoditazed frequence vector
+//' @author Roberto Maestre
+//' @examples
+//' \dontrun{
+//' # simple call:
+//' apodization(c(1,2,3,4), "gaussian")
+//' apodization(c(1,2,3,4), "blackman")
+//' 
+//' }
+//' @export
 //[[Rcpp::export]]
 arma::vec apodization(arma::vec frequences, String filter) {
   if (frequences.n_elem == 0) {
@@ -134,12 +203,25 @@ arma::vec apodization(arma::vec frequences, String filter) {
   return factor;
 }
 
-//! Apply a sort of filter on a centered frequences vector
-/*!
-\param arma:vec vector with frequences to be processed
-\param double the spectral resolution (dnu)
-\return A dataframe with centered frequences and processed
-*/
+//' Triangular Superior absolute differences of a vector
+//'
+//' Given a vector, this function calculates the triangular
+//' superior differences combination. All differences are
+//' absolute and zero-difference will be drop
+//'
+//' @param frequences Armadillo vector with frequences
+//' @return The vector with all differences
+//' @author Roberto Maestre
+//' @examples
+//' \dontrun{
+//' # simple call:
+//' differences(c(1,2,3,4,5))
+//' # simple call returning an empty vector because all 
+//' # differences are equal to 0:
+//' differences(rep(1,10))
+//' 
+//' }
+//' @export
 //[[Rcpp::export]]
 arma::vec differences(arma::vec frequences) {
   if (frequences.n_elem == 0) {
@@ -172,12 +254,26 @@ arma::vec differences(arma::vec frequences) {
   return diff;
 }
 
-//! Apply a sort of filter on a centered frequences vector
-/*!
-\param arma:vec vector with frequences to be processed
-\param double the spectral resolution (dnu)
-\return A dataframe with centered frequences and processed
-*/
+//' Histogram of differences
+//'
+//' Given a vector, this function calculates the histogram
+//' of the non-zero and absolute differences of a given vector
+//' taking into account a Dnu
+//'
+//' @param frequences Armadillo vector with frequences
+//' @param dnu Numeric value for the spectral resolution
+//' @return A list with bins and values representing an histogram
+//' @author Roberto Maestre
+//' @examples
+//' \dontrun{
+//' # simple call:
+//' differences(c(1,2,3,4,5))
+//' # simple call returning an empty vector because all 
+//' # differences are equal to 0:
+//' differences(rep(1,10))
+//' 
+//' }
+//' @export
 //[[Rcpp::export]]
 List diffHistogram(arma::vec frequences, double dnu) {
   // Calculalate differences among frequences
@@ -197,24 +293,36 @@ List diffHistogram(arma::vec frequences, double dnu) {
   return results;
 }
 
-//! Computing Discrete Fourier Transform and return the calculated amplitudes
-/*!
-\param x a vector with time series
-\param totTime an integer representing the total time to calculate frecuencies
-\return The amplitudes
-*/
+//' Apodization and FT
+//'
+//' Apodization of a given vector with one filter and
+//' Fourier Transform calculation
+//'
+//' @param frequences Armadillo vector with frequences
+//' @param filter A string with a specific filter (bartlett, blackman,
+//' connes, cosine, gaussian, hamming, hanning, welch or uniform by-default)
+//' @return A list with amplitudes, frequences, inverse frecuences and the
+//' power spectrum calculated.
+//' @author Roberto Maestre
+//' @examples
+//' \dontrun{
+//' # simple call:
+//' r <- ft(sin(seq(1:100)), "uniform")
+//' plot(r$f, r$powerSpectrum)
+//' }
+//' @export
 //[[Rcpp::export]]
-List ft(arma::vec x, String filter) {
+List apodizationFt(arma::vec frequences, String filter) {
   // Paramters
   const double maxFreq = 100.0; // max value for FT computing
   const double fNyquist = 1; // fNyquist value
   const double unknow = 10000; // ??? Numero de puntos
-  const int n = x.n_rows; // Frequences number
+  const int n = frequences.n_rows; // Frequences number
   
   // Frequencies apodization
-  arma::vec amp = apodization(x, filter);
+  arma::vec amp = apodization(frequences, filter);
   // Calculate frequence differences
-  arma::vec diff = differences(x);
+  arma::vec diff = differences(frequences);
   // Minimum difference
   //double minDiff = arma::min(diff);   --->¿Why is not the min?
   double minDiff = 1.0;
@@ -222,7 +330,7 @@ List ft(arma::vec x, String filter) {
   double delnu = (maxFreq - fNyquist) / unknow;
   arma::vec f = 1.0 / arma::regspace(minDiff, delnu, maxFreq);
   // Outer product
-  arma::mat outerProduct = f * x.t();
+  arma::mat outerProduct = f * frequences.t();
   // Ccalculate real and imaginary part
   // Calculate real and imaginary parts of the outer product
   arma::mat _real = arma::cos(2.0 * M_PI * outerProduct) * amp;
@@ -232,7 +340,7 @@ List ft(arma::vec x, String filter) {
     std::pow(n, 2);
   // Return results
   return List::create(_["amp"] = amp,
-                      _["frequences"] = x,
+                      _["frequences"] = frequences,
                       _["f"] = f,
                       _["powerSpectrum"] = powerSpectrum,
                       _["powerSpectrumInverse"] = 1 / powerSpectrum);
@@ -243,6 +351,24 @@ List ft(arma::vec x, String filter) {
 \param x a vector with values
 \return The vector with the adjacent differences
 */
+
+
+
+//' Calculate adjacent differences in a vector
+//'
+//' All differences between adjacent elements in a vector
+//'
+//' @param x Armadillo vector with numeric element
+//' @return Armadillo vector with the adjacent differences
+//' @author Roberto Maestre
+//' @examples
+//' \dontrun{
+//' # simple call: All adjacent elements has the same length 1
+//' adjacentDifferences(c(1,2,3,4,5))
+//' # simple call: There are positive and negative diffferences
+//' adjacentDifferences(c(1,2,0,14,-2))
+//' }
+//' @export
 //[[Rcpp::export]]
 arma::vec adjacentDifferences(arma::vec x) {
   // Create output vector with differences
@@ -255,11 +381,21 @@ arma::vec adjacentDifferences(arma::vec x) {
   return adjDiffs;
 }
 
-//! Find peaks from a numeric vector
-/*!
-\param x a vector with values
-\return The vector with the peaks index
-*/
+//' Find highest peaks in a time series
+//'
+//' Inspired in the quantmod::findPeaks() R algorithm, 
+//' this function find the highest peaks in a time series.
+//'
+//' @param x Armadillo vector with numeric element
+//' @return Armadillo unsigned vector with the index representing 
+//' the position of the selected peaks
+//' @author Roberto Maestre
+//' @examples
+//' \dontrun{
+//' # simple call: Returns position 1,4 and 7 with the highest peaks
+//' findPeaks(c(1,2,1,2,10,1,2,3,1))
+//' }
+//' @export
 //[[Rcpp::export]]
 arma::uvec findPeaks(arma::vec x) {
   // Vector with peaks
@@ -268,48 +404,96 @@ arma::uvec findPeaks(arma::vec x) {
   return find(d < 0) + 1;
 }
 
-//! Calculate range splits of elements
-/*!
-\param nElements the number of elements in the frequency vector
-\param numFrequencies the selected number of frecuencies
-\return The vector with the ranges in integer format
-*/
+//' Split elements in ranges
+//'
+//' Inspired in the quantmod::findPeaks() R algorithm, 
+//' this function find the highest peaks in a time series.
+//'
+//' @param nElements Number of elements to be splitted
+//' @param numFrequencies Number of total frequences
+//' @return A vector of ranges in integer format
+//' @author Roberto Maestre
+//' @examples
+//' \dontrun{
+//' # simple call:
+//' calculateRange(100,100)
+//' calculateRange(100,100)
+//' calculateRange(10,200)
+//' calculateRange(1,20)
+//' }
+//' @export
 //[[Rcpp::export]]
-arma::ivec calculateRange(int nElements, int numFrequencies) {
+arma::ivec calculateRange(int nElements, int nFrequencies) {
   // Check the frequencies vector of splitted elements
   arma::ivec range(3);
-  if (nElements < numFrequencies) {
+  if (nElements < nFrequencies) {
     range(0) = nElements;
     range.shed_rows(1, 2); // Release memory
-  } else if (nElements > numFrequencies &
-    nElements <= 2 * numFrequencies) {
-    range(0) = numFrequencies;
+  } else if (nElements > nFrequencies &
+    nElements <= 2 * nFrequencies) {
+    range(0) = nFrequencies;
     range(1) = nElements;
     range.shed_row(2); // Release memory
-  } else if (nElements > 2 * numFrequencies &
-    nElements <= 3 * numFrequencies) {
-    range(0) = numFrequencies;
-    range(1) = 2 * numFrequencies;
+  } else if (nElements > 2 * nFrequencies &
+    nElements <= 3 * nFrequencies) {
+    range(0) = nFrequencies;
+    range(1) = 2 * nFrequencies;
     range(2) = nElements;
   } else {
-    range(0) = numFrequencies;
-    range(1) = 2 * numFrequencies;
+    range(0) = nFrequencies;
+    range(1) = 2 * nFrequencies;
     range(2) = 3 * nElements;
   }
   return range;
 }
 
-template < typename T >
-void printVectorValues(const std::vector < T > & v, string msg, int limit) {
-  typename std::vector < T > ::iterator it;
-  Rcout << msg;
-  int c = 0;
-  for (it = v.begin(); it < v.end() && c < limit; it++, c++) {
-    Rcout << "" << * it;
-  }
-  Rcout << "... \n";
-}
-
+//' Main process function
+//'
+//' The complete workflow can be found in the readme section.
+//'
+//' @param frequency Vector with frequences
+//' @param amplitude Vector with amplitudes
+//' @param filter Apodization filter
+//' @param gRegimen Value to drop frecuencies in the G regimen
+//' @param numFrequencies Number of frecuences to be processes calculated
+//' for a range
+//' @param maxDnu Maximum Dnu allowed
+//' @param minDnu Minimum Dnu allowed
+//' @param dnuGuessError Dnu error guessing
+//' @param dnuValue Epecific Dnu value
+//' @param dnuEstimation Flag to estimate ot not the Dnu vale
+//' @param debug Flag to activate verbose debuggin information
+//' @return A vector with histogram of differences and other middle-results
+//' @author Roberto Maestre
+//' @examples
+//' \dontrun{
+//' # simple call:
+//' 
+//' paramters = list(
+//'   "filter" = "gaussian",
+//'   "gRegimen" = 0,
+//'   "minDnu" = 15,
+//'   "maxDnu" = 95,
+//'   "dnuValue" = -1,
+//'   "dnuGuessError" = 10,
+//'   "dnuEstimation" = TRUE,
+//'   "numFrequencies" = 30,
+//'   "debug" = TRUE)
+//' 
+//' result <- process(
+//'     dt.spectrum$frequency,
+//'     dt.spectrum$amplitude,
+//'     filter = paramters$filter,
+//'     gRegimen = paramters$gRegimen,
+//'     minDnu = paramters$minDnu,
+//'     maxDnu = paramters$maxDnu,
+//'     dnuValue = paramters$dnuValue,
+//'     dnuGuessError = paramters$dnuGuessError,
+//'     dnuEstimation = paramters$dnuEstimation,
+//'     numFrequencies = paramters$numFrequencies,
+// '    debug = paramters$debug)
+//' }
+//' @export
 //[[Rcpp::export]]
 List process(arma::vec frequency, arma::vec amplitude, String filter,
              double gRegimen, double numFrequencies,
@@ -337,28 +521,17 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
   arma::uvec idsSort = sort_index(amplitude, "descend");
   frequency = frequency.elem(idsSort);
   amplitude = amplitude.elem(idsSort);
-  
   if (debug) {
-    int c = 0;
-    Rcout << "Sorted frecuences: ";
-    for (arma::vec::iterator it = frequency.begin(); it < frequency.end() && c < 5; it++, c++) {
-      Rcout << " " << * it;
-    }
-    Rcout << "\n";
+    Rcout << "Frequencies: ";
+    printVector(frequency, 20);
   }
-  
   // Calculate the range
   arma::ivec range = calculateRange(frequency.n_elem, numFrequencies);
-  
   if (debug) {
-    int c = 0;
     Rcout << "Range: ";
-    for (arma::ivec::iterator it = range.begin(); it < range.end() && c < 5; it++, c++) {
-      Rcout << " " << * it;
-    }
-    Rcout << "\n";
+    printVector(range, 20);
   }
-  
+
   // Data sctutures
   arma::vec frequencyGlobal, amplitudeGlobal, f, fInv, b;
   List res, _diffHistogram;
@@ -369,7 +542,8 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
   bool first = true;
   for (numIt = range.begin(); numIt < range.end(); numIt++) {
     if (debug) {
-      Rcout << " Iteration over range: " << * numIt << "\n";
+      Rcout << " Iteration over range: " << * numIt;
+      Rcout << "\n";
     }
     if (first) {
       first = false; // Calculations only with the N first sorted frequencies
@@ -382,24 +556,16 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
       amplitudeGlobal = amplitude.elem(pos);
       
       if (debug) {
-        Rcout << "   Frequencies selected: " << frequencyGlobal.n_elem << "\n";
-        Rcout << "     ";
-        int c = 0;
-        for (arma::vec::iterator it = frequencyGlobal.begin(); it < frequencyGlobal.end(); it++, c++) {
-          Rcout << " " << * it;
-        }
-        Rcout << "\n";
-        Rcout << "   Amplitudes selected:  " << amplitudeGlobal.n_elem << "\n";
-        Rcout << "     ";
-        c = 0;
-        for (arma::vec::iterator it = amplitudeGlobal.begin(); it < amplitudeGlobal.end(); it++, c++) {
-          Rcout << " " << * it;
-        }
-        Rcout << "\n";
+          Rcout << "   Frequencies selected: ";
+          printVector(frequencyGlobal, 20);
+          Rcout << "\n";
+          Rcout << "   Amplitudes selected: ";
+          printVector(amplitudeGlobal, 20);
+          Rcout << "\n";
       }
       
       // Calculate FT
-      res = ft(frequencyGlobal, filter);
+      res = apodizationFt(frequencyGlobal, filter);
       // Calculate the inverse frecuence
       f = as < arma::vec > (res["f"]);
       fInv = 1.0 / f;
