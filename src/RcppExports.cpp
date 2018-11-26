@@ -6,49 +6,49 @@
 
 using namespace Rcpp;
 
-// seq_int
-NumericVector seq_int(int first, int last);
-RcppExport SEXP _variableStars_seq_int(SEXP firstSEXP, SEXP lastSEXP) {
+// seqIntegers
+NumericVector seqIntegers(int first, int last);
+RcppExport SEXP _variableStars_seqIntegers(SEXP firstSEXP, SEXP lastSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< int >::type first(firstSEXP);
     Rcpp::traits::input_parameter< int >::type last(lastSEXP);
-    rcpp_result_gen = Rcpp::wrap(seq_int(first, last));
+    rcpp_result_gen = Rcpp::wrap(seqIntegers(first, last));
     return rcpp_result_gen;
 END_RCPP
 }
-// seq_rev
-NumericVector seq_rev(NumericVector x);
-RcppExport SEXP _variableStars_seq_rev(SEXP xSEXP) {
+// vectorRev
+NumericVector vectorRev(NumericVector vector);
+RcppExport SEXP _variableStars_vectorRev(SEXP vectorSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< NumericVector >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(seq_rev(x));
+    Rcpp::traits::input_parameter< NumericVector >::type vector(vectorSEXP);
+    rcpp_result_gen = Rcpp::wrap(vectorRev(vector));
     return rcpp_result_gen;
 END_RCPP
 }
-// compute_fft
-arma::cx_vec compute_fft(arma::vec x);
-RcppExport SEXP _variableStars_compute_fft(SEXP xSEXP) {
+// computeFft
+arma::cx_vec computeFft(arma::vec v);
+RcppExport SEXP _variableStars_computeFft(SEXP vSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_fft(x));
+    Rcpp::traits::input_parameter< arma::vec >::type v(vSEXP);
+    rcpp_result_gen = Rcpp::wrap(computeFft(v));
     return rcpp_result_gen;
 END_RCPP
 }
-// calculate_amplitudes
-DataFrame calculate_amplitudes(arma::vec time, arma::vec x);
-RcppExport SEXP _variableStars_calculate_amplitudes(SEXP timeSEXP, SEXP xSEXP) {
+// calculateSpectrum
+List calculateSpectrum(arma::vec time, arma::vec x);
+RcppExport SEXP _variableStars_calculateSpectrum(SEXP timeSEXP, SEXP xSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::vec >::type time(timeSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type x(xSEXP);
-    rcpp_result_gen = Rcpp::wrap(calculate_amplitudes(time, x));
+    rcpp_result_gen = Rcpp::wrap(calculateSpectrum(time, x));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -87,15 +87,15 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// ft
-List ft(arma::vec x, String filter);
-RcppExport SEXP _variableStars_ft(SEXP xSEXP, SEXP filterSEXP) {
+// apodizationFt
+List apodizationFt(arma::vec frequences, String filter);
+RcppExport SEXP _variableStars_apodizationFt(SEXP frequencesSEXP, SEXP filterSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< arma::vec >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type frequences(frequencesSEXP);
     Rcpp::traits::input_parameter< String >::type filter(filterSEXP);
-    rcpp_result_gen = Rcpp::wrap(ft(x, filter));
+    rcpp_result_gen = Rcpp::wrap(apodizationFt(frequences, filter));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -122,14 +122,14 @@ BEGIN_RCPP
 END_RCPP
 }
 // calculateRange
-arma::ivec calculateRange(int nElements, int numFrequencies);
-RcppExport SEXP _variableStars_calculateRange(SEXP nElementsSEXP, SEXP numFrequenciesSEXP) {
+arma::ivec calculateRange(int nElements, int nFrequencies);
+RcppExport SEXP _variableStars_calculateRange(SEXP nElementsSEXP, SEXP nFrequenciesSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< int >::type nElements(nElementsSEXP);
-    Rcpp::traits::input_parameter< int >::type numFrequencies(numFrequenciesSEXP);
-    rcpp_result_gen = Rcpp::wrap(calculateRange(nElements, numFrequencies));
+    Rcpp::traits::input_parameter< int >::type nFrequencies(nFrequenciesSEXP);
+    rcpp_result_gen = Rcpp::wrap(calculateRange(nElements, nFrequencies));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -156,14 +156,14 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_variableStars_seq_int", (DL_FUNC) &_variableStars_seq_int, 2},
-    {"_variableStars_seq_rev", (DL_FUNC) &_variableStars_seq_rev, 1},
-    {"_variableStars_compute_fft", (DL_FUNC) &_variableStars_compute_fft, 1},
-    {"_variableStars_calculate_amplitudes", (DL_FUNC) &_variableStars_calculate_amplitudes, 2},
+    {"_variableStars_seqIntegers", (DL_FUNC) &_variableStars_seqIntegers, 2},
+    {"_variableStars_vectorRev", (DL_FUNC) &_variableStars_vectorRev, 1},
+    {"_variableStars_computeFft", (DL_FUNC) &_variableStars_computeFft, 1},
+    {"_variableStars_calculateSpectrum", (DL_FUNC) &_variableStars_calculateSpectrum, 2},
     {"_variableStars_apodization", (DL_FUNC) &_variableStars_apodization, 2},
     {"_variableStars_differences", (DL_FUNC) &_variableStars_differences, 1},
     {"_variableStars_diffHistogram", (DL_FUNC) &_variableStars_diffHistogram, 2},
-    {"_variableStars_ft", (DL_FUNC) &_variableStars_ft, 2},
+    {"_variableStars_apodizationFt", (DL_FUNC) &_variableStars_apodizationFt, 2},
     {"_variableStars_adjacentDifferences", (DL_FUNC) &_variableStars_adjacentDifferences, 1},
     {"_variableStars_findPeaks", (DL_FUNC) &_variableStars_findPeaks, 1},
     {"_variableStars_calculateRange", (DL_FUNC) &_variableStars_calculateRange, 2},
