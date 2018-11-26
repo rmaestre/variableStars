@@ -447,6 +447,40 @@ arma::ivec calculateRange(int nElements, int nFrequencies) {
   return range;
 }
 
+//' Autocorrelation
+//'
+//' This function calculates the autocorrelation of the
+//' frequency vector
+//'
+//' @param frequencies The frequences to be processed
+//' @return A numeric vector with the autocorrelations
+//' @author Roberto Maestre
+//' @examples
+//' \dontrun{
+//' # simple call:
+//' autocorrelation(seqIntegers(1,10))
+//' }
+//' @export
+//[[Rcpp::export]]
+arma::vec autocorr(arma::vec frequencies) {
+  // Constants
+  double sig = 0.5; // muHz
+  double freqf = 200; // muHz
+  // Calculate exp and a multiplicative factor
+  int exp = std::abs(std::floor(std::log10(sig)));
+  int fac = std::pow(10, exp);
+  int maxFreq = arma::max(frequencies) + 100;
+  // Sum of gaussian
+  arma::vec fc = arma::zeros(maxFreq * fac);
+  arma::vec::iterator it;
+  const double x = sig * std::sqrt(2 * M_PI);
+  for (it = frequencies.begin(); it < frequencies.end(); it++) {
+    fc += 1.0 / x * arma::exp(-0.5*arma::pow(((arma::linspace(0, maxFreq, maxFreq*fac) - *it)/sig), 2));
+  }
+  
+  return fc;
+}
+
 //' Main process function
 //'
 //' The complete workflow can be found in the readme section.
