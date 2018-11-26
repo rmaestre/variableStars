@@ -41,7 +41,7 @@ We campute the FT, calculating the amplitudes.
 
 ``` r
 # Compute DFT
-dt.spectrum <- calculate_amplitudes(dt.test$time, dt.test$x)
+dt.spectrum <- data.frame(calculateSpectrum(dt.test$time, dt.test$x))
 # Get max amplitude
 maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude),]
 # Plot amplitudes
@@ -80,7 +80,7 @@ We use DFT to calculate the amplitude in each frecuency.
 
 ``` r
 # Compute DFT
-dt.spectrum <- calculate_amplitudes(dt.test$time, dt.test$x)
+dt.spectrum <- data.frame(calculateSpectrum(dt.test$time, dt.test$x))
 # Get max amplitude
 maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude),]
 # Plot amplitudes
@@ -111,7 +111,7 @@ We use DFT to calculate the amplitude in each frecuency.
 ``` r
 # Calculate
 dt.spectrum <-
-  calculate_amplitudes(dt.pulsar$time, dt.pulsar$mmag)
+  data.frame(calculateSpectrum(dt.pulsar$time, dt.pulsar$mmag))
 # Get max amplitude
 maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude),]
 # Plot amplitudes
@@ -130,7 +130,7 @@ A benchmark is proposed to show the performance achieved by made all calculation
 ``` r
 m <-
   microbenchmark(dt <-
-                   calculate_amplitudes(dt.pulsar$time, dt.pulsar$mmag),
+                   data.frame(calculateSpectrum(dt.pulsar$time, dt.pulsar$mmag)),
                  times = 50)
 autoplot(m, log = F) +
   scale_x_discrete(labels = c("DFT on a Pulsar star data")) +

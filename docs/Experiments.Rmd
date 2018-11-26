@@ -75,7 +75,7 @@ rm(dt.plot) # Drop memory
 
 ```{r calculateEspectrum, warning=F}
 # Calculate amplitudes and frequences
-dt.spectrum <- calculate_amplitudes(dt$time, dt$mmag)
+dt.spectrum <- data.frame(calculateSpectrum(dt$time, dt$mmag))
 # Get max amplitude
 maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude), ]
 # Plot amplitudes
