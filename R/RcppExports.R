@@ -277,6 +277,24 @@ calculateRange <- function(nElements, nFrequencies) {
     .Call(`_variableStars_calculateRange`, nElements, nFrequencies)
 }
 
+#' Autocorrelation
+#'
+#' This function calculates the autocorrelation of the
+#' frequency vector
+#'
+#' @param frequencies The frequences to be processed
+#' @return A numeric vector with the autocorrelations
+#' @author Roberto Maestre
+#' @examples
+#' \dontrun{
+#' # simple call:
+#' autocorrelation(seqIntegers(1,10))
+#' }
+#' @export
+autocorr <- function(frequencies) {
+    .Call(`_variableStars_autocorr`, frequencies)
+}
+
 #' }
 #' @export
 process <- function(frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue = -1, dnuEstimation = FALSE, debug = FALSE) {
