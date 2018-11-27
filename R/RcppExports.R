@@ -277,6 +277,30 @@ calculateRange <- function(nElements, nFrequencies) {
     .Call(`_variableStars_calculateRange`, nElements, nFrequencies)
 }
 
+#' Crosscorrelation
+#'
+#' This function calculates the crosscorrelation of the
+#' frequency vector by using a sum of gaussians
+#'
+#' @param frequencies The frequences to be processed
+#' @param lagMax Maximum lag at which to calculate the acf
+#' (null by default)
+#' @param type character string giving the type of acf to be 
+#' computed. Allowed values are "correlation" or 
+#' "covariance" (correlation by default).
+#' @param plot If true the acf is plotted (true by default)
+#' @return A vector with the crosscorrelations
+#' @author Roberto Maestre
+#' @examples
+#' \dontrun{
+#' # simple call:
+#' crosscorrelation(sin(c(1,2,3,4,5,4,3,2,1)), lagMax = 50, plot=T)
+#' }
+#' @export
+crosscorrelation <- function(frequencies, lagMax = NULL, type = "correlation", plot = FALSE) {
+    .Call(`_variableStars_crosscorrelation`, frequencies, lagMax, type, plot)
+}
+
 #' }
 #' @export
 process <- function(frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue = -1, dnuEstimation = FALSE, debug = FALSE) {

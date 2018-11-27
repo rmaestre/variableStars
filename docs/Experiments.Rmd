@@ -39,7 +39,7 @@ Choose:
  * dataFlag = F, to use a real pulsar photometry
 
 ```{r flag}
-dataFlag = T
+dataFlag = F
 ```
 
 ## Data generation
@@ -164,6 +164,21 @@ dt <- data.frame(result$diffHistogram$histogram)
 ggplot(aes(x = bins, y = values), data = dt[dt$values > 0,]) +
   geom_bar(stat = "identity") +
   ggtitle("Histogram of differences") +
+  theme_bw()
+```
+
+
+####  Cross correlation
+
+Simple cross correlation
+
+```{r crossCorrelation, warning=F}
+cc <- result$crossCorrelation
+dt <- data.frame("lag" = seq(round(-1*(length(cc)-1)/2), round((length(cc)-1)/2)), 
+                 "cc"=cc)
+ggplot(aes(x = lag, y = cc), data = dt) +
+  geom_bar(stat = "identity") +
+  ggtitle("Cross correlation") +
   theme_bw()
 ```
 
