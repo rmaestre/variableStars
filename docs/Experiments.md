@@ -118,14 +118,15 @@ result <- process(
     ## ::: Debug information :::
     ## 
     ## Number of frequences to be processed: 101
-    ## Number of frequences after drop the g regimen: 51
-    ## Frequencies: 1.83352, 1.94811, 1.71892, 2.06271, 1.60433, 2.1773, 1.48973, 2.2919, 2.40649, 1.37514, 2.52109, 2.63568, 1.26054, 2.75028, 2.86487, 2.97946, 1.14595, 3.09406, 3.20865, 3.32325, Range: 30, 51,  Iteration over range: 30
+    ## Number of frequences after drop the g regimen: 50
+    ## Frequencies: 1.83352, 1.94811, 1.71892, 2.06271, 1.60433, 2.1773, 1.48973, 2.2919, 2.40649, 1.37514, 2.52109, 2.63568, 1.26054, 2.75028, 2.86487, 2.97946, 1.14595, 3.09406, 3.20865, 3.32325, Range: 30, 50,  Iteration over range: 30
     ##    Frequencies selected: 1.83352, 1.94811, 1.71892, 2.06271, 1.60433, 2.1773, 1.48973, 2.2919, 2.40649, 1.37514, 2.52109, 2.63568, 1.26054, 2.75028, 2.86487, 2.97946, 1.14595, 3.09406, 3.20865, 3.32325, 
     ##    Amplitudes selected: 0.998384, 0.0830948, 0.0671104, 0.041144, 0.0335765, 0.0278634, 0.0218368, 0.0213431, 0.0174669, 0.0158437, 0.0148973, 0.013069, 0.0121994, 0.0117024, 0.010643, 0.00979842, 0.00974385, 0.00911032, 0.00853982, 0.00806009, 
     ##     Dnu: 2.0098
     ##     Dnu Peak: 2.0098
     ##     Dnu Guess: 0.305586
-    ##  Iteration over range: 51
+    ##     Cross correlation calculated:0.262757, 0.293021, 0.3243, 0.356428, 0.389248, 0.422619, 0.456412, 0.490516, 0.524827, 0.55925, 
+    ##  Iteration over range: 50
     ##     Nothing to do
 
 #### Main results
@@ -185,3 +186,19 @@ ggplot(aes(x = bins, y = values), data = dt[dt$values > 0,]) +
 ```
 
 ![](Experiments_files/figure-markdown_github/diffsHistogram-1.png)
+
+#### Cross correlation
+
+Simple cross correlation
+
+``` r
+cc <- result$crossCorrelation
+dt <- data.frame("lag" = seq(round(-1*(length(cc)-1)/2), round((length(cc)-1)/2)), 
+                 "cc"=cc)
+ggplot(aes(x = lag, y = cc), data = dt) +
+  geom_bar(stat = "identity") +
+  ggtitle("Cross correlation") +
+  theme_bw()
+```
+
+![](Experiments_files/figure-markdown_github/crossCorrelation-1.png)
