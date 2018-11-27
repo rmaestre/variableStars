@@ -447,22 +447,31 @@ arma::ivec calculateRange(int nElements, int nFrequencies) {
   return range;
 }
 
-//' Autocorrelation
+//' Crosscorrelation
 //'
-//' This function calculates the autocorrelation of the
-//' frequency vector
+//' This function calculates the crosscorrelation of the
+//' frequency vector by using a sum of gaussians
 //'
 //' @param frequencies The frequences to be processed
-//' @return A numeric vector with the autocorrelations
+//' @param lagMax Maximum lag at which to calculate the acf
+//' (null by default)
+//' @param type character string giving the type of acf to be 
+//' computed. Allowed values are "correlation" or 
+//' "covariance" (correlation by default).
+//' @param plot If true the acf is plotted (true by default)
+//' @return A vector with the crosscorrelations
 //' @author Roberto Maestre
 //' @examples
 //' \dontrun{
 //' # simple call:
-//' autocorrelation(seqIntegers(1,10))
+//' crosscorrelation(sin(c(1,2,3,4,5,4,3,2,1)), lagMax = 50, plot=T)
 //' }
 //' @export
 //[[Rcpp::export]]
-arma::vec autocorr(arma::vec frequencies) {
+arma::vec crosscorrelation(arma::vec frequencies, 
+                      Rcpp::Nullable<int> lagMax = R_NilValue, 
+                      String type = "correlation", 
+                      bool plot = false) {
   // Constants
   double sig = 0.5; // muHz
   double freqf = 200; // muHz
@@ -470,15 +479,29 @@ arma::vec autocorr(arma::vec frequencies) {
   int exp = std::abs(std::floor(std::log10(sig)));
   int fac = std::pow(10, exp);
   int maxFreq = arma::max(frequencies) + 100;
-  // Sum of gaussian
+  // Sum of gaussians
   arma::vec fc = arma::zeros(maxFreq * fac);
   arma::vec::iterator it;
   const double x = sig * std::sqrt(2 * M_PI);
   for (it = frequencies.begin(); it < frequencies.end(); it++) {
     fc += 1.0 / x * arma::exp(-0.5*arma::pow(((arma::linspace(0, maxFreq, maxFreq*fac) - *it)/sig), 2));
   }
+  // Using the stats (R) environment
+  Environment stats("package:stats");
+  Function ccf = stats["ccf"];
+  NumericVector xx = NumericVector(fc.begin(),fc.end());
+  List res =  ccf(xx, xx, lagMax, type, plot);
+  arma::vec cc = as < arma::vec > (res["acf"]);
   
-  return fc;
+  // Get the last-half vector of cross correlations
+  arma::uvec pos = arma::linspace<arma::uvec>(cc.size() / 2, cc.size() - 1, cc.size() / 2);
+  arma::vec re = cc.elem(pos);
+
+  // to-do #258 on the python function
+  //pos = arma::linspace<arma::uvec>(0, (maxFreq * fac) - 1, maxFreq * fac);
+  
+  // Return results
+  return cc;
 }
 
 //' Main process function
@@ -567,7 +590,7 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
   }
 
   // Data sctutures
-  arma::vec frequencyGlobal, amplitudeGlobal, f, fInv, b;
+  arma::vec frequencyGlobal, amplitudeGlobal, f, fInv, b, cc;
   List res, _diffHistogram;
   double dnu, dnuPeak, dnuGuess;
   
@@ -637,6 +660,15 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
       
       // Histogram of differences
       _diffHistogram = diffHistogram(frequencyGlobal, dnu);
+      
+      // Calculate crosscorrelation
+      cc = crosscorrelation(frequencyGlobal);
+      if (debug) {
+        Rcout << "    Cross correlation calculated:";
+        printVector(cc, 10);
+        Rcout << "\n";
+      }
+      
     } else {
       if (debug) {
         Rcout << "    Nothing to do" << "\n";
@@ -652,6 +684,7 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
                                    _["amplitude"] = amplitude),
                                    _["ft"] = res,
                                    _["diffHistogram"] = _diffHistogram,
+                                   _["crossCorrelation"] = cc,
                                    _["f"] = res["f"],
                                                _["fInv"] = fInv,
                                                _["dnuPeak"] = dnuPeak,
