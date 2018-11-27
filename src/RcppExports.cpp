@@ -133,6 +133,20 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// crosscorrelation
+arma::vec crosscorrelation(arma::vec frequencies, Rcpp::Nullable<int> lagMax, String type, bool plot);
+RcppExport SEXP _variableStars_crosscorrelation(SEXP frequenciesSEXP, SEXP lagMaxSEXP, SEXP typeSEXP, SEXP plotSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type frequencies(frequenciesSEXP);
+    Rcpp::traits::input_parameter< Rcpp::Nullable<int> >::type lagMax(lagMaxSEXP);
+    Rcpp::traits::input_parameter< String >::type type(typeSEXP);
+    Rcpp::traits::input_parameter< bool >::type plot(plotSEXP);
+    rcpp_result_gen = Rcpp::wrap(crosscorrelation(frequencies, lagMax, type, plot));
+    return rcpp_result_gen;
+END_RCPP
+}
 // process
 List process(arma::vec frequency, arma::vec amplitude, String filter, double gRegimen, double numFrequencies, double maxDnu, double minDnu, double dnuGuessError, double dnuValue, bool dnuEstimation, bool debug);
 RcppExport SEXP _variableStars_process(SEXP frequencySEXP, SEXP amplitudeSEXP, SEXP filterSEXP, SEXP gRegimenSEXP, SEXP numFrequenciesSEXP, SEXP maxDnuSEXP, SEXP minDnuSEXP, SEXP dnuGuessErrorSEXP, SEXP dnuValueSEXP, SEXP dnuEstimationSEXP, SEXP debugSEXP) {
@@ -167,6 +181,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_variableStars_adjacentDifferences", (DL_FUNC) &_variableStars_adjacentDifferences, 1},
     {"_variableStars_findPeaks", (DL_FUNC) &_variableStars_findPeaks, 1},
     {"_variableStars_calculateRange", (DL_FUNC) &_variableStars_calculateRange, 2},
+    {"_variableStars_crosscorrelation", (DL_FUNC) &_variableStars_crosscorrelation, 4},
     {"_variableStars_process", (DL_FUNC) &_variableStars_process, 11},
     {NULL, NULL, 0}
 };
