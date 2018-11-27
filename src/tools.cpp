@@ -581,12 +581,14 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
   if (debug) {
     Rcout << "Frequencies: ";
     printVector(frequency, 20);
+    Rcout << "\n";
   }
   // Calculate the range
   arma::ivec range = calculateRange(frequency.n_elem, numFrequencies);
   if (debug) {
     Rcout << "Range: ";
     printVector(range, 20);
+    Rcout << "\n";
   }
 
   // Data sctutures
