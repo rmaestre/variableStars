@@ -277,6 +277,9 @@ arma::vec differences(arma::vec frequences) {
 //[[Rcpp::export]]
 List diffHistogram(arma::vec frequences, double dnu) {
   // Calculalate differences among frequences
+  Rcout << "frequences" << frequences << "\n"; 
+  Rcout << "dnu" << dnu << "\n";
+  
   arma::vec diffs = differences(frequences);
   
   // Histogram bin paramterns
@@ -284,12 +287,17 @@ List diffHistogram(arma::vec frequences, double dnu) {
   double binSize = dnu * 0.015; // Bin length
   // Generate space for bins for histogram
   arma::vec bins = arma::regspace(0, binSize, maxHistogramBin);
+  
+  Rcout << "diffs" << diffs << "\n";
+  Rcout << "bins" << bins << "\n";
+  
+  
   // Return results
   List results;
   results["diffs"] = diffs;
   // Calculate histogram
   results["histogram"] =
-    List::create(_["bins"] = bins, _["values"] = arma::hist(diffs, bins));
+    List::create(_["bins"] = bins, _["values"] = arma::histc(diffs, bins));
   return results;
 }
 
