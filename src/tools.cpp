@@ -442,7 +442,7 @@ arma::ivec calculateRange(int nElements, int nFrequencies) {
   } else {
     range(0) = nFrequencies;
     range(1) = 2 * nFrequencies;
-    range(2) = 3 * nElements;
+    range(2) = 3 * nFrequencies;
   }
   return range;
 }
