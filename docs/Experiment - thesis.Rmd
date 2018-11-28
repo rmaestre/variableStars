@@ -32,6 +32,16 @@ if (T) {
   colnames(dt) <- c("Id","frequency","Freq2","amplitude","Phase","Sig", "S/N","rms", "e_Freq1","e_Amp","e_Phase")
 }
 head(dt)
+
+# Save Data to disk (to be replicated)
+write.table(
+  dt[c("frequency", "amplitude")],
+  file = "/tmp/data.csv",
+  sep = "\t",
+  quote = F,
+  row.names = F,
+  col.names = F
+)
 ```
 
 #### Frequences and Amplitudes 
@@ -55,7 +65,7 @@ result <- process(
   dnuValue = -1,
   dnuGuessError = 10,
   dnuEstimation = TRUE,
-  numFrequencies = 50,
+  numFrequencies = 30,
   debug = TRUE
 )
 ```
@@ -118,19 +128,6 @@ ggplot(aes(x = bins, y = values), data = dt) +
   ggtitle("Histogram of differences") +
   theme_bw()
 ```
-
-We only show bins with < 100 values
-
-
-```{r diffsHistogramSelected, warning=F}
-dt <- data.frame(result$diffHistogram$histogram)
-ggplot(aes(x = bins, y = values), data = dt[dt$values < 100,]) +
-  geom_bar(stat = "identity") +
-  ggtitle("Histogram of differences") +
-  theme_bw()
-```
-
-
 
 
 ####  Cross correlation
