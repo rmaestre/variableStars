@@ -9,6 +9,7 @@ output: github_document
 library(variableStars)
 library(data.table)
 library(ggplot2)
+library(ggsci)
 library(microbenchmark)
 ```
 
@@ -19,7 +20,7 @@ library(microbenchmark)
 
 ```{r parameters}
 paramters = list(
-  "filter" = "gaussian",
+  "filter" = "uniform",
   "gRegimen" = 0,
   "minDnu" = 15,
   "maxDnu" = 95,
@@ -130,8 +131,8 @@ result <- process(
 ggplot(
   aes(x = frequences, y = amplitude),
   data = data.frame(
-    "frequences" = result$ft$frequences,
-    "amplitude" = result$ft$amp
+    "frequences" = result$apodization$frequences,
+    "amplitude" = result$apodization$amp
   )
 ) +
   geom_point() +
@@ -140,18 +141,28 @@ ggplot(
   theme_bw()
 ```
 
-#### FT - Power Spectrum
+#### Periodicities
 
 ```{r ftPower, warning=F}
+# DS to save all data
+dt <- setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("fInv", "b", "label"))
+# Prepare data
+ranges <- names(result$fresAmps)
+for(range in ranges){
+  dt <- rbind(dt, 
+  data.frame("fInv"=result$fresAmps[[as.character(range)]][["fInv"]],
+             "b"=result$fresAmps[[as.character(range)]][["b"]],
+            "label"=paste(result$fresAmps[[as.character(range)]][["label"]]," freqs")))
+}
 # Plot frecuency and amplitude
-dt <-
-  data.frame("f" = result$ft$f,
-             "powerSpectrum" = result$ft$powerSpectrum)
-ggplot(aes(x = f, y = powerSpectrum), data = dt) +
-  geom_point() +
-  geom_line() +
-  ggtitle("FT - Power Spectrum") +
-  theme_bw()
+ggplot(aes(x = fInv, y = b, group=label, colour=label), data = dt) +
+  #geom_point(alpha=0.2) +
+  geom_line(alpha=0.8) +
+  ggtitle(expression(paste("Periodicities (",d^-1,")"))) +
+  xlab(expression(paste("Periodicities (",mu,"hz)"))) +
+  ylab("Amplitude") +
+  theme_bw() + 
+  scale_color_lancet()
 ```
 
 ####  Histogram fo differences. 
