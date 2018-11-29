@@ -3,10 +3,7 @@ Experiment on HD174966
 Roberto Maestre
 10/24/2018
 
-Experiment configuration
-------------------------
-
-#### Data source
+### Data source
 
 ``` r
 dt.star <- data.frame(read.table("../data/freqs.dat", sep = " "))
@@ -45,13 +42,15 @@ Data gathering from the Antonio's PhD thesis.
 
 -   HD174966: freqs.dat, <ftp://cdsarc.u-strasbg.fr/pub/cats/J/A+A/559/A63/ReadMe>
 
-#### Frequences and Amplitudes
+### Frequencies and amplitudes
 
 ``` r
 plot_spectrum(-5, 80, dt.star)
 ```
 
-![](Experiment_-_HD174966_files/figure-markdown_github/experimentOne-1.png)
+![](Experiment_-_HD174966_files/figure-markdown_github/spectrum-1.png)
+
+### Experiment execution
 
 ``` r
 result <- process(
@@ -89,6 +88,8 @@ result <- process(
     ##    Frequencies selected: 268.459, 312.02, 247.926, 320.781, 203.964, 580.477, 144.431, 209.899, 0.813717, 1.22332, 
     ##    Amplitudes selected: 6.2902, 5.1034, 2.0929, 0.9973, 0.6038, 0.3111, 0.2462, 0.2308, 0.172, 0.1694,
 
+### Apodization
+
 ``` r
 # Plot frecuency and amplitude
 ggplot(
@@ -104,13 +105,15 @@ ggplot(
   theme_bw()
 ```
 
-![](Experiment_-_HD174966_files/figure-markdown_github/experimentOne-2.png)
+![](Experiment_-_HD174966_files/figure-markdown_github/freqs-1.png)
+
+### Periodicities
 
 ``` r
 plot_periodicities(result$fresAmps)
 ```
 
-![](Experiment_-_HD174966_files/figure-markdown_github/experimentOne-3.png)
+![](Experiment_-_HD174966_files/figure-markdown_github/periods-1.png)
 
 ``` r
 dt <- data.frame(result$diffHistogram$histogram)
@@ -120,7 +123,9 @@ ggplot(aes(x = bins, y = values), data = dt) +
   theme_bw()
 ```
 
-![](Experiment_-_HD174966_files/figure-markdown_github/experimentOne-4.png)
+![](Experiment_-_HD174966_files/figure-markdown_github/periods-2.png)
+
+### Autocorrelation
 
 ``` r
 cc <- result$crossCorrelation
@@ -137,4 +142,4 @@ ggplot(aes(x = lag, y = cc), data = dt) +
   theme_bw()
 ```
 
-![](Experiment_-_HD174966_files/figure-markdown_github/experimentOne-5.png)
+![](Experiment_-_HD174966_files/figure-markdown_github/autocor-1.png)

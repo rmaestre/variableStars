@@ -14,9 +14,7 @@ library(microbenchmark)
 ```
 
 
-## Experiment configuration
-
-#### Data source
+### Data source
 
 ```{r data}
 if (T) {
@@ -43,11 +41,15 @@ Data gathering from the Antonio's PhD thesis.
 
 - HD174936: table1.dat, ftp://cdsarc.u-strasbg.fr/pub/cats/J/A+A/506/79/ReadMe
 
-#### Frequences and Amplitudes 
+### Frequencies and amplitudes
 
-```{r experimentOne}
+```{r spectrum}
 plot_spectrum(-5, 80, dt.star)
+```
 
+### Experiment execution
+
+```{r exe}
 result <- process(
   dt.star$frequency,
   dt.star$amplitude,
@@ -61,7 +63,11 @@ result <- process(
   numFrequencies = 30,
   debug = TRUE
 )
+```
 
+### Apodization
+
+```{r freqs}
 # Plot frecuency and amplitude
 ggplot(
   aes(x = frequences, y = amplitude),
@@ -74,18 +80,23 @@ ggplot(
   geom_line() +
   ggtitle("Apodization- Frequences and amplitudes") +
   theme_bw()
+```
 
+### Periodicities
 
+```{r periods}
 plot_periodicities(result$fresAmps)
-
 
 dt <- data.frame(result$diffHistogram$histogram)
 ggplot(aes(x = bins, y = values), data = dt) +
   geom_bar(stat = "identity") +
   ggtitle("Histogram of differences") +
   theme_bw()
+```
 
+### Autocorrelation
 
+```{r autocor}
 cc <- result$crossCorrelation
 dt <-
   data.frame("lag" = seq(round(-1 * (length(

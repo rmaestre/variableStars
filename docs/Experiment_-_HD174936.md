@@ -3,10 +3,7 @@ Experiment on HD174936
 Roberto Maestre
 10/24/2018
 
-Experiment configuration
-------------------------
-
-#### Data source
+### Data source
 
 ``` r
 if (T) {
@@ -50,13 +47,15 @@ Data gathering from the Antonio's PhD thesis.
 
 -   HD174936: table1.dat, <ftp://cdsarc.u-strasbg.fr/pub/cats/J/A+A/506/79/ReadMe>
 
-#### Frequences and Amplitudes
+### Frequencies and amplitudes
 
 ``` r
 plot_spectrum(-5, 80, dt.star)
 ```
 
-![](Experiment_-_HD174936_files/figure-markdown_github/experimentOne-1.png)
+![](Experiment_-_HD174936_files/figure-markdown_github/spectrum-1.png)
+
+### Experiment execution
 
 ``` r
 result <- process(
@@ -94,6 +93,8 @@ result <- process(
     ##    Frequencies selected: 377.298, 412.711, 414.62, 360.076, 339.22, 367.963, 321.916, 387.625, 359.466, 0.660089, 
     ##    Amplitudes selected: 2.1216, 1.0158, 0.7157, 0.5646, 0.5463, 0.5303, 0.3623, 0.3193, 0.2997, 0.2947,
 
+### Apodization
+
 ``` r
 # Plot frecuency and amplitude
 ggplot(
@@ -109,13 +110,15 @@ ggplot(
   theme_bw()
 ```
 
-![](Experiment_-_HD174936_files/figure-markdown_github/experimentOne-2.png)
+![](Experiment_-_HD174936_files/figure-markdown_github/freqs-1.png)
+
+### Periodicities
 
 ``` r
 plot_periodicities(result$fresAmps)
 ```
 
-![](Experiment_-_HD174936_files/figure-markdown_github/experimentOne-3.png)
+![](Experiment_-_HD174936_files/figure-markdown_github/periods-1.png)
 
 ``` r
 dt <- data.frame(result$diffHistogram$histogram)
@@ -125,7 +128,9 @@ ggplot(aes(x = bins, y = values), data = dt) +
   theme_bw()
 ```
 
-![](Experiment_-_HD174936_files/figure-markdown_github/experimentOne-4.png)
+![](Experiment_-_HD174936_files/figure-markdown_github/periods-2.png)
+
+### Autocorrelation
 
 ``` r
 cc <- result$crossCorrelation
@@ -142,4 +147,4 @@ ggplot(aes(x = lag, y = cc), data = dt) +
   theme_bw()
 ```
 
-![](Experiment_-_HD174936_files/figure-markdown_github/experimentOne-5.png)
+![](Experiment_-_HD174936_files/figure-markdown_github/autocor-1.png)

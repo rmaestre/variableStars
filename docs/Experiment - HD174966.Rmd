@@ -14,9 +14,7 @@ library(microbenchmark)
 ```
 
 
-## Experiment configuration
-
-#### Data source
+### Data source
 
 ```{r data}
 dt.star <- data.frame(read.table("../data/freqs.dat", sep = " "))
@@ -38,11 +36,15 @@ Data gathering from the Antonio's PhD thesis.
 
 - HD174966: freqs.dat, ftp://cdsarc.u-strasbg.fr/pub/cats/J/A+A/559/A63/ReadMe
 
-#### Frequences and Amplitudes 
+### Frequencies and amplitudes
 
-```{r experimentOne}
+```{r spectrum}
 plot_spectrum(-5, 80, dt.star)
+```
 
+### Experiment execution
+
+```{r exe}
 result <- process(
   dt.star$frequency,
   dt.star$amplitude,
@@ -56,7 +58,11 @@ result <- process(
   numFrequencies = 30,
   debug = TRUE
 )
+```
 
+### Apodization
+
+```{r freqs}
 # Plot frecuency and amplitude
 ggplot(
   aes(x = frequences, y = amplitude),
@@ -69,18 +75,23 @@ ggplot(
   geom_line() +
   ggtitle("Apodization- Frequences and amplitudes") +
   theme_bw()
+```
 
+### Periodicities
 
+```{r periods}
 plot_periodicities(result$fresAmps)
-
 
 dt <- data.frame(result$diffHistogram$histogram)
 ggplot(aes(x = bins, y = values), data = dt) +
   geom_bar(stat = "identity") +
   ggtitle("Histogram of differences") +
   theme_bw()
+```
 
+### Autocorrelation
 
+```{r autocor}
 cc <- result$crossCorrelation
 dt <-
   data.frame("lag" = seq(round(-1 * (length(
@@ -94,6 +105,4 @@ ggplot(aes(x = lag, y = cc), data = dt) +
   ggtitle("Cross correlation") +
   theme_bw()
 ```
-
-
 
