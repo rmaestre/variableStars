@@ -277,9 +277,6 @@ arma::vec differences(arma::vec frequences) {
 //[[Rcpp::export]]
 List diffHistogram(arma::vec frequences, double dnu) {
   // Calculalate differences among frequences
-  Rcout << "frequences" << frequences << "\n"; 
-  Rcout << "dnu" << dnu << "\n";
-  
   arma::vec diffs = differences(frequences);
   
   // Histogram bin paramterns
@@ -287,11 +284,7 @@ List diffHistogram(arma::vec frequences, double dnu) {
   double binSize = dnu * 0.015; // Bin length
   // Generate space for bins for histogram
   arma::vec bins = arma::regspace(0, binSize, maxHistogramBin);
-  
-  Rcout << "diffs" << diffs << "\n";
-  Rcout << "bins" << bins << "\n";
-  
-  
+
   // Return results
   List results;
   results["diffs"] = diffs;
@@ -350,6 +343,7 @@ List apodizationFt(arma::vec frequences, String filter) {
   return List::create(_["amp"] = amp,
                       _["frequences"] = frequences,
                       _["f"] = f,
+                      _["f_inv"] = 1.0 / f,
                       _["powerSpectrum"] = powerSpectrum,
                       _["powerSpectrumInverse"] = 1 / powerSpectrum);
 }

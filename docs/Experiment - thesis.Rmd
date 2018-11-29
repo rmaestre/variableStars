@@ -94,28 +94,15 @@ ggplot(
 ```{r ftPower, warning=F}
 # Plot frecuency and amplitude
 dt <-
-  data.frame("f" = result$ft$f,
+  data.frame("f_inv" = result$ft$f_inv,
              "powerSpectrum" = result$ft$powerSpectrum)
-ggplot(aes(x = f, y = powerSpectrum), data = dt) +
+ggplot(aes(x = f_inv, y = powerSpectrum), data = dt) +
   geom_point(alpha=0.2) +
   geom_line(alpha=0.2) +
   ggtitle("FT - Power Spectrum") +
   theme_bw()
 ```
 
-Plot selected spectrum
-
-```{r ftPowerSelected, warning=F}
-# Plot frecuency and amplitude
-dt <-
-  data.frame("f" = result$ft$f,
-             "powerSpectrum" = result$ft$powerSpectrum)
-ggplot(aes(x = f, y = powerSpectrum), data = dt[dt$f<0.2,]) +
-  geom_point(alpha=0.2) +
-  geom_line(alpha=0.2) +
-  ggtitle("FT - Power Spectrum") +
-  theme_bw()
-```
 
 ####  Histogram fo differences. 
 
