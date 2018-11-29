@@ -1,0 +1,108 @@
+---
+title: "Experiment on HD174966"
+author: "Roberto Maestre"
+date: "10/24/2018"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(variableStars)
+library(data.table)
+library(ggplot2)
+library(ggsci)
+library(microbenchmark)
+```
+
+
+### Data source
+
+```{r data}
+dt.star <- data.frame(read.table("../data/freqs.dat", sep = " "))
+colnames(dt.star) <- c("Id","frequency","Freq2","amplitude","Phase","Sig", "S/N","rms", "e_Freq1","e_Amp","e_Phase")
+head(dt.star)
+
+# Save Data to disk (to be replicated)
+write.table(
+  dt.star[c("frequency", "amplitude")],
+  file = "/tmp/data.csv",
+  sep = "\t",
+  quote = F,
+  row.names = F,
+  col.names = F
+)
+```
+
+Data gathering from the Antonio's PhD thesis.
+
+- HD174966: freqs.dat, ftp://cdsarc.u-strasbg.fr/pub/cats/J/A+A/559/A63/ReadMe
+
+### Frequencies and amplitudes
+
+```{r spectrum}
+plot_spectrum(-5, 80, dt.star)
+```
+
+### Experiment execution
+
+```{r exe}
+result <- process(
+  dt.star$frequency,
+  dt.star$amplitude,
+  filter = "uniform",
+  gRegimen = 0,
+  minDnu = 15,
+  maxDnu = 95,
+  dnuValue = -1,
+  dnuGuessError = 10,
+  dnuEstimation = TRUE,
+  numFrequencies = 30,
+  debug = TRUE
+)
+```
+
+### Apodization
+
+```{r freqs}
+# Plot frecuency and amplitude
+ggplot(
+  aes(x = frequences, y = amplitude),
+  data = data.frame(
+    "frequences" = result$apodization$frequences,
+    "amplitude" = result$apodization$amp
+  )
+) +
+  geom_point() +
+  geom_line() +
+  ggtitle("Apodization- Frequences and amplitudes") +
+  theme_bw()
+```
+
+### Periodicities
+
+```{r periods}
+plot_periodicities(result$fresAmps)
+
+dt <- data.frame(result$diffHistogram$histogram)
+ggplot(aes(x = bins, y = values), data = dt) +
+  geom_bar(stat = "identity") +
+  ggtitle("Histogram of differences") +
+  theme_bw()
+```
+
+### Autocorrelation
+
+```{r autocor}
+cc <- result$crossCorrelation
+dt <-
+  data.frame("lag" = seq(round(-1 * (length(
+    cc
+  ) - 1) / 2), round((length(
+    cc
+  ) - 1) / 2)),
+  "cc" = cc)
+ggplot(aes(x = lag, y = cc), data = dt) +
+  geom_bar(stat = "identity") +
+  ggtitle("Cross correlation") +
+  theme_bw()
+```
+

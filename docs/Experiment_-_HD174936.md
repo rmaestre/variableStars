@@ -1,27 +1,19 @@
-Experiment on HD174936 and HD 174966
+Experiment on HD174936
 ================
 Roberto Maestre
 10/24/2018
 
-Experiment configuration
-------------------------
-
-#### Data source
-
-Data gathering from the Antonio's PhD thesis.
-
--   HD174936: table1.dat, <ftp://cdsarc.u-strasbg.fr/pub/cats/J/A+A/506/79/ReadMe>
--   HD174966: freqs.dat, <ftp://cdsarc.u-strasbg.fr/pub/cats/J/A+A/559/A63/ReadMe>
+### Data source
 
 ``` r
 if (T) {
-  dt <- data.frame(read.table("../data/table1.dat", sep = "\t"))
-  colnames(dt) <- c("Seq","frequency","amplitude","Phase","Sig","S/N","rms","e_Freq","e_Amp","e_Phase")
+  dt.star <- data.frame(read.table("../data/table1.dat", sep = "\t"))
+  colnames(dt.star) <- c("Seq","frequency","amplitude","Phase","Sig","S/N","rms","e_Freq","e_Amp","e_Phase")
 } else {
-  dt <- data.frame(read.table("../data/freqs.dat", sep = " "))
-  colnames(dt) <- c("Id","frequency","Freq2","amplitude","Phase","Sig", "S/N","rms", "e_Freq1","e_Amp","e_Phase")
+  dt.star <- data.frame(read.table("../data/freqs.dat", sep = " "))
+  colnames(dt.star) <- c("Id","frequency","Freq2","amplitude","Phase","Sig", "S/N","rms", "e_Freq1","e_Amp","e_Phase")
 }
-head(dt)
+head(dt.star)
 ```
 
     ##   Seq frequency amplitude     Phase      Sig     S/N   rms    e_Freq
@@ -42,7 +34,7 @@ head(dt)
 ``` r
 # Save Data to disk (to be replicated)
 write.table(
-  dt[c("frequency", "amplitude")],
+  dt.star[c("frequency", "amplitude")],
   file = "/tmp/data.csv",
   sep = "\t",
   quote = F,
@@ -51,23 +43,24 @@ write.table(
 )
 ```
 
-#### Frequences and Amplitudes
+Data gathering from the Antonio's PhD thesis.
+
+-   HD174936: table1.dat, <ftp://cdsarc.u-strasbg.fr/pub/cats/J/A+A/506/79/ReadMe>
+
+### Frequencies and amplitudes
 
 ``` r
-plot_spectrum(-10, 90, dt)
+plot_spectrum(-5, 80, dt.star)
 ```
 
-![](Experiment_-_thesis_files/figure-markdown_github/freqAmp-1.png)
+![](Experiment_-_HD174936_files/figure-markdown_github/spectrum-1.png)
 
-Experiment execution
---------------------
-
-process is the main method on the variableStars package to compute and estimate all parameters
+### Experiment execution
 
 ``` r
 result <- process(
-  dt$frequency,
-  dt$amplitude,
+  dt.star$frequency,
+  dt.star$amplitude,
   filter = "uniform",
   gRegimen = 0,
   minDnu = 15,
@@ -87,26 +80,28 @@ result <- process(
     ## Frequencies: 377.298, 412.711, 414.62, 360.076, 339.22, 367.963, 321.916, 387.625, 359.466, 0.660089, 385.889, 158.011, 465.895, 50.0353, 313.119, 421.049, 253.375, 394.708, 452.201, 282.342, 
     ## Range: 30, 60, 90, 
     ##  Iteration over range: 30
-    ##    Frequencies selected: 377.298, 412.711, 414.62, 360.076, 339.22, 367.963, 321.916, 387.625, 359.466, 0.660089, 385.889, 158.011, 465.895, 50.0353, 313.119, 421.049, 253.375, 394.708, 452.201, 282.342, 
-    ##    Amplitudes selected: 2.1216, 1.0158, 0.7157, 0.5646, 0.5463, 0.5303, 0.3623, 0.3193, 0.2997, 0.2947, 0.2906, 0.2759, 0.2407, 0.2343, 0.2232, 0.2162, 0.2081, 0.1873, 0.174, 0.1722, 
+    ##    Frequencies selected: 377.298, 412.711, 414.62, 360.076, 339.22, 367.963, 321.916, 387.625, 359.466, 0.660089, 
+    ##    Amplitudes selected: 2.1216, 1.0158, 0.7157, 0.5646, 0.5463, 0.5303, 0.3623, 0.3193, 0.2997, 0.2947, 
     ##     Dnu: 9.4051
     ##     Dnu Peak: 9.4051
     ##     Dnu Guess: 0.22003
     ##     Cross correlation calculated:-0.0663463, -0.0674715, -0.0676236, -0.0667651, -0.0648855, -0.0620033, -0.0581655, -0.0534425, -0.0479188, -0.0416764, 
     ##  Iteration over range: 60
-    ##     Nothing to do
+    ##    Frequencies selected: 377.298, 412.711, 414.62, 360.076, 339.22, 367.963, 321.916, 387.625, 359.466, 0.660089, 
+    ##    Amplitudes selected: 2.1216, 1.0158, 0.7157, 0.5646, 0.5463, 0.5303, 0.3623, 0.3193, 0.2997, 0.2947, 
     ##  Iteration over range: 90
-    ##     Nothing to do
+    ##    Frequencies selected: 377.298, 412.711, 414.62, 360.076, 339.22, 367.963, 321.916, 387.625, 359.466, 0.660089, 
+    ##    Amplitudes selected: 2.1216, 1.0158, 0.7157, 0.5646, 0.5463, 0.5303, 0.3623, 0.3193, 0.2997, 0.2947,
 
-#### Apodization
+### Apodization
 
 ``` r
 # Plot frecuency and amplitude
 ggplot(
   aes(x = frequences, y = amplitude),
   data = data.frame(
-    "frequences" = result$ft$frequences,
-    "amplitude" = result$ft$amp
+    "frequences" = result$apodization$frequences,
+    "amplitude" = result$apodization$amp
   )
 ) +
   geom_point() +
@@ -115,27 +110,15 @@ ggplot(
   theme_bw()
 ```
 
-![](Experiment_-_thesis_files/figure-markdown_github/apodization-1.png)
+![](Experiment_-_HD174936_files/figure-markdown_github/freqs-1.png)
 
-#### FT - Power Spectrum
+### Periodicities
 
 ``` r
-# Plot frecuency and amplitude
-dt <-
-  data.frame("f_inv" = result$ft$f_inv,
-             "powerSpectrum" = result$ft$powerSpectrum)
-ggplot(aes(x = f_inv, y = powerSpectrum), data = dt) +
-  geom_point(alpha=0.2) +
-  geom_line(alpha=1.0) +
-  ggtitle("FT - Power Spectrum") +
-  theme_bw()
+plot_periodicities(result$fresAmps)
 ```
 
-![](Experiment_-_thesis_files/figure-markdown_github/ftPower-1.png)
-
-#### Histogram fo differences.
-
-We show the complete histogram
+![](Experiment_-_HD174936_files/figure-markdown_github/periods-1.png)
 
 ``` r
 dt <- data.frame(result$diffHistogram$histogram)
@@ -145,20 +128,23 @@ ggplot(aes(x = bins, y = values), data = dt) +
   theme_bw()
 ```
 
-![](Experiment_-_thesis_files/figure-markdown_github/diffsHistogram-1.png)
+![](Experiment_-_HD174936_files/figure-markdown_github/periods-2.png)
 
-#### Cross correlation
-
-Simple cross correlation
+### Autocorrelation
 
 ``` r
 cc <- result$crossCorrelation
-dt <- data.frame("lag" = seq(round(-1*(length(cc)-1)/2), round((length(cc)-1)/2)), 
-                 "cc"=cc)
+dt <-
+  data.frame("lag" = seq(round(-1 * (length(
+    cc
+  ) - 1) / 2), round((length(
+    cc
+  ) - 1) / 2)),
+  "cc" = cc)
 ggplot(aes(x = lag, y = cc), data = dt) +
   geom_bar(stat = "identity") +
   ggtitle("Cross correlation") +
   theme_bw()
 ```
 
-![](Experiment_-_thesis_files/figure-markdown_github/crossCorrelation-1.png)
+![](Experiment_-_HD174936_files/figure-markdown_github/autocor-1.png)

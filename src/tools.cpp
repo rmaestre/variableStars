@@ -344,8 +344,7 @@ List apodizationFt(arma::vec frequences, String filter) {
                       _["frequences"] = frequences,
                       _["f"] = f,
                       _["f_inv"] = 1.0 / f,
-                      _["powerSpectrum"] = powerSpectrum,
-                      _["powerSpectrumInverse"] = 1 / powerSpectrum);
+                      _["powerSpectrum"] = powerSpectrum);
 }
 
 //! Computing Adjacent Differences from a given vector
@@ -595,9 +594,11 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
 
   // Data sctutures
   arma::vec frequencyGlobal, amplitudeGlobal, f, fInv, b, cc;
-  List res, _diffHistogram;
+  List resApod, _diffHistogram;
   double dnu, dnuPeak, dnuGuess;
   
+  // Data Strcuture to save intermediate results
+  List interResults;
   // Loop over frequencies vector
   arma::ivec::iterator numIt;
   bool first = true;
@@ -606,37 +607,40 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
       Rcout << " Iteration over range: " << * numIt;
       Rcout << "\n";
     }
+      
+    // Calculate the range for subselecting frecuences
+    arma::uvec pos( * numIt);
+    std::iota(pos.begin(), pos.end(), 0);
+    // Loop subselection of frecuences and amplitudes
+    frequencyGlobal = frequency.elem(pos);
+    amplitudeGlobal = amplitude.elem(pos);
+    if (debug) {
+        Rcout << "   Frequencies selected: ";
+        printVector(frequencyGlobal, 10);
+        Rcout << "\n";
+        Rcout << "   Amplitudes selected: ";
+        printVector(amplitudeGlobal, 10);
+        Rcout << "\n";
+    }
+      
+    // Calculate FT
+    resApod = apodizationFt(frequencyGlobal, filter);
+    // Calculate the inverse frecuence
+    f = as < arma::vec > (resApod["f"]);
+    fInv = 1.0 / f;
+    b = as < arma::vec > (resApod["powerSpectrum"]);
+    // Save intermediate data
+    interResults[std::to_string(*numIt)] = 
+      List::create(_["fInv"]=fInv, _["b"]=b, _["label"]=std::to_string(*numIt));
+      
+    // The next alculations are only for the N first sorted frequencies
     if (first) {
-      first = false; // Calculations only with the N first sorted frequencies
-      // Calculate the range for subselecting frecuences
-      arma::uvec pos( * numIt);
-      std::iota(pos.begin(), pos.end(), 0);
-      
-      // Loop subselection of frecuences and amplitudes
-      frequencyGlobal = frequency.elem(pos);
-      amplitudeGlobal = amplitude.elem(pos);
-      
-      if (debug) {
-          Rcout << "   Frequencies selected: ";
-          printVector(frequencyGlobal, 20);
-          Rcout << "\n";
-          Rcout << "   Amplitudes selected: ";
-          printVector(amplitudeGlobal, 20);
-          Rcout << "\n";
-      }
-      
-      // Calculate FT
-      res = apodizationFt(frequencyGlobal, filter);
-      // Calculate the inverse frecuence
-      f = as < arma::vec > (res["f"]);
-      fInv = 1.0 / f;
-      b = as < arma::vec > (res["powerSpectrum"]);
-      
+      first = false; 
       // Get the peaks
       arma::uvec peaksInd = findPeaks(b);
       arma::vec localMax = fInv.elem(peaksInd);
       arma::vec localMaxB = b.elem(peaksInd);
-      
+        
       // Get DNU on the peak
       arma::vec maxSel = fInv.elem(find(b == * std::max_element(localMaxB.begin(), localMaxB.end())));
       dnu = 0.0;
@@ -664,7 +668,7 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
       
       // Histogram of differences
       _diffHistogram = diffHistogram(frequencyGlobal, dnu);
-      
+
       // Calculate crosscorrelation
       cc = crosscorrelation(frequencyGlobal);
       if (debug) {
@@ -672,27 +676,15 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
         printVector(cc, 10);
         Rcout << "\n";
       }
-      
-    } else {
-      if (debug) {
-        Rcout << "    Nothing to do" << "\n";
-      }
     } // End first iteration
   } // End range loop
   
-  // Calculated the connected ind
-  
   // Return the output with all valuable elements
-  return List::create(_["photometry"] =
-                      List::create(_["frequency"] = frequency,
-                                   _["amplitude"] = amplitude),
-                                   _["ft"] = res,
-                                   _["diffHistogram"] = _diffHistogram,
-                                   _["crossCorrelation"] = cc,
-                                   _["f"] = res["f"],
-                                               _["fInv"] = fInv,
-                                               _["dnuPeak"] = dnuPeak,
-                                               _["dnu"] = dnu,
-                                               _["dnuGuess"] = dnuGuess
-  );
+  return List::create(_["fresAmps"] = interResults,
+                      _["diffHistogram"] = _diffHistogram,
+                      _["crossCorrelation"] = cc,
+                      _["apodization"] = resApod,
+                      _["dnuPeak"] = dnuPeak,
+                      _["dnu"] = dnu,
+                      _["dnuGuess"] = dnuGuess );
 }
