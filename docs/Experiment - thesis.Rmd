@@ -98,7 +98,7 @@ dt <-
              "powerSpectrum" = result$ft$powerSpectrum)
 ggplot(aes(x = f_inv, y = powerSpectrum), data = dt) +
   geom_point(alpha=0.2) +
-  geom_line(alpha=0.2) +
+  geom_line(alpha=1.0) +
   ggtitle("FT - Power Spectrum") +
   theme_bw()
 ```
