@@ -106,3 +106,24 @@ ggplot(aes(x = lag, y = cc), data = dt) +
   theme_bw()
 ```
 
+
+```{r benchmark, warning=F, message=F, cache=F}
+m <-
+  microbenchmark(result <- process(
+  dt.star$frequency,
+  dt.star$amplitude,
+  filter = "uniform",
+  gRegimen = 0,
+  minDnu = 15,
+  maxDnu = 95,
+  dnuValue = -1,
+  dnuGuessError = 10,
+  dnuEstimation = TRUE,
+  numFrequencies = 30,
+  debug = F
+)
+                 ,times = 100)
+autoplot(m, log = F) +
+  scale_x_discrete(labels = c("DFT on a Pulsar star data")) +
+  xlab("")
+```
