@@ -469,13 +469,12 @@ arma::ivec calculateRange(int nElements, int nFrequencies) {
 //' }
 //' @export
 //[[Rcpp::export]]
-arma::vec crosscorrelation(arma::vec frequencies, 
-                      Rcpp::Nullable<int> lagMax = R_NilValue, 
+List crosscorrelation(arma::vec frequencies, 
                       String type = "correlation", 
                       bool plot = false) {
   // Constants
   double sig = 0.5; // muHz
-  double freqf = 200; // muHz
+  int freqf = 200; // muHz
   // Calculate exp and a multiplicative factor
   int exp = std::abs(std::floor(std::log10(sig)));
   int fac = std::pow(10, exp);
@@ -491,18 +490,24 @@ arma::vec crosscorrelation(arma::vec frequencies,
   Environment stats("package:stats");
   Function ccf = stats["ccf"];
   NumericVector xx = NumericVector(fc.begin(),fc.end());
-  List res =  ccf(xx, xx, lagMax, type, plot);
+  List res =  ccf(xx, xx, xx.length(), type, plot);
   arma::vec cc = as < arma::vec > (res["acf"]);
-  
-  // Get the last-half vector of cross correlations
-  arma::uvec pos = arma::linspace<arma::uvec>(cc.size() / 2, cc.size() - 1, cc.size() / 2);
-  arma::vec re = cc.elem(pos);
 
-  // to-do #258 on the python function
-  //pos = arma::linspace<arma::uvec>(0, (maxFreq * fac) - 1, maxFreq * fac);
+  // Get the last-half vector of cross correlations
+  arma::uvec pos;
+  pos = arma::linspace<arma::uvec>(cc.size() / 2, cc.size() - 1, cc.size() / 2);
+  arma::vec re = cc.elem(pos);
+  // Select last half of crosscorrelations
+  if (re.n_elem > (freqf * fac)) {
+    pos = arma::linspace<arma::uvec>(0, (freqf * fac) - 1, freqf * fac);
+  } else {
+    pos = arma::linspace<arma::uvec>(0, re.n_elem - 1, freqf * fac);
+  }
+  arma::vec reFinal = re.elem(pos);
+  arma::vec index = arma::linspace(0, freqf, reFinal.n_elem);
   
   // Return results
-  return cc;
+  return List::create(_["autocorre"]=reFinal, _["index"]=index);
 }
 
 //' Main process function
@@ -593,8 +598,8 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
   }
 
   // Data sctutures
-  arma::vec frequencyGlobal, amplitudeGlobal, f, fInv, b, cc;
-  List resApod, _diffHistogram;
+  arma::vec frequencyGlobal, amplitudeGlobal, f, fInv, b;
+  List resApod, _diffHistogram, autocorr;
   double dnu, dnuPeak, dnuGuess;
   
   // Data Strcuture to save intermediate results
@@ -670,10 +675,10 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
       _diffHistogram = diffHistogram(frequencyGlobal, dnu);
 
       // Calculate crosscorrelation
-      cc = crosscorrelation(frequencyGlobal);
+      autocorr = crosscorrelation(frequencyGlobal);
       if (debug) {
         Rcout << "    Cross correlation calculated:";
-        printVector(cc, 10);
+        //printVector(cc, 10);
         Rcout << "\n";
       }
     } // End first iteration
@@ -682,7 +687,7 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
   // Return the output with all valuable elements
   return List::create(_["fresAmps"] = interResults,
                       _["diffHistogram"] = _diffHistogram,
-                      _["crossCorrelation"] = cc,
+                      _["crossCorrelation"] = autocorr,
                       _["apodization"] = resApod,
                       _["dnuPeak"] = dnuPeak,
                       _["dnu"] = dnu,
