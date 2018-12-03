@@ -127,7 +127,7 @@ result <- process(
     ##     Dnu: 1.0693
     ##     Dnu Peak: 3.9403
     ##     Dnu Guess: 82.9435
-    ##     Cross correlation calculated:0.682078, 0.670522, 0.658349, 0.646074, 0.634194, 0.623175, 0.613438, 0.605355, 0.599246, 0.595376, 
+    ##     Cross correlation calculated:
     ##  Iteration over range: 60
     ##    Frequencies selected: 264.505, 264.113, 260.586, 264.897, 263.721, 265.288, 268.423, 263.329, 256.668, 251.965, 
     ##    Amplitudes selected: 2.18044, 0.514798, 0.512875, 0.489923, 0.370046, 0.343731, 0.263693, 0.263439, 0.251894, 0.221904, 
@@ -203,18 +203,17 @@ ggplot(aes(x = bins, y = values), data = dt[dt$values > 0,]) +
 
 ![](Experiments_files/figure-markdown_github/diffsHistogram-1.png)
 
-#### Cross correlation
-
-Simple cross correlation
+### Autocorrelation
 
 ``` r
-cc <- result$crossCorrelation
-dt <- data.frame("lag" = seq(round(-1*(length(cc)-1)/2), round((length(cc)-1)/2)), 
-                 "cc"=cc)
-ggplot(aes(x = lag, y = cc), data = dt) +
-  geom_bar(stat = "identity") +
-  ggtitle("Cross correlation") +
+dt <- data.frame(result$crossCorrelation)
+
+ggplot(aes(x = index, y = autocorre), data = dt) +
+  geom_line(stat = "identity") +
+  ggtitle("Autocorrelacion (Crosscorrelation)") +
+  xlab(expression(paste("Periodicities (",mu,"hz)"))) +
+  ylab("Autocorrelation") +
   theme_bw()
 ```
 
-![](Experiments_files/figure-markdown_github/crossCorrelation-1.png)
+![](Experiments_files/figure-markdown_github/autocor-1.png)

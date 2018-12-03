@@ -179,18 +179,18 @@ ggplot(aes(x = bins, y = values), data = dt[dt$values > 0,]) +
 ```
 
 
-####  Cross correlation
+### Autocorrelation
 
-Simple cross correlation
+```{r autocor}
+dt <- data.frame(result$crossCorrelation)
 
-```{r crossCorrelation, warning=F}
-cc <- result$crossCorrelation
-dt <- data.frame("lag" = seq(round(-1*(length(cc)-1)/2), round((length(cc)-1)/2)), 
-                 "cc"=cc)
-ggplot(aes(x = lag, y = cc), data = dt) +
-  geom_bar(stat = "identity") +
-  ggtitle("Cross correlation") +
+ggplot(aes(x = index, y = autocorre), data = dt) +
+  geom_line(stat = "identity") +
+  ggtitle("Autocorrelacion (Crosscorrelation)") +
+  xlab(expression(paste("Periodicities (",mu,"hz)"))) +
+  ylab("Autocorrelation") +
   theme_bw()
 ```
+
 
 

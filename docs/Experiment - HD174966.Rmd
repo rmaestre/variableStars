@@ -45,7 +45,7 @@ plot_spectrum(-5, 80, dt.star)
 ### Experiment execution
 
 ```{r exe}
-result <- process(
+result <- variableStars::process(
   dt.star$frequency,
   dt.star$amplitude,
   filter = "uniform",
@@ -81,7 +81,11 @@ ggplot(
 
 ```{r periods}
 plot_periodicities(result$fresAmps)
+```
 
+### Histogram of differences
+
+```{r differences}
 dt <- data.frame(result$diffHistogram$histogram)
 ggplot(aes(x = bins, y = values), data = dt) +
   geom_bar(stat = "identity") +
@@ -92,20 +96,18 @@ ggplot(aes(x = bins, y = values), data = dt) +
 ### Autocorrelation
 
 ```{r autocor}
-cc <- result$crossCorrelation
-dt <-
-  data.frame("lag" = seq(round(-1 * (length(
-    cc
-  ) - 1) / 2), round((length(
-    cc
-  ) - 1) / 2)),
-  "cc" = cc)
-ggplot(aes(x = lag, y = cc), data = dt) +
-  geom_bar(stat = "identity") +
-  ggtitle("Cross correlation") +
+dt <- data.frame(result$crossCorrelation)
+
+ggplot(aes(x = index, y = autocorre), data = dt) +
+  geom_line(stat = "identity") +
+  ggtitle("Autocorrelacion (Crosscorrelation)") +
+  xlab(expression(paste("Periodicities (",mu,"hz)"))) +
+  ylab("Autocorrelation") +
+  ylim(c(-0.05, 0.25)) +
   theme_bw()
 ```
 
+### Computation benchmark
 
 ```{r benchmark, warning=F, message=F, cache=F}
 m <-
@@ -124,6 +126,6 @@ m <-
 )
                  ,times = 100)
 autoplot(m, log = F) +
-  scale_x_discrete(labels = c("DFT on a Pulsar star data")) +
+  scale_x_discrete(labels = c("The complete process")) +
   xlab("")
 ```

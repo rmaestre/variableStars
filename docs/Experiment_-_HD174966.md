@@ -53,7 +53,7 @@ plot_spectrum(-5, 80, dt.star)
 ### Experiment execution
 
 ``` r
-result <- process(
+result <- variableStars::process(
   dt.star$frequency,
   dt.star$amplitude,
   filter = "uniform",
@@ -80,7 +80,7 @@ result <- process(
     ##     Dnu: 7.2568
     ##     Dnu Peak: 7.2568
     ##     Dnu Guess: 0.190972
-    ##     Cross correlation calculated:0.00441838, 0.00397885, 0.00316635, 0.00205702, 0.00074198, -0.00068112, -0.00211292, -0.00345211, -0.00458919, -0.00539412, 
+    ##     Cross correlation calculated:
     ##  Iteration over range: 60
     ##    Frequencies selected: 268.459, 312.02, 247.926, 320.781, 203.964, 580.477, 144.431, 209.899, 0.813717, 1.22332, 
     ##    Amplitudes selected: 6.2902, 5.1034, 2.0929, 0.9973, 0.6038, 0.3111, 0.2462, 0.2308, 0.172, 0.1694, 
@@ -115,6 +115,8 @@ plot_periodicities(result$fresAmps)
 
 ![](Experiment_-_HD174966_files/figure-markdown_github/periods-1.png)
 
+### Histogram of differences
+
 ``` r
 dt <- data.frame(result$diffHistogram$histogram)
 ggplot(aes(x = bins, y = values), data = dt) +
@@ -123,23 +125,45 @@ ggplot(aes(x = bins, y = values), data = dt) +
   theme_bw()
 ```
 
-![](Experiment_-_HD174966_files/figure-markdown_github/periods-2.png)
+![](Experiment_-_HD174966_files/figure-markdown_github/differences-1.png)
 
 ### Autocorrelation
 
 ``` r
-cc <- result$crossCorrelation
-dt <-
-  data.frame("lag" = seq(round(-1 * (length(
-    cc
-  ) - 1) / 2), round((length(
-    cc
-  ) - 1) / 2)),
-  "cc" = cc)
-ggplot(aes(x = lag, y = cc), data = dt) +
-  geom_bar(stat = "identity") +
-  ggtitle("Cross correlation") +
+dt <- data.frame(result$crossCorrelation)
+
+ggplot(aes(x = index, y = autocorre), data = dt) +
+  geom_line(stat = "identity") +
+  ggtitle("Autocorrelacion (Crosscorrelation)") +
+  xlab(expression(paste("Periodicities (",mu,"hz)"))) +
+  ylab("Autocorrelation") +
+  ylim(c(-0.05, 0.25)) +
   theme_bw()
 ```
 
+    ## Warning: Removed 13 rows containing missing values (geom_path).
+
 ![](Experiment_-_HD174966_files/figure-markdown_github/autocor-1.png)
+
+``` r
+m <-
+  microbenchmark(result <- process(
+  dt.star$frequency,
+  dt.star$amplitude,
+  filter = "uniform",
+  gRegimen = 0,
+  minDnu = 15,
+  maxDnu = 95,
+  dnuValue = -1,
+  dnuGuessError = 10,
+  dnuEstimation = TRUE,
+  numFrequencies = 30,
+  debug = F
+)
+                 ,times = 100)
+autoplot(m, log = F) +
+  scale_x_discrete(labels = c("The complete process")) +
+  xlab("")
+```
+
+![](Experiment_-_HD174966_files/figure-markdown_github/benchmark-1.png)

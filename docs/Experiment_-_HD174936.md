@@ -85,7 +85,7 @@ result <- process(
     ##     Dnu: 9.4051
     ##     Dnu Peak: 9.4051
     ##     Dnu Guess: 0.22003
-    ##     Cross correlation calculated:-0.0663463, -0.0674715, -0.0676236, -0.0667651, -0.0648855, -0.0620033, -0.0581655, -0.0534425, -0.0479188, -0.0416764, 
+    ##     Cross correlation calculated:
     ##  Iteration over range: 60
     ##    Frequencies selected: 377.298, 412.711, 414.62, 360.076, 339.22, 367.963, 321.916, 387.625, 359.466, 0.660089, 
     ##    Amplitudes selected: 2.1216, 1.0158, 0.7157, 0.5646, 0.5463, 0.5303, 0.3623, 0.3193, 0.2997, 0.2947, 
@@ -120,6 +120,8 @@ plot_periodicities(result$fresAmps)
 
 ![](Experiment_-_HD174936_files/figure-markdown_github/periods-1.png)
 
+### Histogram of differences
+
 ``` r
 dt <- data.frame(result$diffHistogram$histogram)
 ggplot(aes(x = bins, y = values), data = dt) +
@@ -128,23 +130,47 @@ ggplot(aes(x = bins, y = values), data = dt) +
   theme_bw()
 ```
 
-![](Experiment_-_HD174936_files/figure-markdown_github/periods-2.png)
+![](Experiment_-_HD174936_files/figure-markdown_github/differences-1.png)
 
 ### Autocorrelation
 
 ``` r
-cc <- result$crossCorrelation
-dt <-
-  data.frame("lag" = seq(round(-1 * (length(
-    cc
-  ) - 1) / 2), round((length(
-    cc
-  ) - 1) / 2)),
-  "cc" = cc)
-ggplot(aes(x = lag, y = cc), data = dt) +
-  geom_bar(stat = "identity") +
-  ggtitle("Cross correlation") +
+dt <- data.frame(result$crossCorrelation)
+
+ggplot(aes(x = index, y = autocorre), data = dt) +
+  geom_line(stat = "identity") +
+  ggtitle("Autocorrelacion (Crosscorrelation)") +
+  xlab(expression(paste("Periodicities (",mu,"hz)"))) +
+  ylab("Autocorrelation") +
+  ylim(c(-0.1, 0.25)) +
   theme_bw()
 ```
 
+    ## Warning: Removed 12 rows containing missing values (geom_path).
+
 ![](Experiment_-_HD174936_files/figure-markdown_github/autocor-1.png)
+
+### Computation benchmark
+
+``` r
+m <-
+  microbenchmark(result <- process(
+  dt.star$frequency,
+  dt.star$amplitude,
+  filter = "uniform",
+  gRegimen = 0,
+  minDnu = 15,
+  maxDnu = 95,
+  dnuValue = -1,
+  dnuGuessError = 10,
+  dnuEstimation = TRUE,
+  numFrequencies = 30,
+  debug = F
+)
+                 ,times = 100)
+autoplot(m, log = F) +
+  scale_x_discrete(labels = c("The complete process")) +
+  xlab("")
+```
+
+![](Experiment_-_HD174936_files/figure-markdown_github/benchmark-1.png)

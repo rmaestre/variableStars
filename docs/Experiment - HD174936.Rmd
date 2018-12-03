@@ -86,7 +86,11 @@ ggplot(
 
 ```{r periods}
 plot_periodicities(result$fresAmps)
+```
 
+### Histogram of differences
+
+```{r differences}
 dt <- data.frame(result$diffHistogram$histogram)
 ggplot(aes(x = bins, y = values), data = dt) +
   geom_bar(stat = "identity") +
@@ -97,19 +101,39 @@ ggplot(aes(x = bins, y = values), data = dt) +
 ### Autocorrelation
 
 ```{r autocor}
-cc <- result$crossCorrelation
-dt <-
-  data.frame("lag" = seq(round(-1 * (length(
-    cc
-  ) - 1) / 2), round((length(
-    cc
-  ) - 1) / 2)),
-  "cc" = cc)
-ggplot(aes(x = lag, y = cc), data = dt) +
-  geom_bar(stat = "identity") +
-  ggtitle("Cross correlation") +
+dt <- data.frame(result$crossCorrelation)
+
+ggplot(aes(x = index, y = autocorre), data = dt) +
+  geom_line(stat = "identity") +
+  ggtitle("Autocorrelacion (Crosscorrelation)") +
+  xlab(expression(paste("Periodicities (",mu,"hz)"))) +
+  ylab("Autocorrelation") +
+  ylim(c(-0.1, 0.25)) +
   theme_bw()
 ```
 
+
+### Computation benchmark
+
+```{r benchmark, warning=F, message=F, cache=F}
+m <-
+  microbenchmark(result <- process(
+  dt.star$frequency,
+  dt.star$amplitude,
+  filter = "uniform",
+  gRegimen = 0,
+  minDnu = 15,
+  maxDnu = 95,
+  dnuValue = -1,
+  dnuGuessError = 10,
+  dnuEstimation = TRUE,
+  numFrequencies = 30,
+  debug = F
+)
+                 ,times = 100)
+autoplot(m, log = F) +
+  scale_x_discrete(labels = c("The complete process")) +
+  xlab("")
+```
 
 
