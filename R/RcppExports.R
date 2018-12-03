@@ -297,8 +297,8 @@ calculateRange <- function(nElements, nFrequencies) {
 #' crosscorrelation(sin(c(1,2,3,4,5,4,3,2,1)), lagMax = 50, plot=T)
 #' }
 #' @export
-crosscorrelation <- function(frequencies, lagMax = NULL, type = "correlation", plot = FALSE) {
-    .Call(`_variableStars_crosscorrelation`, frequencies, lagMax, type, plot)
+crosscorrelation <- function(frequencies, type = "correlation", plot = FALSE) {
+    .Call(`_variableStars_crosscorrelation`, frequencies, type, plot)
 }
 
 #' }
