@@ -61,7 +61,7 @@ plot_spectrum(-5, 80, dt.star)
 result <- process(
   dt.star$frequency,
   dt.star$amplitude,
-  filter = "uniform",
+  filter = "gaussian",
   gRegimen = 0,
   minDnu = 15,
   maxDnu = 95,
@@ -82,8 +82,8 @@ result <- process(
     ##  Iteration over range: 30
     ##    Frequencies selected: 377.298, 412.711, 414.62, 360.076, 339.22, 367.963, 321.916, 387.625, 359.466, 0.660089, 
     ##    Amplitudes selected: 2.1216, 1.0158, 0.7157, 0.5646, 0.5463, 0.5303, 0.3623, 0.3193, 0.2997, 0.2947, 
-    ##     Dnu: 9.4051
-    ##     Dnu Peak: 9.4051
+    ##     Dnu: 4.3066
+    ##     Dnu Peak: 4.3066
     ##     Dnu Guess: 0.22003
     ##     Cross correlation calculated:
     ##  Iteration over range: 60
