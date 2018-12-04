@@ -4,21 +4,22 @@
 \alias{crosscorrelation}
 \title{Crosscorrelation}
 \usage{
-crosscorrelation(frequencies, lagMax = NULL, type = "correlation",
-  plot = FALSE)
+crosscorrelation(frequencies, type = "correlation", plot = FALSE)
 }
 \arguments{
 \item{frequencies}{The frequences to be processed}
 
-\item{lagMax}{Maximum lag at which to calculate the acf
-(null by default)}
-
 \item{type}{character string giving the type of acf to be 
 computed. Allowed values are "correlation" or 
 "covariance" (correlation by default).}
+
+\item{plot}{If true the acf is plotted (true by default)}
+
+\item{lagMax}{Maximum lag at which to calculate the acf
+(null by default)}
 }
 \value{
-plot If true the acf is plotted (true by default)
+A vector with the crosscorrelations
 }
 \description{
 This function calculates the crosscorrelation of the
