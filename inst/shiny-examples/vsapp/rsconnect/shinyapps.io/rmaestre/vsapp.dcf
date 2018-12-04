@@ -1,0 +1,10 @@
+name: vsapp
+title:
+username:
+account: rmaestre
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 603224
+bundleId: 1739850
+url: https://rmaestre.shinyapps.io/vsapp/
+when: 1543943090.6919
