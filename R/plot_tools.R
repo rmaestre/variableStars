@@ -23,11 +23,7 @@ plot_spectrum <- function(min, max, dt) {
 
 
 #' @export
-plot_apodization <- function(result) {
-  dt <- data.frame(
-    "frequences" = result$apodization$frequences,
-    "amplitude" = result$apodization$amp
-  )
+plot_apodization <- function(dt) {
   p <- ggplot(aes(x = frequences, y = amplitude),
               data = dt) +
     geom_point() +
@@ -38,7 +34,7 @@ plot_apodization <- function(result) {
 }
 
 #' @export
-plot_periodicities <- function(list) {
+prepare_periodicities_dataset <- function(list) {
   # DS to save all data
   dt <-
     setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("fInv", "b", "label"))
@@ -52,6 +48,11 @@ plot_periodicities <- function(list) {
                   "label" = paste(list[[as.character(range)]][["label"]], " freqs")
                 ))
   }
+  dt
+}
+
+#' @export
+plot_periodicities <- function(dt) {
   # Plot frecuency and amplitude
   ggplot(aes(
     x = fInv,
