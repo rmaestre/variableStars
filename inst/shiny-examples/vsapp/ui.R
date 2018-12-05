@@ -1,6 +1,14 @@
 ui <- pageWithSidebar(
   headerPanel('Variable Stars'),
   sidebarPanel(
+    h4("Download data examples"),
+    helpText(   
+      a("HD 174966",     
+        href="https://raw.githubusercontent.com/rmaestre/variableStars/master/data/freqs.dat"),
+      a("HD 174936",     
+        href="https://raw.githubusercontent.com/rmaestre/variableStars/master/data/table1.dat")
+      ),
+    tags$hr(),
     #Selector for file upload
     h2("Data Input"),
     checkboxInput(
@@ -101,9 +109,12 @@ ui <- pageWithSidebar(
     actionButton(inputId = 'process', 'Process'),
     br(),
     p("Click the button to perfomr the calculations.")
+    ,
+    downloadButton("downloadData", "Download experiment data")
   ),
   mainPanel(
     h2("Data input"),
+    h6("Only 5 first lines are showed"),
     tableOutput("filetable"),
     h2("Results"),
     fluidRow(splitLayout(

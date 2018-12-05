@@ -4,7 +4,8 @@ library(ggplot2)
 library(ggsci)
 
 server <- function(input, output, session) {
-  globals <- reactiveValues(cluster = NULL)
+  globals <-
+    reactiveValues(mainResult = NULL, processedDatasets = list())
   
   # Read data from input
   filedata <- reactive({
@@ -20,7 +21,7 @@ server <- function(input, output, session) {
   
   # This previews the CSV data file
   output$filetable <- renderTable({
-    head(filedata(), 3)
+    head(filedata(), 5)
   })
   
   # Dynamically generate UI input when data is uploaded ----
@@ -42,7 +43,7 @@ server <- function(input, output, session) {
   # -----------------------------------------------------------
   main_process <- function() {
     return(
-      variableStars::process(
+      process(
         t(filedata()[c(input$selectedFrecuency)]),
         t(filedata()[c(input$selectedAmplitude)]),
         filter = input$apodization,
@@ -58,29 +59,83 @@ server <- function(input, output, session) {
     )
   }
   
+  write_csv <- function(dt, fileName) {
+    tmpdir <- tempdir()
+    setwd(tempdir())
+    write.table(dt,
+                fileName,
+                quote = F,
+                row.names = F,
+                sep = " ")
+  }
+  
+  # --------------------------------------------------------
+  # Create a zip to download all processed dataset that are
+  # already saved into globals$processedDatasets
+  output$downloadData <- downloadHandler(
+    filename = function() {
+      paste("output", "zip", sep = ".")
+    },
+    content = function(fname) {
+      # ---------------------------------------------------
+      # Save all processed datasets
+      fs <- c()
+      for (name in names(globals$processedDatasets)) {
+        completeName <- paste0(name, ".csv")
+        write_csv(globals$processedDatasets[[name]], completeName)
+        fs <- c(fs, completeName)
+      }
+      # Compress all files and force download
+      zip(zipfile = fname, files = fs)
+    },
+    contentType = "application/zip"
+  )
+  
+  
+  # --------------------------------------------------------
+  # Process for main process
   spectrum <- eventReactive(input$process, {
-    globals$cluster <- main_process()
+    # All process is only computed once
+    globals$mainResult <- main_process()
+    # ------------------------------
     dt <- data.frame(filedata()[c(input$selectedFrecuency)],
                      filedata()[c(input$selectedAmplitude)])
     colnames(dt) <- c("frequency", "amplitude")
+    # Save global dataset
+    globals$processedDatasets[["spectrum"]] = dt
+    # Return plot
     plot_spectrum(min(dt$frequency), max(dt$frequency), dt)
-    
   })
   apodization <- eventReactive(input$process, {
-    plot_apodization(globals$cluster)
+    dt <- data.frame(
+      "frequences" = globals$mainResult$apodization$frequences,
+      "amplitude" = globals$mainResult$apodization$amp
+    )
+    # Save global dataset
+    globals$processedDatasets[["apodization"]] = dt
+    # Return plot
+    plot_apodization(dt)
   })
   periodicities <- eventReactive(input$process, {
-    plot_periodicities(globals$cluster$fresAmps)
+    dt <- prepare_periodicities_dataset(globals$mainResult$fresAmps)
+    # Save global dataset
+    globals$processedDatasets[["periodicities"]] = dt
+    plot_periodicities(dt)
   })
   histogramDiff <- eventReactive(input$process, {
-    dt <- data.frame(globals$cluster$diffHistogram$histogram)
+    dt <- data.frame(globals$mainResult$diffHistogram$histogram)
+    # Save global dataset
+    globals$processedDatasets[["histogramDiff"]] = dt
+    # Return plot
     ggplot(aes(x = bins, y = values), data = dt) +
       geom_bar(stat = "identity") +
       ggtitle("Histogram of differences") +
       theme_bw()
   })
   autocorrelation <- eventReactive(input$process, {
-    dt <- data.frame(globals$cluster$crossCorrelation)
+    dt <- data.frame(globals$mainResult$crossCorrelation)
+    # Save global dataset
+    globals$processedDatasets[["autocorrelation"]] = dt
     ggplot(aes(x = index, y = autocorre), data = dt) +
       geom_line(stat = "identity") +
       ggtitle("Autocorrelacion (Crosscorrelation)") +
