@@ -80,7 +80,8 @@ ggplot(
 ### Periodicities
 
 ```{r periods}
-plot_periodicities(result$fresAmps)
+dt <- prepare_periodicities_dataset(result$fresAmps)
+plot_periodicities(dt)
 ```
 
 ### Histogram of differences

@@ -115,7 +115,8 @@ ggplot(
 ### Periodicities
 
 ``` r
-plot_periodicities(result$fresAmps)
+dt <- prepare_periodicities_dataset(result$fresAmps)
+plot_periodicities(dt)
 ```
 
 ![](Experiment_-_HD174936_files/figure-markdown_github/periods-1.png)

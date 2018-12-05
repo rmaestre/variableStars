@@ -110,7 +110,8 @@ ggplot(
 ### Periodicities
 
 ``` r
-plot_periodicities(result$fresAmps)
+dt <- prepare_periodicities_dataset(result$fresAmps)
+plot_periodicities(dt)
 ```
 
 ![](Experiment_-_HD174966_files/figure-markdown_github/periods-1.png)
@@ -144,6 +145,8 @@ ggplot(aes(x = index, y = autocorre), data = dt) +
     ## Warning: Removed 13 rows containing missing values (geom_path).
 
 ![](Experiment_-_HD174966_files/figure-markdown_github/autocor-1.png)
+
+### Computation benchmark
 
 ``` r
 m <-
