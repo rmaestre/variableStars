@@ -146,27 +146,54 @@ ggplot(aes(x = index, y = autocorre), data = dt) +
 
 ![](Experiment_-_HD174966_files/figure-markdown_github/autocor-1.png)
 
+### Echelle
+
+#### For first all frecuencies
+
+``` r
+dt <- data.frame(
+  "x" = result$echelle$modDnuStacked,
+  "y" = result$echelle$freMas,
+  "h" = result$echelle$amplitudes
+)
+plot_echelle(dt)
+```
+
+![](Experiment_-_HD174966_files/figure-markdown_github/echelle30-1.png)
+
+#### For first 30 frecuencies
+
+``` r
+dt <- data.frame(
+  "x" = result$echelleRanges$`30`$modDnuStacked,
+  "y" = result$echelleRanges$`30`$freMas,
+  "h" = result$echelleRanges$`30`$amplitudes
+)
+# Plot echelle
+plot_echelle(dt)
+```
+
+![](Experiment_-_HD174966_files/figure-markdown_github/echelleAll-1.png)
+
 ### Computation benchmark
 
 ``` r
-m <-
-  microbenchmark(result <- process(
-  dt.star$frequency,
-  dt.star$amplitude,
-  filter = "uniform",
-  gRegimen = 0,
-  minDnu = 15,
-  maxDnu = 95,
-  dnuValue = -1,
-  dnuGuessError = 10,
-  dnuEstimation = TRUE,
-  numFrequencies = 30,
-  debug = F
-)
-                 ,times = 100)
-autoplot(m, log = F) +
-  scale_x_discrete(labels = c("The complete process")) +
-  xlab("")
+# m <-
+#   microbenchmark(result <- process(
+#   dt.star$frequency,
+#   dt.star$amplitude,
+#   filter = "uniform",
+#   gRegimen = 0,
+#   minDnu = 15,
+#   maxDnu = 95,
+#   dnuValue = -1,
+#   dnuGuessError = 10,
+#   dnuEstimation = TRUE,
+#   numFrequencies = 30,
+#   debug = F
+# )
+#                  ,times = 100)
+# autoplot(m, log = F) +
+#   scale_x_discrete(labels = c("The complete process")) +
+#   xlab("")
 ```
-
-![](Experiment_-_HD174966_files/figure-markdown_github/benchmark-1.png)

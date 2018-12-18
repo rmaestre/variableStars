@@ -11,6 +11,7 @@ library(data.table)
 library(ggplot2)
 library(ggsci)
 library(microbenchmark)
+library(RColorBrewer)
 ```
 
 
@@ -108,25 +109,52 @@ ggplot(aes(x = index, y = autocorre), data = dt) +
   theme_bw()
 ```
 
+### Echelle
+
+#### For first all frecuencies
+
+
+```{r echelle30, warning=F, message=F, cache=F}
+dt <- data.frame(
+  "x" = result$echelle$modDnuStacked,
+  "y" = result$echelle$freMas,
+  "h" = result$echelle$amplitudes
+)
+plot_echelle(dt)
+```
+
+#### For first 30 frecuencies
+
+```{r echelleAll, warning=F, message=F, cache=F}
+dt <- data.frame(
+  "x" = result$echelleRanges$`30`$modDnuStacked,
+  "y" = result$echelleRanges$`30`$freMas,
+  "h" = result$echelleRanges$`30`$amplitudes
+)
+# Plot echelle
+plot_echelle(dt)
+```
+
+
 ### Computation benchmark
 
 ```{r benchmark, warning=F, message=F, cache=F}
-m <-
-  microbenchmark(result <- process(
-  dt.star$frequency,
-  dt.star$amplitude,
-  filter = "uniform",
-  gRegimen = 0,
-  minDnu = 15,
-  maxDnu = 95,
-  dnuValue = -1,
-  dnuGuessError = 10,
-  dnuEstimation = TRUE,
-  numFrequencies = 30,
-  debug = F
-)
-                 ,times = 100)
-autoplot(m, log = F) +
-  scale_x_discrete(labels = c("The complete process")) +
-  xlab("")
+# m <-
+#   microbenchmark(result <- process(
+#   dt.star$frequency,
+#   dt.star$amplitude,
+#   filter = "uniform",
+#   gRegimen = 0,
+#   minDnu = 15,
+#   maxDnu = 95,
+#   dnuValue = -1,
+#   dnuGuessError = 10,
+#   dnuEstimation = TRUE,
+#   numFrequencies = 30,
+#   debug = F
+# )
+#                  ,times = 100)
+# autoplot(m, log = F) +
+#   scale_x_discrete(labels = c("The complete process")) +
+#   xlab("")
 ```
