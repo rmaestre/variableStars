@@ -10,7 +10,7 @@ Authors@R: c(
 Maintainer: Roberto Maestre <rmaestre@gmail.com>
 Description: tbd
 License: GPL (>= 2)
-Imports: Rcpp (>= 0.12.18)
+Imports: Rcpp (>= 0.12.18), RColorBrewer
 LinkingTo: Rcpp, RcppArmadillo
 Suggests: knitr,
     rmarkdown,
