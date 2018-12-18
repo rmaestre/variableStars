@@ -68,3 +68,26 @@ plot_periodicities <- function(dt) {
     theme_bw() +
     scale_color_lancet()
 }
+
+
+#' @export
+plot_echelle <- function(dt) {
+  # colour palette
+  rf <- colorRampPalette(rev(brewer.pal(11, 'Spectral')))
+  r <- rf(32)
+  # plot
+  ggplot(aes(x = x, y = y), data = dt) +
+    stat_density2d(
+      geom = "raster",
+      aes(fill = ..density..),
+      n = 50,
+      #h = 10,
+      contour = FALSE
+    ) +
+    geom_point(aes(size=h), color="black") + 
+    theme_bw() +
+    scale_fill_gradientn(colours = r) +
+    ggtitle("Echelle diagram") +
+    xlab(expression(paste("Frecuencies mod ", delta, "v"))) +
+    ylab("Frecuencies")
+}

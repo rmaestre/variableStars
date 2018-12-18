@@ -301,6 +301,27 @@ crosscorrelation <- function(frequencies, type = "correlation", plot = FALSE) {
     .Call(`_variableStars_crosscorrelation`, frequencies, type, plot)
 }
 
+#' Echelle diagram
+#'
+#' Diagram to plot Echelle: the mode frequencies plotted 
+#' as a function of the frequency modulo the large separation
+#'
+#' @param frequency Vector with frequences
+#' @param amplitudes Vector with amplitudes
+#' @param dnu Selected dnu
+#' @return A list with x-y axis to plott a Echelle diagram plus 
+#' the amplitude in each frequency
+#' @author Roberto Maestre
+#' @examples
+#' \dontrun{
+#' # simple call:
+#' echelle(c(1,2,3,1,2,3,1,2,3), c(1,1,1,1,2,2,2,2), 2)
+#' }
+#' @export
+echelle <- function(frequencies, amplitudes, dnu) {
+    .Call(`_variableStars_echelle`, frequencies, amplitudes, dnu)
+}
+
 #' }
 #' @export
 process <- function(frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue = -1, dnuEstimation = FALSE, debug = FALSE) {
