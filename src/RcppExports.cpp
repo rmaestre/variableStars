@@ -146,6 +146,19 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// echelle
+List echelle(arma::vec frequencies, arma::vec amplitudes, double dnu);
+RcppExport SEXP _variableStars_echelle(SEXP frequenciesSEXP, SEXP amplitudesSEXP, SEXP dnuSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::vec >::type frequencies(frequenciesSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type amplitudes(amplitudesSEXP);
+    Rcpp::traits::input_parameter< double >::type dnu(dnuSEXP);
+    rcpp_result_gen = Rcpp::wrap(echelle(frequencies, amplitudes, dnu));
+    return rcpp_result_gen;
+END_RCPP
+}
 // process
 List process(arma::vec frequency, arma::vec amplitude, String filter, double gRegimen, double numFrequencies, double maxDnu, double minDnu, double dnuGuessError, double dnuValue, bool dnuEstimation, bool debug);
 RcppExport SEXP _variableStars_process(SEXP frequencySEXP, SEXP amplitudeSEXP, SEXP filterSEXP, SEXP gRegimenSEXP, SEXP numFrequenciesSEXP, SEXP maxDnuSEXP, SEXP minDnuSEXP, SEXP dnuGuessErrorSEXP, SEXP dnuValueSEXP, SEXP dnuEstimationSEXP, SEXP debugSEXP) {
@@ -181,6 +194,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_variableStars_findPeaks", (DL_FUNC) &_variableStars_findPeaks, 1},
     {"_variableStars_calculateRange", (DL_FUNC) &_variableStars_calculateRange, 2},
     {"_variableStars_crosscorrelation", (DL_FUNC) &_variableStars_crosscorrelation, 3},
+    {"_variableStars_echelle", (DL_FUNC) &_variableStars_echelle, 3},
     {"_variableStars_process", (DL_FUNC) &_variableStars_process, 11},
     {NULL, NULL, 0}
 };

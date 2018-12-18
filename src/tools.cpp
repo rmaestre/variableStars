@@ -510,6 +510,71 @@ List crosscorrelation(arma::vec frequencies,
   return List::create(_["autocorre"]=reFinal, _["index"]=index);
 }
 
+/**
+ * Extend division reminder to vectors
+ *
+ * @param   a       Dividend 
+ * @param   n       Divisor
+ */
+template<typename T>
+T mod(T a, int n)
+{
+  return a - arma::floor(a/n)*n;
+} 
+
+//' Echelle diagram
+//'
+//' Diagram to plot Echelle: the mode frequencies plotted 
+//' as a function of the frequency modulo the large separation
+//'
+//' @param frequency Vector with frequences
+//' @param amplitudes Vector with amplitudes
+//' @param dnu Selected dnu
+//' @return A list with x-y axis to plott a Echelle diagram plus 
+//' the amplitude in each frequency
+//' @author Roberto Maestre
+//' @examples
+//' \dontrun{
+//' # simple call:
+//' echelle(c(1,2,3,1,2,3,1,2,3), c(1,1,1,1,2,2,2,2), 2)
+//' }
+//' @export
+//[[Rcpp::export]]
+List echelle(arma::vec frequencies, arma::vec amplitudes, double dnu) {
+  // Constants
+  double tolerance = dnu * 0.015;
+  double dnuD = dnu * 0.0864;
+  // Data structures
+  arma::vec modDnu(frequencies.n_rows),
+              modDnuMas(frequencies.n_rows);
+  arma::vec::iterator it, out;
+  // Calculate modulus of all frequencie vector
+  for (it = frequencies.begin(), out = modDnu.begin(); 
+       it < frequencies.end(); it++, out++) {
+    *out = std::fmod(*it, dnu);
+  }
+  modDnuMas = modDnu + dnu;
+  
+  // Create x axis with stacked frecuencies
+  // Joint the two vectors
+  arma::uvec ids = find(modDnuMas < (dnu  + 2.0 * tolerance));
+  arma::vec modDnuStacked = arma::join_cols(modDnu, modDnuMas.elem(ids));
+  // This vector is normalized between [0 and 1]
+  double minValue = arma::min(modDnuStacked);
+  double maxValue = arma::max(modDnuStacked);
+  modDnuStacked = (modDnuStacked - minValue) / (maxValue-minValue);
+  
+  // Create the y axis
+  arma::vec freMas = arma::join_cols(frequencies, frequencies.elem(ids)); 
+  // Return also the amplitudes
+  arma::vec amplitudesSelected = arma::join_cols(amplitudes, amplitudes.elem(ids));
+  
+  return List::create(_["modDnuStacked"]=modDnuStacked,
+                      _["freMas"]=freMas,
+                      _["amplitudes"]=amplitudesSelected);
+}
+  
+
 //' Main process function
 //'
 //' The complete workflow can be found in the readme section.
@@ -603,7 +668,7 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
   double dnu, dnuPeak, dnuGuess;
   
   // Data Strcuture to save intermediate results
-  List interResults;
+  List interResults, interEchelle;
   // Loop over frequencies vector
   arma::ivec::iterator numIt;
   bool first = true;
@@ -635,8 +700,10 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
     fInv = 1.0 / f;
     b = as < arma::vec > (resApod["powerSpectrum"]);
     // Save intermediate data
+    // Related to fourier transform
     interResults[std::to_string(*numIt)] = 
-      List::create(_["fInv"]=fInv, _["b"]=b, _["label"]=std::to_string(*numIt));
+      List::create(_["fInv"]=fInv, _["b"]=b, 
+                   _["label"]=std::to_string(*numIt));
       
     // The next alculations are only for the N first sorted frequencies
     if (first) {
@@ -658,7 +725,7 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
           if (dnuGuess < minDnu | dnuGuess > maxDnu | (arma::min(fInv) > dnuGuess + dnuGuessError)) {
             dnu = dnuPeak;
           } else {
-            dnu = arma::min(fInv.elem(peaksInd) - dnuGuess) + dnuGuess;
+            dnu = arma::min(arma::abs(fInv.elem(peaksInd) - dnuGuess)) + dnuGuess;
           }
         } else {
           dnu = dnuPeak;
@@ -682,12 +749,20 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
         Rcout << "\n";
       }
     } // End first iteration
+    
+    // Calculate echelle diagram and save inter loop results
+    interEchelle[std::to_string(*numIt)] = echelle(frequencyGlobal, amplitudeGlobal, dnu);
+    
   } // End range loop
   
   // Return the output with all valuable elements
-  return List::create(_["fresAmps"] = interResults,
+  return List::create(_["frequency"] = frequency,
+                      _["amplitude"] = amplitude,
+                      _["fresAmps"] = interResults,
                       _["diffHistogram"] = _diffHistogram,
                       _["crossCorrelation"] = autocorr,
+                      _["echelleRanges"] = interEchelle,
+                      _["echelle"] = echelle(frequency, amplitude, dnu),
                       _["apodization"] = resApod,
                       _["dnuPeak"] = dnuPeak,
                       _["dnu"] = dnu,
