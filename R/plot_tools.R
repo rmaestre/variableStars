@@ -6,10 +6,11 @@ plot_spectrum <- function(min, max, dt) {
     geom_point(aes(alpha = 0.6)) +
     geom_point(aes(frequency, amplitude, colour = "#009988"),
                data = max_amplitude) +
-    geom_line() +
+    #geom_line() +
+    geom_bar(aes(alpha=0.6), stat="identity") +
     theme_bw() + ylab("Amplitude") + xlab("Frecuency") +
     ggtitle(paste(
-      "First Frecuency (F:",
+      "First Frequency (F:",
       round(max_amplitude$frequency, 4),
       ", A:",
       round(max_amplitude$amplitude, 4),
@@ -80,14 +81,15 @@ plot_echelle <- function(dt) {
     stat_density2d(
       geom = "raster",
       aes(fill = ..density..),
-      n = 50,
+      n = 200,
       #h = 10,
       contour = FALSE
     ) +
-    geom_point(aes(size=h), color="black") + 
+    geom_point(aes(size=h, color=h), shape="+") + 
     theme_bw() +
     scale_fill_gradientn(colours = r) +
     ggtitle("Echelle diagram") +
-    xlab(expression(paste("Frecuencies mod ", delta, "v"))) +
-    ylab("Frecuencies")
+    xlab(expression(paste("Frequencies mod ", Delta, nu))) +
+    ylab("Frequencies") +
+    scale_color_gradientn(colours = r)
 }

@@ -15,37 +15,7 @@ library(RColorBrewer)
 ```
 
 
-## Experiment configuration
-
-#### Parameters for execution
-
-```{r parameters}
-paramters = list(
-  "filter" = "uniform",
-  "gRegimen" = 0,
-  "minDnu" = 15,
-  "maxDnu" = 95,
-  "dnuValue" = -1,
-  "dnuGuessError" = 10,
-  "dnuEstimation" = TRUE,
-  "numFrequencies" = 30,
-  "debug" = TRUE)
-```
-
-#### Data source
-
-Choose: 
-
- * dataFlag = T, to use synthetic data generated or,
-
- * dataFlag = F, to use a real pulsar photometry
-
-```{r flag}
-dataFlag = F
-```
-
-
-#### Frequences and Amplitudes on photometry data
+## Experiment I
 
 ```{r calculateEspectrum, warning=F}
 # Generate first pattern
@@ -53,36 +23,17 @@ dt.spectrum <- data.frame(
   "frequency" = seq(from=0, to=10, by=0.25) ,
   "amplitude" = 10
 )
-# Generate second pattern as the biased first
-dt.spectrum.bias <- data.frame(dt.spectrum)
-dt.spectrum.bias$frequency <- dt.spectrum.bias$frequency + 0.3
-dt.spectrum.bias$amplitude <- 5 + rnorm(nrow(dt.spectrum.bias),0,1.0)
-#  
-# All together
-dt.spectrum <- rbind(dt.spectrum, dt.spectrum.bias)
-
 # Get max amplitude
 maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude), ]
 # Plot amplitudes
-plot_spectrum(min(dt.spectrum$frequency),
-              max(dt.spectrum$frequency),
+plot_spectrum(min(dt.spectrum$frequency)-1,
+              max(dt.spectrum$frequency)+1,
               dt.spectrum)
-# Save Data to disk (to be replicated)
-write.table(
-  dt.spectrum[c("frequency", "amplitude")],
-  file = "/tmp/data.csv",
-  sep = "\t",
-  quote = F,
-  row.names = F,
-  col.names = F
-)
 ```
 
-##  Experiment execution
+Experiment execution
 
-process is the main method on the variableStars package to compute and estimate all parameters
-
-```{r calculate, warning=F}
+```{r calculate, warning=F, echo=F}
 result <- process(
   dt.spectrum$frequency,
   dt.spectrum$amplitude,
@@ -98,48 +49,11 @@ result <- process(
 )
 ```
 
-#### Main results
 
-* **Dnu** (```result$dnu```) = `r result$dnu`.
-* **DnuGuess** ```(result$dnuGuess```) = `r result$dnuGuess`.
-* **DnuPeak** (```result$dnuPeak```) = `r result$dnuPeak`.
-* **Frequency** (```result$photometry$frequency```) = `r head(c(result$photometry$frequency), 25)`...
-* **Amplitude** (```result$photometry$amplitude```) = `r head(c(result$photometry$amplitude), 25)`...
-* **Diffs** (```result$diffHistogram$diffs```) = `r head(c(result$diffHistogram$diffs), 25)`...
-
-#### Apodization
-
-
-```{r apodization, warning=F}
+```{r ftPower, warning=F, echo=F}
 # Plot frecuency and amplitude
-ggplot(
-  aes(x = frequences, y = amplitude),
-  data = data.frame(
-    "frequences" = result$apodization$frequences,
-    "amplitude" = result$apodization$amp
-  )
-) +
-  geom_point() +
-  geom_line() +
-  ggtitle("Apodization- Frequences and amplitudes") +
-  theme_bw()
-```
-
-#### Periodicities
-
-```{r ftPower, warning=F}
-# DS to save all data
-dt <- setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("fInv", "b", "label"))
-# Prepare data
-ranges <- names(result$fresAmps)
-for(range in ranges){
-  dt <- rbind(dt, 
-  data.frame("fInv"=result$fresAmps[[as.character(range)]][["fInv"]],
-             "b"=result$fresAmps[[as.character(range)]][["b"]],
-            "label"=paste(result$fresAmps[[as.character(range)]][["label"]]," freqs")))
-}
-# Plot frecuency and amplitude
-ggplot(aes(x = fInv, y = b, group=label, colour=label), data = dt) +
+ggplot(aes(x = fInv, y = b, group=label, colour=label), 
+       data = prepare_periodicities_dataset(result$fresAmps)) +
   #geom_point(alpha=0.2) +
   geom_line(alpha=0.8) +
   ggtitle(expression(paste("Periodicities (",d^-1,")"))) +
@@ -147,45 +61,242 @@ ggplot(aes(x = fInv, y = b, group=label, colour=label), data = dt) +
   ylab("Amplitude") +
   theme_bw() + 
   scale_color_lancet() +
-  xlim(0, 10)
-```
-
-####  Histogram fo differences. 
-
-We only show bins with >0 values
-
-
-```{r diffsHistogram, warning=F}
-dt <- data.frame(result$diffHistogram$histogram)
-ggplot(aes(x = bins, y = values), data = dt[dt$values > 0,]) +
-  geom_bar(stat = "identity") +
-  ggtitle("Histogram of differences") +
-  theme_bw()
+  xlim(0, 5)
 ```
 
 
-### Autocorrelation
-
-```{r autocor}
-dt <- data.frame(result$crossCorrelation)
-
-ggplot(aes(x = index, y = autocorre), data = dt) +
-  geom_line(stat = "identity") +
-  ggtitle("Autocorrelacion (Crosscorrelation)") +
-  xlab(expression(paste("Periodicities (",mu,"hz)"))) +
-  ylab("Autocorrelation") +
-  theme_bw()
-```
-
-#### For first all frecuencies
-
-
-```{r echelle30, warning=F, message=F, cache=F}
-dt <- data.frame(
+```{r echelle30, warning=F, message=F, cache=F, echo=F}
+plot_echelle(dt <- data.frame(
   "x" = result$echelle$modDnuStacked,
   "y" = result$echelle$freMas,
   "h" = result$echelle$amplitudes
+))
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Experiment II
+
+```{r doscalculateEspectrum, warning=F}
+# Generate first pattern
+dt.spectrum <- data.frame(
+  "frequency" = seq(from=0, to=10, by=0.25) ,
+  "amplitude" = 10
 )
-plot_echelle(dt)
+# Generate second pattern as the biased first
+dt.spectrum.bias <- data.frame(dt.spectrum)
+dt.spectrum.bias$frequency <- dt.spectrum.bias$frequency + 0.15
+dt.spectrum.bias$amplitude <- 5
+  
+#All together
+dt.spectrum <- rbind(dt.spectrum, dt.spectrum.bias)
+# Get max amplitude
+maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude), ]
+# Plot amplitudes
+plot_spectrum(min(dt.spectrum$frequency)-1,
+              max(dt.spectrum$frequency)+1,
+              dt.spectrum)
+```
+
+Experiment execution
+
+```{r doscalculate, warning=F, echo=F}
+result <- process(
+  dt.spectrum$frequency,
+  dt.spectrum$amplitude,
+  filter = "uniform",
+  gRegimen = 0,
+  minDnu = 15,
+  maxDnu = 95,
+  dnuValue = -1,
+  dnuGuessError = 10,
+  dnuEstimation = TRUE,
+  numFrequencies = 30,
+  debug = TRUE
+)
+```
+
+
+```{r dosftPower, warning=F, echo=F}
+# Plot frecuency and amplitude
+ggplot(aes(x = fInv, y = b, group=label, colour=label), 
+       data = prepare_periodicities_dataset(result$fresAmps)) +
+  #geom_point(alpha=0.2) +
+  geom_line(alpha=0.8) +
+  ggtitle(expression(paste("Periodicities (",d^-1,")"))) +
+  xlab(expression(paste("Periodicities (",mu,"hz)"))) +
+  ylab("Amplitude") +
+  theme_bw() + 
+  scale_color_lancet() +
+  xlim(0, 5)
+```
+
+
+```{r dosechelle30, warning=F, message=F, cache=F, echo=F}
+plot_echelle(dt <- data.frame(
+  "x" = result$echelle$modDnuStacked,
+  "y" = result$echelle$freMas,
+  "h" = result$echelle$amplitudes
+))
+```
+
+
+
+
+
+
+
+
+
+
+## Experiment III
+
+```{r trescalculateEspectrum, warning=F}
+# Generate first pattern
+dt.spectrum <- data.frame(
+  "frequency" = seq(from=0, to=10, by=0.25) ,
+  "amplitude" = 10
+)
+# Generate second pattern as the biased first
+dt.spectrum.bias <- data.frame(dt.spectrum)
+dt.spectrum.bias$frequency <- dt.spectrum.bias$frequency + 0.15
+dt.spectrum.bias$amplitude <- 5 + rnorm(nrow(dt.spectrum.bias),0,1.0)
+  
+#All together
+dt.spectrum <- rbind(dt.spectrum, dt.spectrum.bias)
+# Get max amplitude
+maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude), ]
+# Plot amplitudes
+plot_spectrum(min(dt.spectrum$frequency)-1,
+              max(dt.spectrum$frequency)+1,
+              dt.spectrum)
+```
+
+Experiment execution
+
+```{r trescalculate, warning=F, echo=F}
+result <- process(
+  dt.spectrum$frequency,
+  dt.spectrum$amplitude,
+  filter = "uniform",
+  gRegimen = 0,
+  minDnu = 15,
+  maxDnu = 95,
+  dnuValue = -1,
+  dnuGuessError = 10,
+  dnuEstimation = TRUE,
+  numFrequencies = 30,
+  debug = TRUE
+)
+```
+
+
+```{r tresftPower, warning=F, echo=F}
+# Plot frecuency and amplitude
+ggplot(aes(x = fInv, y = b, group=label, colour=label), 
+       data = prepare_periodicities_dataset(result$fresAmps)) +
+  #geom_point(alpha=0.2) +
+  geom_line(alpha=0.8) +
+  ggtitle(expression(paste("Periodicities (",d^-1,")"))) +
+  xlab(expression(paste("Periodicities (",mu,"hz)"))) +
+  ylab("Amplitude") +
+  theme_bw() + 
+  scale_color_lancet() +
+  xlim(0, 5)
+```
+
+
+```{r tressechelle30, warning=F, message=F, cache=F, echo=F}
+plot_echelle(dt <- data.frame(
+  "x" = result$echelle$modDnuStacked,
+  "y" = result$echelle$freMas,
+  "h" = result$echelle$amplitudes
+))
+```
+
+
+
+
+
+
+
+
+
+
+
+## Experiment IV
+
+```{r cuatrocalculateEspectrum, warning=F}
+# Generate first pattern
+dt.spectrum <- data.frame(
+  "frequency" = seq(from=0, to=10, by=0.25) + rnorm(nrow(dt.spectrum.bias),0,0.1) ,
+  "amplitude" = 10
+)
+# Generate second pattern as the biased first
+dt.spectrum.bias <- data.frame(dt.spectrum)
+dt.spectrum.bias$frequency <- dt.spectrum.bias$frequency + rnorm(nrow(dt.spectrum.bias),0,0.1)
+dt.spectrum.bias$amplitude <- 5 + rnorm(nrow(dt.spectrum.bias),0,1.0)
+  
+#All together
+dt.spectrum <- rbind(dt.spectrum, dt.spectrum.bias)
+# Get max amplitude
+maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude), ]
+# Plot amplitudes
+plot_spectrum(min(dt.spectrum$frequency)-1,
+              max(dt.spectrum$frequency)+1,
+              dt.spectrum)
+```
+
+Experiment execution
+
+```{r cuatrocalculate, warning=F, echo=F}
+result <- process(
+  dt.spectrum$frequency,
+  dt.spectrum$amplitude,
+  filter = "uniform",
+  gRegimen = 0,
+  minDnu = 15,
+  maxDnu = 95,
+  dnuValue = -1,
+  dnuGuessError = 10,
+  dnuEstimation = TRUE,
+  numFrequencies = 30,
+  debug = TRUE
+)
+```
+
+
+```{r cuatroftPower, warning=F, echo=F}
+# Plot frecuency and amplitude
+ggplot(aes(x = fInv, y = b, group=label, colour=label), 
+       data = prepare_periodicities_dataset(result$fresAmps)) +
+  #geom_point(alpha=0.2) +
+  geom_line(alpha=0.8) +
+  ggtitle(expression(paste("Periodicities (",d^-1,")"))) +
+  xlab(expression(paste("Periodicities (",mu,"hz)"))) +
+  ylab("Amplitude") +
+  theme_bw() + 
+  scale_color_lancet() +
+  xlim(0, 5)
+```
+
+
+```{r cuatrosechelle30, warning=F, message=F, cache=F, echo=F}
+plot_echelle(dt <- data.frame(
+  "x" = result$echelle$modDnuStacked,
+  "y" = result$echelle$freMas,
+  "h" = result$echelle$amplitudes
+))
 ```
 
