@@ -38,14 +38,14 @@ dataFlag = F
 ``` r
 # Generate first pattern
 dt.spectrum <- data.frame(
-  "frequency" = seq(from=0, to=10, by=0.5),
+  "frequency" = seq(from=0, to=10, by=0.25) ,
   "amplitude" = 10
 )
 # Generate second pattern as the biased first
 dt.spectrum.bias <- data.frame(dt.spectrum)
 dt.spectrum.bias$frequency <- dt.spectrum.bias$frequency + 0.3
-dt.spectrum.bias$amplitude <- 5
-
+dt.spectrum.bias$amplitude <- 5 + rnorm(nrow(dt.spectrum.bias),0,1.0)
+#  
 # All together
 dt.spectrum <- rbind(dt.spectrum, dt.spectrum.bias)
 
@@ -94,29 +94,32 @@ result <- process(
 
     ## ::: Debug information :::
     ## 
-    ## Number of frequences to be processed: 42
-    ## Number of frequences after drop the g regimen: 41
-    ## Frequencies: 5.78704, 11.5741, 17.3611, 23.1481, 28.9352, 34.7222, 40.5093, 46.2963, 52.0833, 57.8704, 63.6574, 69.4444, 75.2315, 81.0185, 86.8056, 92.5926, 98.3796, 104.167, 109.954, 115.741, 
-    ## Range: 30, 41, 
+    ## Number of frequences to be processed: 82
+    ## Number of frequences after drop the g regimen: 81
+    ## Frequencies: 2.89352, 5.78704, 8.68056, 11.5741, 14.4676, 17.3611, 20.2546, 23.1481, 26.0417, 28.9352, 31.8287, 34.7222, 37.6157, 40.5093, 43.4028, 46.2963, 49.1898, 52.0833, 54.9769, 57.8704, 
+    ## Range: 30, 60, 81, 
     ##  Iteration over range: 30
-    ##    Frequencies selected: 5.78704, 11.5741, 17.3611, 23.1481, 28.9352, 34.7222, 40.5093, 46.2963, 52.0833, 57.8704, 
+    ##    Frequencies selected: 2.89352, 5.78704, 8.68056, 11.5741, 14.4676, 17.3611, 20.2546, 23.1481, 26.0417, 28.9352, 
     ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 
-    ##     Dnu: 1.1584
-    ##     Dnu Peak: 1.1584
-    ##     Dnu Guess: 1.15741
+    ##     Dnu: 2.8909
+    ##     Dnu Peak: 2.8909
+    ##     Dnu Guess: 0.964506
     ##     Cross correlation calculated:
-    ##  Iteration over range: 41
-    ##    Frequencies selected: 5.78704, 11.5741, 17.3611, 23.1481, 28.9352, 34.7222, 40.5093, 46.2963, 52.0833, 57.8704, 
+    ##  Iteration over range: 60
+    ##    Frequencies selected: 2.89352, 5.78704, 8.68056, 11.5741, 14.4676, 17.3611, 20.2546, 23.1481, 26.0417, 28.9352, 
+    ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 
+    ##  Iteration over range: 81
+    ##    Frequencies selected: 2.89352, 5.78704, 8.68056, 11.5741, 14.4676, 17.3611, 20.2546, 23.1481, 26.0417, 28.9352, 
     ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
 
 #### Main results
 
--   **Dnu** (`result$dnu`) = 1.1584.
--   **DnuGuess** `(result$dnuGuess`) = 1.1574074.
--   **DnuPeak** (`result$dnuPeak`) = 1.1584.
+-   **Dnu** (`result$dnu`) = 2.8909.
+-   **DnuGuess** `(result$dnuGuess`) = 0.9645062.
+-   **DnuPeak** (`result$dnuPeak`) = 2.8909.
 -   **Frequency** (`result$photometry$frequency`) = ...
 -   **Amplitude** (`result$photometry$amplitude`) = ...
--   **Diffs** (`result$diffHistogram$diffs`) = 5.787037, 11.5740741, 17.3611111, 23.1481481, 28.9351852, 34.7222222, 40.5092593, 46.2962963, 52.0833333, 57.8703704, 63.6574074, 69.4444444, 75.2314815, 81.0185185, 86.8055556, 92.5925926, 98.3796296, 104.1666667, 109.9537037, 2.3148148, 3.4722222, 9.2592593, 15.0462963, 20.8333333, 26.6203704...
+-   **Diffs** (`result$diffHistogram$diffs`) = 2.8935185, 5.787037, 8.6805556, 11.5740741, 14.4675926, 17.3611111, 20.2546296, 23.1481481, 26.0416667, 28.9351852, 31.8287037, 34.7222222, 37.6157407, 40.5092593, 43.4027778, 46.2962963, 49.1898148, 52.0833333, 54.9768519, 57.8703704, 60.7638889, 63.6574074, 66.5509259, 69.4444444, 72.337963...
 
 #### Apodization
 

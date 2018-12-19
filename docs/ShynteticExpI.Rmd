@@ -50,14 +50,14 @@ dataFlag = F
 ```{r calculateEspectrum, warning=F}
 # Generate first pattern
 dt.spectrum <- data.frame(
-  "frequency" = seq(from=0, to=10, by=0.5),
+  "frequency" = seq(from=0, to=10, by=0.25) ,
   "amplitude" = 10
 )
 # Generate second pattern as the biased first
 dt.spectrum.bias <- data.frame(dt.spectrum)
 dt.spectrum.bias$frequency <- dt.spectrum.bias$frequency + 0.3
-dt.spectrum.bias$amplitude <- 5
-
+dt.spectrum.bias$amplitude <- 5 + rnorm(nrow(dt.spectrum.bias),0,1.0)
+#  
 # All together
 dt.spectrum <- rbind(dt.spectrum, dt.spectrum.bias)
 
