@@ -168,8 +168,9 @@ plot_echelle(dt <- data.frame(
 # Generate first pattern
 dt.spectrum <- data.frame(
   "frequency" = seq(from=0, to=10, by=0.25) ,
-  "amplitude" = 10 + rnorm(nrow(dt.spectrum.bias),0,1.0)
+  "amplitude" = 10 
 )
+dt.spectrum$amplitude <- dt.spectrum$amplitude + rnorm(nrow(dt.spectrum),0,1.0)
 # Generate second pattern as the biased first
 dt.spectrum.bias <- data.frame(dt.spectrum)
 dt.spectrum.bias$frequency <- dt.spectrum.bias$frequency + 0.15

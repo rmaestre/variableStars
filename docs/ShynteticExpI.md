@@ -9,7 +9,7 @@ Experiment I
 ``` r
 # Generate first pattern
 dt.spectrum <- data.frame(
-  "frequency" = seq(from=0, to=10, by=2) ,
+  "frequency" = seq(from=0, to=10, by=1) ,
   "amplitude" = 10
 )
 # Get max amplitude
@@ -26,16 +26,16 @@ Experiment execution
 
     ## ::: Debug information :::
     ## 
-    ## Number of frequences to be processed: 6
-    ## Number of frequences after drop the g regimen: 5
-    ## Frequencies: 23.1481, 46.2963, 69.4444, 92.5926, 115.741, 
-    ## Range: 5, 
-    ##  Iteration over range: 5
-    ##    Frequencies selected: 23.1481, 46.2963, 69.4444, 92.5926, 115.741, 
-    ##    Amplitudes selected: 10, 10, 10, 10, 10, 
-    ##     Dnu: 23.1463
-    ##     Dnu Peak: 23.1463
-    ##     Dnu Guess: 7.71605
+    ## Number of frequences to be processed: 11
+    ## Number of frequences after drop the g regimen: 10
+    ## Frequencies: 11.5741, 23.1481, 34.7222, 46.2963, 57.8704, 69.4444, 81.0185, 92.5926, 104.167, 115.741, 
+    ## Range: 10, 
+    ##  Iteration over range: 10
+    ##    Frequencies selected: 11.5741, 23.1481, 34.7222, 46.2963, 57.8704, 69.4444, 81.0185, 92.5926, 104.167, 115.741, 
+    ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 
+    ##     Dnu: 11.5732
+    ##     Dnu Peak: 11.5732
+    ##     Dnu Guess: 3.85802
     ##     Cross correlation calculated:
 
 ![](ShynteticExpI_files/figure-markdown_github/ftPower-1.png)
@@ -48,12 +48,12 @@ Experiment II
 ``` r
 # Generate first pattern
 dt.spectrum <- data.frame(
-  "frequency" = seq(from=0, to=10, by=0.25) ,
+  "frequency" = seq(from=0, to=10, by=1) ,
   "amplitude" = 10
 )
 # Generate second pattern as the biased first
 dt.spectrum.bias <- data.frame(dt.spectrum)
-dt.spectrum.bias$frequency <- dt.spectrum.bias$frequency + 0.15
+dt.spectrum.bias$frequency <- dt.spectrum.bias$frequency + 0.25
 dt.spectrum.bias$amplitude <- 5
   
 #All together
@@ -72,23 +72,17 @@ Experiment execution
 
     ## ::: Debug information :::
     ## 
-    ## Number of frequences to be processed: 82
-    ## Number of frequences after drop the g regimen: 81
-    ## Frequencies: 2.89352, 5.78704, 8.68056, 11.5741, 14.4676, 17.3611, 20.2546, 23.1481, 26.0417, 28.9352, 31.8287, 34.7222, 37.6157, 40.5093, 43.4028, 46.2963, 49.1898, 52.0833, 54.9769, 57.8704, 
-    ## Range: 30, 60, 81, 
-    ##  Iteration over range: 30
-    ##    Frequencies selected: 2.89352, 5.78704, 8.68056, 11.5741, 14.4676, 17.3611, 20.2546, 23.1481, 26.0417, 28.9352, 
+    ## Number of frequences to be processed: 22
+    ## Number of frequences after drop the g regimen: 21
+    ## Frequencies: 11.5741, 23.1481, 34.7222, 46.2963, 57.8704, 69.4444, 81.0185, 92.5926, 104.167, 115.741, 2.89352, 14.4676, 26.0417, 37.6157, 49.1898, 60.7639, 72.338, 83.912, 95.4861, 107.06, 
+    ## Range: 21, 
+    ##  Iteration over range: 21
+    ##    Frequencies selected: 11.5741, 23.1481, 34.7222, 46.2963, 57.8704, 69.4444, 81.0185, 92.5926, 104.167, 115.741, 
     ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 
     ##     Dnu: 2.8909
     ##     Dnu Peak: 2.8909
     ##     Dnu Guess: 0.964506
     ##     Cross correlation calculated:
-    ##  Iteration over range: 60
-    ##    Frequencies selected: 2.89352, 5.78704, 8.68056, 11.5741, 14.4676, 17.3611, 20.2546, 23.1481, 26.0417, 28.9352, 
-    ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 
-    ##  Iteration over range: 81
-    ##    Frequencies selected: 2.89352, 5.78704, 8.68056, 11.5741, 14.4676, 17.3611, 20.2546, 23.1481, 26.0417, 28.9352, 
-    ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
 
 ![](ShynteticExpI_files/figure-markdown_github/dosftPower-1.png)
 
@@ -101,8 +95,9 @@ Experiment III
 # Generate first pattern
 dt.spectrum <- data.frame(
   "frequency" = seq(from=0, to=10, by=0.25) ,
-  "amplitude" = 10
+  "amplitude" = 10 
 )
+dt.spectrum$amplitude <- dt.spectrum$amplitude + rnorm(nrow(dt.spectrum),0,1.0)
 # Generate second pattern as the biased first
 dt.spectrum.bias <- data.frame(dt.spectrum)
 dt.spectrum.bias$frequency <- dt.spectrum.bias$frequency + 0.15
@@ -126,21 +121,21 @@ Experiment execution
     ## 
     ## Number of frequences to be processed: 82
     ## Number of frequences after drop the g regimen: 81
-    ## Frequencies: 2.89352, 5.78704, 8.68056, 11.5741, 14.4676, 17.3611, 20.2546, 23.1481, 26.0417, 28.9352, 31.8287, 34.7222, 37.6157, 40.5093, 43.4028, 46.2963, 49.1898, 52.0833, 54.9769, 57.8704, 
+    ## Frequencies: 60.7639, 14.4676, 46.2963, 109.954, 86.8056, 43.4028, 104.167, 66.5509, 72.338, 8.68056, 89.6991, 63.6574, 107.06, 98.3796, 69.4444, 26.0417, 17.3611, 34.7222, 49.1898, 112.847, 
     ## Range: 30, 60, 81, 
     ##  Iteration over range: 30
-    ##    Frequencies selected: 2.89352, 5.78704, 8.68056, 11.5741, 14.4676, 17.3611, 20.2546, 23.1481, 26.0417, 28.9352, 
-    ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 
+    ##    Frequencies selected: 60.7639, 14.4676, 46.2963, 109.954, 86.8056, 43.4028, 104.167, 66.5509, 72.338, 8.68056, 
+    ##    Amplitudes selected: 11.6237, 11.5179, 11.3128, 11.2562, 11.2159, 11.0321, 10.6311, 10.6266, 10.599, 10.5851, 
     ##     Dnu: 2.8909
     ##     Dnu Peak: 2.8909
-    ##     Dnu Guess: 0.964506
+    ##     Dnu Guess: 1.92901
     ##     Cross correlation calculated:
     ##  Iteration over range: 60
-    ##    Frequencies selected: 2.89352, 5.78704, 8.68056, 11.5741, 14.4676, 17.3611, 20.2546, 23.1481, 26.0417, 28.9352, 
-    ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 
+    ##    Frequencies selected: 60.7639, 14.4676, 46.2963, 109.954, 86.8056, 43.4028, 104.167, 66.5509, 72.338, 8.68056, 
+    ##    Amplitudes selected: 11.6237, 11.5179, 11.3128, 11.2562, 11.2159, 11.0321, 10.6311, 10.6266, 10.599, 10.5851, 
     ##  Iteration over range: 81
-    ##    Frequencies selected: 2.89352, 5.78704, 8.68056, 11.5741, 14.4676, 17.3611, 20.2546, 23.1481, 26.0417, 28.9352, 
-    ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
+    ##    Frequencies selected: 60.7639, 14.4676, 46.2963, 109.954, 86.8056, 43.4028, 104.167, 66.5509, 72.338, 8.68056, 
+    ##    Amplitudes selected: 11.6237, 11.5179, 11.3128, 11.2562, 11.2159, 11.0321, 10.6311, 10.6266, 10.599, 10.5851,
 
 ![](ShynteticExpI_files/figure-markdown_github/tresftPower-1.png)
 
@@ -153,7 +148,7 @@ Experiment IV
 # Generate first pattern
 dt.spectrum <- data.frame(
   "frequency" = seq(from=0, to=10, by=0.25) + rnorm(nrow(dt.spectrum.bias),0,0.1) ,
-  "amplitude" = 10
+  "amplitude" = 10 
 )
 # Generate second pattern as the biased first
 dt.spectrum.bias <- data.frame(dt.spectrum)
@@ -177,21 +172,21 @@ Experiment execution
     ## ::: Debug information :::
     ## 
     ## Number of frequences to be processed: 82
-    ## Number of frequences after drop the g regimen: 80
-    ## Frequencies: 1.70135, 5.46207, 7.01212, 13.7322, 15.8514, 18.8912, 20.836, 21.3963, 26.4131, 28.6725, 31.6831, 35.9488, 37.632, 39.4512, 40.9728, 45.4978, 49.6017, 55.1424, 55.3641, 57.6071, 
-    ## Range: 30, 60, 80, 
+    ## Number of frequences after drop the g regimen: 81
+    ## Frequencies: 0.576375, 3.72331, 4.06342, 9.54308, 12.1136, 14.7651, 15.312, 19.4521, 23.7544, 24.6813, 29.2946, 31.8298, 33.9409, 38.3168, 40.5375, 42.4359, 45.7718, 48.7506, 52.2282, 53.8325, 
+    ## Range: 30, 60, 81, 
     ##  Iteration over range: 30
-    ##    Frequencies selected: 1.70135, 5.46207, 7.01212, 13.7322, 15.8514, 18.8912, 20.836, 21.3963, 26.4131, 28.6725, 
+    ##    Frequencies selected: 0.576375, 3.72331, 4.06342, 9.54308, 12.1136, 14.7651, 15.312, 19.4521, 23.7544, 24.6813, 
     ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 
-    ##     Dnu: 2.4355
-    ##     Dnu Peak: 2.4355
-    ##     Dnu Guess: 0.567116
+    ##     Dnu: 2.8216
+    ##     Dnu Peak: 2.8216
+    ##     Dnu Guess: 0.192125
     ##     Cross correlation calculated:
     ##  Iteration over range: 60
-    ##    Frequencies selected: 1.70135, 5.46207, 7.01212, 13.7322, 15.8514, 18.8912, 20.836, 21.3963, 26.4131, 28.6725, 
+    ##    Frequencies selected: 0.576375, 3.72331, 4.06342, 9.54308, 12.1136, 14.7651, 15.312, 19.4521, 23.7544, 24.6813, 
     ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 
-    ##  Iteration over range: 80
-    ##    Frequencies selected: 1.70135, 5.46207, 7.01212, 13.7322, 15.8514, 18.8912, 20.836, 21.3963, 26.4131, 28.6725, 
+    ##  Iteration over range: 81
+    ##    Frequencies selected: 0.576375, 3.72331, 4.06342, 9.54308, 12.1136, 14.7651, 15.312, 19.4521, 23.7544, 24.6813, 
     ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
 
 ![](ShynteticExpI_files/figure-markdown_github/cuatroftPower-1.png)
