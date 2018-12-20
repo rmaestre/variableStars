@@ -20,7 +20,7 @@ library(RColorBrewer)
 ```{r calculateEspectrum, warning=F}
 # Generate first pattern
 dt.spectrum <- data.frame(
-  "frequency" = seq(from=0, to=10, by=0.25) ,
+  "frequency" = seq(from=0, to=10, by=1) ,
   "amplitude" = 10
 )
 # Get max amplitude
@@ -51,9 +51,10 @@ result <- process(
 
 
 ```{r ftPower, warning=F, echo=F}
+dt <- prepare_periodicities_dataset(result$fresAmps)
 # Plot frecuency and amplitude
 ggplot(aes(x = fInv, y = b, group=label, colour=label), 
-       data = prepare_periodicities_dataset(result$fresAmps)) +
+       data = dt) +
   #geom_point(alpha=0.2) +
   geom_line(alpha=0.8) +
   ggtitle(expression(paste("Periodicities (",d^-1,")"))) +
@@ -61,7 +62,8 @@ ggplot(aes(x = fInv, y = b, group=label, colour=label),
   ylab("Amplitude") +
   theme_bw() + 
   scale_color_lancet() +
-  xlim(0, 5)
+  xlim(0, 4)
+#dt[which.max(dt$b),]
 ```
 
 
@@ -91,12 +93,12 @@ plot_echelle(dt <- data.frame(
 ```{r doscalculateEspectrum, warning=F}
 # Generate first pattern
 dt.spectrum <- data.frame(
-  "frequency" = seq(from=0, to=10, by=0.25) ,
+  "frequency" = seq(from=0, to=10, by=1) ,
   "amplitude" = 10
 )
 # Generate second pattern as the biased first
 dt.spectrum.bias <- data.frame(dt.spectrum)
-dt.spectrum.bias$frequency <- dt.spectrum.bias$frequency + 0.15
+dt.spectrum.bias$frequency <- dt.spectrum.bias$frequency + 0.25
 dt.spectrum.bias$amplitude <- 5
   
 #All together
@@ -166,7 +168,7 @@ plot_echelle(dt <- data.frame(
 # Generate first pattern
 dt.spectrum <- data.frame(
   "frequency" = seq(from=0, to=10, by=0.25) ,
-  "amplitude" = 10
+  "amplitude" = 10 + rnorm(nrow(dt.spectrum.bias),0,1.0)
 )
 # Generate second pattern as the biased first
 dt.spectrum.bias <- data.frame(dt.spectrum)
@@ -241,7 +243,7 @@ plot_echelle(dt <- data.frame(
 # Generate first pattern
 dt.spectrum <- data.frame(
   "frequency" = seq(from=0, to=10, by=0.25) + rnorm(nrow(dt.spectrum.bias),0,0.1) ,
-  "amplitude" = 10
+  "amplitude" = 10 
 )
 # Generate second pattern as the biased first
 dt.spectrum.bias <- data.frame(dt.spectrum)

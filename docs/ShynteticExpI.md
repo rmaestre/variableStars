@@ -9,7 +9,7 @@ Experiment I
 ``` r
 # Generate first pattern
 dt.spectrum <- data.frame(
-  "frequency" = seq(from=0, to=10, by=0.25) ,
+  "frequency" = seq(from=0, to=10, by=2) ,
   "amplitude" = 10
 )
 # Get max amplitude
@@ -26,20 +26,17 @@ Experiment execution
 
     ## ::: Debug information :::
     ## 
-    ## Number of frequences to be processed: 41
-    ## Number of frequences after drop the g regimen: 40
-    ## Frequencies: 2.89352, 5.78704, 8.68056, 11.5741, 14.4676, 17.3611, 20.2546, 23.1481, 26.0417, 28.9352, 31.8287, 34.7222, 37.6157, 40.5093, 43.4028, 46.2963, 49.1898, 52.0833, 54.9769, 57.8704, 
-    ## Range: 30, 40, 
-    ##  Iteration over range: 30
-    ##    Frequencies selected: 2.89352, 5.78704, 8.68056, 11.5741, 14.4676, 17.3611, 20.2546, 23.1481, 26.0417, 28.9352, 
-    ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 
-    ##     Dnu: 2.8909
-    ##     Dnu Peak: 2.8909
-    ##     Dnu Guess: 0.964506
+    ## Number of frequences to be processed: 6
+    ## Number of frequences after drop the g regimen: 5
+    ## Frequencies: 23.1481, 46.2963, 69.4444, 92.5926, 115.741, 
+    ## Range: 5, 
+    ##  Iteration over range: 5
+    ##    Frequencies selected: 23.1481, 46.2963, 69.4444, 92.5926, 115.741, 
+    ##    Amplitudes selected: 10, 10, 10, 10, 10, 
+    ##     Dnu: 23.1463
+    ##     Dnu Peak: 23.1463
+    ##     Dnu Guess: 7.71605
     ##     Cross correlation calculated:
-    ##  Iteration over range: 40
-    ##    Frequencies selected: 2.89352, 5.78704, 8.68056, 11.5741, 14.4676, 17.3611, 20.2546, 23.1481, 26.0417, 28.9352, 
-    ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
 
 ![](ShynteticExpI_files/figure-markdown_github/ftPower-1.png)
 
@@ -181,20 +178,20 @@ Experiment execution
     ## 
     ## Number of frequences to be processed: 82
     ## Number of frequences after drop the g regimen: 80
-    ## Frequencies: 1.20124, 5.64731, 8.5489, 9.58222, 14.4498, 15.8333, 18.1244, 24.2436, 25.3428, 28.1587, 31.1338, 35.3752, 38.234, 38.8629, 42.1377, 45.2593, 49.5743, 52.4696, 53.8387, 56.6919, 
+    ## Frequencies: 1.70135, 5.46207, 7.01212, 13.7322, 15.8514, 18.8912, 20.836, 21.3963, 26.4131, 28.6725, 31.6831, 35.9488, 37.632, 39.4512, 40.9728, 45.4978, 49.6017, 55.1424, 55.3641, 57.6071, 
     ## Range: 30, 60, 80, 
     ##  Iteration over range: 30
-    ##    Frequencies selected: 1.20124, 5.64731, 8.5489, 9.58222, 14.4498, 15.8333, 18.1244, 24.2436, 25.3428, 28.1587, 
+    ##    Frequencies selected: 1.70135, 5.46207, 7.01212, 13.7322, 15.8514, 18.8912, 20.836, 21.3963, 26.4131, 28.6725, 
     ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 
-    ##     Dnu: 1.2178
-    ##     Dnu Peak: 1.2178
-    ##     Dnu Guess: 0.400415
+    ##     Dnu: 2.4355
+    ##     Dnu Peak: 2.4355
+    ##     Dnu Guess: 0.567116
     ##     Cross correlation calculated:
     ##  Iteration over range: 60
-    ##    Frequencies selected: 1.20124, 5.64731, 8.5489, 9.58222, 14.4498, 15.8333, 18.1244, 24.2436, 25.3428, 28.1587, 
+    ##    Frequencies selected: 1.70135, 5.46207, 7.01212, 13.7322, 15.8514, 18.8912, 20.836, 21.3963, 26.4131, 28.6725, 
     ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 
     ##  Iteration over range: 80
-    ##    Frequencies selected: 1.20124, 5.64731, 8.5489, 9.58222, 14.4498, 15.8333, 18.1244, 24.2436, 25.3428, 28.1587, 
+    ##    Frequencies selected: 1.70135, 5.46207, 7.01212, 13.7322, 15.8514, 18.8912, 20.836, 21.3963, 26.4131, 28.6725, 
     ##    Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10,
 
 ![](ShynteticExpI_files/figure-markdown_github/cuatroftPower-1.png)
