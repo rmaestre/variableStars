@@ -755,6 +755,8 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
     
   } // End range loop
   
+  Rcout << "\n Successful process. \n";
+  
   // Return the output with all valuable elements
   return List::create(_["frequency"] = frequency,
                       _["amplitude"] = amplitude,
