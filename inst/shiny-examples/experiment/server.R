@@ -8,44 +8,29 @@ server <- function(input, output, session) {
     reactiveValues(mainResult = NULL, processedDatasets = list())
   
   # Read data from input
-  filedata <- reactive({
-    infile <- input$datafile
-    if (is.null(infile)) {
-      # User has not uploaded a file yet
-      return(NULL)
-    }
-    read.csv(infile$datapath,
-             header = input$header,
-             sep = input$sep)
-  })
-  
-  # This previews the CSV data file
-  output$filetable <- renderTable({
-    head(filedata(), 5)
-  })
-  
-  # Dynamically generate UI input when data is uploaded ----
-  output$frecuencyVar <- renderUI({
-    selectInput(
-      inputId = "selectedFrecuency",
-      label = "Select Frecuency",
-      choices = names(filedata())
-    )
-  })
-  output$amplitudeVar <- renderUI({
-    selectInput(
-      inputId = "selectedAmplitude",
-      label = "Select Amplitude",
-      choices = names(filedata())
-    )
-  })
+  filedata <- function(){
+    # Create number of frecuences
+    n <- round(input$numFreqs / 2)
+    dis <- input$distance
+    # Create data.frame
+    dt <- data.frame("x"=seq(from=0, to=2*n*dis, by=dis), "y"=input$baseAMplitudeFirst)
+    dt$pos <- seq(1,nrow(dt)) # Secucencial integers
+    # Even elements with other amplitude value
+    dt[lapply(dt$pos, "%%", 2) == 0,]$y <- input$baseAMplitudeSecond
+    # Apply random 
+    set.seed(input$seed)
+    dt$y <- abs(rnorm(nrow(dt), dt$y, input$ampRandRange))
+    dt$pos <- NULL
+    dt
+  }
+
   
   # -----------------------------------------------------------
   main_process <- function() {
     return(
       process(
-        t(filedata()[c(input$selectedFrecuency)]),
-        t(filedata()[c(input$selectedAmplitude)]),
+        t(filedata()[c("x")]),
+        t(filedata()[c("y")]),
         filter = input$apodization,
         gRegimen = input$gRegimen,
         minDnu = input$minDnu,
@@ -98,8 +83,8 @@ server <- function(input, output, session) {
     # All process is only computed once
     globals$mainResult <- main_process()
     # ------------------------------
-    dt <- data.frame(filedata()[c(input$selectedFrecuency)],
-                     filedata()[c(input$selectedAmplitude)])
+    dt <- data.frame(filedata()[c("x")],
+                     filedata()[c("y")])
     colnames(dt) <- c("frequency", "amplitude")
     # Save global dataset
     globals$processedDatasets[["spectrum"]] = dt
@@ -121,6 +106,16 @@ server <- function(input, output, session) {
     # Save global dataset
     globals$processedDatasets[["periodicities"]] = dt
     plot_periodicities(dt)
+  })
+  echelle <- eventReactive(input$process, {
+    dt <- data.frame(
+      "x" = globals$mainResult$echelle$modDnuStacked,
+      "y" = globals$mainResult$echelle$freMas,
+      "h" = globals$mainResult$echelle$amplitudes
+    )
+    # Save global dataset
+    globals$processedDatasets[["echelle"]] = dt
+    plot_echelle(dt)
   })
   histogramDiff <- eventReactive(input$process, {
     dt <- data.frame(globals$mainResult$diffHistogram$histogram)
@@ -154,6 +149,9 @@ server <- function(input, output, session) {
   })
   output$plotPeriodicities = renderPlot({
     periodicities()
+  })
+  output$plotEchelle = renderPlot({
+    echelle()
   })
   output$plotHistogramDiff = renderPlot({
     histogramDiff()

@@ -1,14 +1,37 @@
 ui <- pageWithSidebar(
   headerPanel('Variable Stars'),
   sidebarPanel(
+    numericInput(
+      inputId = 'seed',
+      'Random seed',
+      1234,
+      min = 0,
+      max = 10000
+    ),
     sliderInput("numFreqs", "Frequences number",
-                min = 0, max = 1000, value = 10
+                min = 0, max = 100, value = 5
+    ),
+    numericInput(
+      inputId = 'baseAMplitudeFirst',
+      'Base amplitude 1º pattern',
+      10,
+      min = 0,
+      max = 100,
+      step = 0.1
+    ),
+    numericInput(
+      inputId = 'baseAMplitudeSecond',
+      'Base amplitude 2º pattern',
+      10,
+      min = 0,
+      max = 100,
+      step = 0.1
     ),
     sliderInput("ampRandRange", "Random amplitudes range",
                 min = 0, max = 1000, value = 10
     ),
-    sliderInput("obs", "Distance between patterns",
-                min = 0, max = 10, value = 10
+    sliderInput("distance", "Distance between patterns",
+                min = 0, max = 10, value = 2, step = 0.1
     ),
     tags$hr(),
     h2("Experiment parameters"),
@@ -94,8 +117,9 @@ ui <- pageWithSidebar(
       plotOutput("plotApodization")
     )),
     fluidRow(splitLayout(
-      cellWidths = c("100%"),
-      plotOutput("plotPeriodicities")
+      cellWidths = c("50%", "50%"),
+      plotOutput("plotPeriodicities"),
+      plotOutput("plotEchelle")
     )),
     fluidRow(splitLayout(
       cellWidths = c("50%", "50%"),
