@@ -86,7 +86,9 @@ result <- variableStars::process(
     ##    Amplitudes selected: 6.2902, 5.1034, 2.0929, 0.9973, 0.6038, 0.3111, 0.2462, 0.2308, 0.172, 0.1694, 
     ##  Iteration over range: 90
     ##    Frequencies selected: 268.459, 312.02, 247.926, 320.781, 203.964, 580.477, 144.431, 209.899, 0.813717, 1.22332, 
-    ##    Amplitudes selected: 6.2902, 5.1034, 2.0929, 0.9973, 0.6038, 0.3111, 0.2462, 0.2308, 0.172, 0.1694,
+    ##    Amplitudes selected: 6.2902, 5.1034, 2.0929, 0.9973, 0.6038, 0.3111, 0.2462, 0.2308, 0.172, 0.1694, 
+    ## 
+    ##  Successful process.
 
 ### Apodization
 
@@ -156,7 +158,7 @@ dt <- data.frame(
   "y" = result$echelle$freMas,
   "h" = result$echelle$amplitudes
 )
-plot_echelle(dt)
+plot_echelle(dt, result$echelle$dnu, result$echelle$dnuD) 
 ```
 
 ![](Experiment_-_HD174966_files/figure-markdown_github/echelle30-1.png)
@@ -170,7 +172,7 @@ dt <- data.frame(
   "h" = result$echelleRanges$`30`$amplitudes
 )
 # Plot echelle
-plot_echelle(dt)
+plot_echelle(dt, result$echelle$dnu, result$echelle$dnuD) 
 ```
 
 ![](Experiment_-_HD174966_files/figure-markdown_github/echelleAll-1.png)

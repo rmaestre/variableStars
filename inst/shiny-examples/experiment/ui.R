@@ -1,41 +1,38 @@
 ui <- pageWithSidebar(
   headerPanel('Variable Stars'),
   sidebarPanel(
-    h4("Download data examples"),
-    helpText(   
-      a("HD 174966",     
-        href="https://raw.githubusercontent.com/rmaestre/variableStars/master/data/freqs.dat"),
-      a("HD 174936",     
-        href="https://raw.githubusercontent.com/rmaestre/variableStars/master/data/table1.dat")
-      ),
-    tags$hr(),
-    #Selector for file upload
-    h2("Data Input"),
-    checkboxInput(
-      inputId = 'header',
-      label = 'Header',
-      value = TRUE
+    numericInput(
+      inputId = 'seed',
+      'Random seed',
+      1234,
+      min = 0,
+      max = 10000
     ),
-    radioButtons(
-      inputId = 'sep',
-      label = 'Separator',
-      choices = c(
-        Comma = ',' ,
-        Semicolon = ';' ,
-        Tab = '\t',
-        Space = ''
-      ),
-      selected = ','
+    sliderInput("numFreqs", "Frequences number",
+                min = 0, max = 100, value = 5
     ),
-    fileInput(
-      inputId = 'datafile',
-      'Choose CSV file with frecuencies and amplitudes',
-      accept = c('text/csv', 'text/comma-separated-values,text/plain')
+    numericInput(
+      inputId = 'baseAMplitudeFirst',
+      'Base amplitude 1º pattern',
+      10,
+      min = 0,
+      max = 100,
+      step = 0.1
     ),
-    tags$hr(),
-    h2("Columns selector"),
-    uiOutput("frecuencyVar"),
-    uiOutput("amplitudeVar"),
+    numericInput(
+      inputId = 'baseAMplitudeSecond',
+      'Base amplitude 2º pattern',
+      10,
+      min = 0,
+      max = 100,
+      step = 0.1
+    ),
+    sliderInput("ampRandRange", "Random amplitudes range",
+                min = 0, max = 1000, value = 10
+    ),
+    sliderInput("distance", "Distance between patterns",
+                min = 0, max = 10, value = 2, step = 0.1
+    ),
     tags$hr(),
     h2("Experiment parameters"),
     selectInput(
@@ -113,9 +110,6 @@ ui <- pageWithSidebar(
     downloadButton("downloadData", "Download experiment data")
   ),
   mainPanel(
-    h2("Data input"),
-    h6("Only 5 first lines are showed"),
-    tableOutput("filetable"),
     h2("Results"),
     fluidRow(splitLayout(
       cellWidths = c("50%", "50%"),

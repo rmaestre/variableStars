@@ -17,13 +17,23 @@ All the code is based on these two papers:
 
 ## Installation
 
-```{r test_label, wrapper=TRUE, eval=FALSE}
+```{r runUI, wrapper=TRUE, eval=FALSE}
 install.packages("devtools")
 library(devtools)
 install_github("rmaestre/variableStars")
 runUI()
 ```
 
+[![UI](docs/figures/ui.png)](docs/figures/ui.png)
+ 
+A UI for experimentation with synthetic data is provided:
+
+```{r runUISynthetic, wrapper=TRUE, eval=FALSE}
+library(devtools)
+runUI()
+```
+
+[![UI](docs/figures/ui_synthetic.png)](docs/figures/ui_synthetic.png)
 
 ## Example of use on a pulsar data
 

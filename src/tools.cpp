@@ -571,7 +571,9 @@ List echelle(arma::vec frequencies, arma::vec amplitudes, double dnu) {
   
   return List::create(_["modDnuStacked"]=modDnuStacked,
                       _["freMas"]=freMas,
-                      _["amplitudes"]=amplitudesSelected);
+                      _["amplitudes"]=amplitudesSelected,
+                      _["dnuD"]=dnuD,
+                      _["dnu"]=dnu);
 }
   
 
@@ -754,6 +756,8 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
     interEchelle[std::to_string(*numIt)] = echelle(frequencyGlobal, amplitudeGlobal, dnu);
     
   } // End range loop
+  
+  Rcout << "\n Successful process. \n";
   
   // Return the output with all valuable elements
   return List::create(_["frequency"] = frequency,

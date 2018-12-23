@@ -54,6 +54,9 @@ prepare_periodicities_dataset <- function(list) {
 
 #' @export
 plot_periodicities <- function(dt) {
+  # Calculate maxs
+  inds <- aggregate(b~label, data = dt, max)
+  maxs <- dt[dt$b %in% inds$b,]
   # Plot frecuency and amplitude
   ggplot(aes(
     x = fInv,
@@ -63,17 +66,22 @@ plot_periodicities <- function(dt) {
   ), data = dt) +
     #geom_point(alpha=0.2) +
     geom_line(alpha = 0.8) +
+    geom_vline(data=maxs, 
+               mapping=aes(xintercept=fInv, colour=label), linetype=2) +
     ggtitle(expression(paste("Periodicities (", d ^ -1, ")"))) +
     xlab(expression(paste("Periodicities (", mu, "hz)"))) +
     ylab("Amplitude") +
     theme_bw() +
-    scale_color_lancet()
+    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+    scale_color_lancet() +
+    scale_x_continuous(breaks=round(c(maxs$fInv,seq(0,max(dt$fInv),10)), 1))
 }
 
 
 #' @export
-plot_echelle <- function(dt) {
+plot_echelle <- function(dt, dnu, dnuD) {
   # colour palette
+  library(RColorBrewer)
   rf <- colorRampPalette(rev(brewer.pal(11, 'Spectral')))
   r <- rf(32)
   # plot
@@ -89,7 +97,8 @@ plot_echelle <- function(dt) {
     theme_bw() +
     scale_fill_gradientn(colours = r) +
     ggtitle("Echelle diagram") +
-    xlab(expression(paste("Frequencies mod ", Delta, nu))) +
+    xlab(substitute(paste(title," ",Delta,nu," (",dnu," ",mu,"Hz =",dnuD," ",d^-1,")", sep=" "), 
+                    list(title="Frequencies mod", dnu=dnu, dnuD=dnuD))) +
     ylab("Frequencies") +
-    scale_color_gradientn(colours = r)
+    scale_color_gradientn(colours = r) 
 }
