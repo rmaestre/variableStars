@@ -122,6 +122,16 @@ server <- function(input, output, session) {
     globals$processedDatasets[["periodicities"]] = dt
     plot_periodicities(dt)
   })
+  echelle <- eventReactive(input$process, {
+    dt <- data.frame(
+      "x" = globals$mainResult$echelle$modDnuStacked,
+      "y" = globals$mainResult$echelle$freMas,
+      "h" = globals$mainResult$echelle$amplitudes
+    )
+    # Save global dataset
+    globals$processedDatasets[["echelle"]] = dt
+    plot_echelle(dt, globals$mainResult$echelle$dnu, globals$mainResult$echelle$dnuD)
+  })
   histogramDiff <- eventReactive(input$process, {
     dt <- data.frame(globals$mainResult$diffHistogram$histogram)
     # Save global dataset
@@ -154,6 +164,9 @@ server <- function(input, output, session) {
   })
   output$plotPeriodicities = renderPlot({
     periodicities()
+  })
+  output$plotEchelle = renderPlot({
+    echelle()
   })
   output$plotHistogramDiff = renderPlot({
     histogramDiff()

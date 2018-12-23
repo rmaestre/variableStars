@@ -123,8 +123,9 @@ ui <- pageWithSidebar(
       plotOutput("plotApodization")
     )),
     fluidRow(splitLayout(
-      cellWidths = c("100%"),
-      plotOutput("plotPeriodicities")
+      cellWidths = c("50%", "50%"),
+      plotOutput("plotPeriodicities"),
+      plotOutput("plotEchelle")
     )),
     fluidRow(splitLayout(
       cellWidths = c("50%", "50%"),
