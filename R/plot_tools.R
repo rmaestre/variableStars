@@ -79,7 +79,7 @@ plot_periodicities <- function(dt) {
 
 
 #' @export
-plot_echelle <- function(dt) {
+plot_echelle <- function(dt, dnu, dnuD) {
   # colour palette
   library(RColorBrewer)
   rf <- colorRampPalette(rev(brewer.pal(11, 'Spectral')))
@@ -97,7 +97,8 @@ plot_echelle <- function(dt) {
     theme_bw() +
     scale_fill_gradientn(colours = r) +
     ggtitle("Echelle diagram") +
-    xlab(expression(paste("Frequencies mod ", Delta, nu))) +
+    xlab(substitute(paste(title," ",Delta,nu," (",dnu," ",mu,"Hz =",dnuD," ",d^-1,")", sep=" "), 
+                    list(title="Frequencies mod", dnu=dnu, dnuD=dnuD))) +
     ylab("Frequencies") +
     scale_color_gradientn(colours = r) 
 }

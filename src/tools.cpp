@@ -571,7 +571,9 @@ List echelle(arma::vec frequencies, arma::vec amplitudes, double dnu) {
   
   return List::create(_["modDnuStacked"]=modDnuStacked,
                       _["freMas"]=freMas,
-                      _["amplitudes"]=amplitudesSelected);
+                      _["amplitudes"]=amplitudesSelected,
+                      _["dnuD"]=dnuD,
+                      _["dnu"]=dnu);
 }
   
 
