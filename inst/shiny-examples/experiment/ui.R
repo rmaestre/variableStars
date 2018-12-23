@@ -30,8 +30,14 @@ ui <- pageWithSidebar(
     sliderInput("ampRandRange", "Random amplitudes range",
                 min = 0, max = 1000, value = 10
     ),
+    sliderInput("freqOneRandRange", "Random frecuence 1º range",
+                min = 0, max = 2, value = 0.0, step = 0.01
+    ),
+    sliderInput("freqTwoRandRange", "Random frecuence 2º range",
+                min = 0, max = 2, value = 0.0, step = 0.01
+    ),
     sliderInput("distance", "Distance between patterns",
-                min = 0, max = 10, value = 2, step = 0.1
+                min = 0, max = 20, value = 5, step = 0.1
     ),
     tags$hr(),
     h2("Experiment parameters"),

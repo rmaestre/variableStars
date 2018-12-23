@@ -19,11 +19,23 @@ server <- function(input, output, session) {
     dt[lapply(dt$pos, "%%", 2) == 0,]$y <- input$baseAMplitudeSecond
     # Apply random 
     set.seed(input$seed)
+    # Add random noise on frequence
+    if (input$freqOneRandRange > 0) {
+      dt[lapply(dt$pos, "%%", 2) == 0,]$x <- rnorm(n, 
+                                                   dt[lapply(dt$pos, "%%", 2) == 0,]$x, 
+                                                   input$freqOneRandRange)
+    }
+    if (input$freqTwoRandRange > 0) {
+      dt[lapply(dt$pos, "%%", 2) != 0,]$x <- rnorm(n+1, 
+                                                   dt[lapply(dt$pos, "%%", 2) != 0,]$x, 
+                                                   input$freqTwoRandRange)
+    }
+    
     dt$y <- abs(rnorm(nrow(dt), dt$y, input$ampRandRange))
-    dt$pos <- NULL
+    #dt$pos <- NULL
     dt
   }
-
+  
   
   # -----------------------------------------------------------
   main_process <- function() {
@@ -84,12 +96,14 @@ server <- function(input, output, session) {
     globals$mainResult <- main_process()
     # ------------------------------
     dt <- data.frame(filedata()[c("x")],
-                     filedata()[c("y")])
-    colnames(dt) <- c("frequency", "amplitude")
+                     filedata()[c("y")],
+                     filedata()[c("pos")])
+    colnames(dt) <- c("frequency", "amplitude", "pattern")
     # Save global dataset
     globals$processedDatasets[["spectrum"]] = dt
     # Return plot
-    plot_spectrum(min(dt$frequency), max(dt$frequency), dt)
+    plot_spectrum(min(dt$frequency), max(dt$frequency), dt) +
+      geom_bar(aes(fill=as.factor(pattern%%2)), stat="identity")
   })
   apodization <- eventReactive(input$process, {
     dt <- data.frame(
