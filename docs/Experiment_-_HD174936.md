@@ -163,7 +163,7 @@ dt <- data.frame(
   "y" = result$echelle$freMas,
   "h" = result$echelle$amplitudes
 )
-plot_echelle(dt)
+plot_echelle(dt, result$echelle$dnu, result$echelle$dnuD) 
 ```
 
 ![](Experiment_-_HD174936_files/figure-markdown_github/echelle30-1.png)
@@ -177,7 +177,7 @@ dt <- data.frame(
   "h" = result$echelleRanges$`30`$amplitudes
 )
 # Plot echelle
-plot_echelle(dt)
+plot_echelle(dt, result$echelle$dnu, result$echelle$dnuD) 
 ```
 
 ![](Experiment_-_HD174936_files/figure-markdown_github/echelleAll-1.png)

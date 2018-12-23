@@ -115,7 +115,7 @@ server <- function(input, output, session) {
     )
     # Save global dataset
     globals$processedDatasets[["echelle"]] = dt
-    plot_echelle(dt)
+    plot_echelle(dt, globals$mainResult$echelle$dnu, globals$mainResult$echelle$dnuD)
   })
   histogramDiff <- eventReactive(input$process, {
     dt <- data.frame(globals$mainResult$diffHistogram$histogram)

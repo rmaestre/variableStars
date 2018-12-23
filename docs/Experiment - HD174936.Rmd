@@ -125,7 +125,7 @@ dt <- data.frame(
   "y" = result$echelle$freMas,
   "h" = result$echelle$amplitudes
 )
-plot_echelle(dt)
+plot_echelle(dt, result$echelle$dnu, result$echelle$dnuD) 
 ```
 
 #### For first 30 frecuencies
@@ -137,7 +137,7 @@ dt <- data.frame(
   "h" = result$echelleRanges$`30`$amplitudes
 )
 # Plot echelle
-plot_echelle(dt)
+plot_echelle(dt, result$echelle$dnu, result$echelle$dnuD) 
 ```
 
 
