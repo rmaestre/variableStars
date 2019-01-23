@@ -9,7 +9,7 @@ ui <- pageWithSidebar(
       max = 10000
     ),
     sliderInput("numFreqs", "Frequences number",
-                min = 0, max = 100, value = 5
+                min = 0, max = 100, value = 20
     ),
     numericInput(
       inputId = 'baseAMplitudeFirst',
@@ -36,7 +36,7 @@ ui <- pageWithSidebar(
       step = 1
     ),
     sliderInput("ampRandRange", "Random amplitudes range",
-                min = 0, max = 1000, value = 10
+                min = 0, max = 1000, value = 0
     ),
     sliderInput("freqOneRandRange", "Random frecuence 1º range",
                 min = 0, max = 2, value = 0.0, step = 0.01
@@ -45,7 +45,7 @@ ui <- pageWithSidebar(
                 min = 0, max = 2, value = 0.0, step = 0.01
     ),
     sliderInput("distance", "Distance between patterns",
-                min = 0, max = 20, value = 5, step = 0.1
+                min = 0, max = 20, value = 4, step = 0.1
     ),
     tags$hr(),
     h2("Experiment parameters"),

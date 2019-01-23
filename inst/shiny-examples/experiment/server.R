@@ -9,36 +9,26 @@ server <- function(input, output, session) {
   
   # Read data from input
   filedata <- function(){
-    # Create number of frecuences
-    n <- round(input$numFreqs / 2)
-    dis <- input$distance
-    # Create data.frame
-    dt <- data.frame("x"=seq(from=0, to=2*n*dis, by=dis), "y"=input$baseAMplitudeFirst)
-    dt$pos <- seq(1,nrow(dt)) # Secucencial integers
-    # Even elements with other amplitude value
-    dt[lapply(dt$pos, "%%", 2) == 0,]$y <- input$baseAMplitudeSecond
-    # Apply random 
-    set.seed(input$seed)
-    # Add random noise on frequence
-    if (input$freqOneRandRange > 0) {
-      dt[lapply(dt$pos, "%%", 2) == 0,]$x <- rnorm(n, 
-                                                   dt[lapply(dt$pos, "%%", 2) == 0,]$x, 
-                                                   input$freqOneRandRange)
-    }
-    if (input$freqTwoRandRange > 0) {
-      dt[lapply(dt$pos, "%%", 2) != 0,]$x <- rnorm(n+1, 
-                                                   dt[lapply(dt$pos, "%%", 2) != 0,]$x, 
-                                                   input$freqTwoRandRange)
-    }
-    
-    dt$y <- abs(rnorm(nrow(dt), dt$y, input$ampRandRange))
-    #dt$pos <- NULL
-    dt
+    # Generate synthetic data
+    generate_data(input$numFreqs, input$distance, 
+                  input$baseAMplitudeFirst, input$baseAMplitudeSecond, 
+                  input$shift, input$seed, 
+                  input$freqOneRandRange, input$freqTwoRandRange, 
+                  input$ampRandRange)
   }
   
   
   # -----------------------------------------------------------
   main_process <- function() {
+    print(input$apodization)
+    print(input$gRegimen)
+    print(input$minDnu)
+    print(input$maxDnu)
+    print(input$dnuValue)
+    print(input$dnuGuessError)
+    print(input$dnuEstimation)
+    print(input$numFrequencies)
+    
     return(
       process(
         t(filedata()[c("x")]),
@@ -143,14 +133,17 @@ server <- function(input, output, session) {
   })
   autocorrelation <- eventReactive(input$process, {
     dt <- data.frame(globals$mainResult$crossCorrelation)
+    #dt <- dt[dt$index > 5,]
     # Save global dataset
     globals$processedDatasets[["autocorrelation"]] = dt
+    # Get max autocorre
+    max_autocorr <- dt[which.max(dt$autocorre), ]
     ggplot(aes(x = index, y = autocorre), data = dt) +
       geom_line(stat = "identity") +
+      geom_vline(xintercept=max_autocorr$index) +
       ggtitle("Autocorrelacion (Crosscorrelation)") +
       xlab(expression(paste("Periodicities (", mu, "hz)"))) +
       ylab("Autocorrelation") +
-      ylim(c(-0.1, 0.25)) +
       theme_bw()
   })
   
