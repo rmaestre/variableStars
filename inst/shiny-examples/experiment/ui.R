@@ -27,6 +27,14 @@ ui <- pageWithSidebar(
       max = 100,
       step = 0.1
     ),
+    numericInput(
+      inputId = 'shift',
+      'Pattern shift displacement',
+      0,
+      min = -100,
+      max = 100,
+      step = 1
+    ),
     sliderInput("ampRandRange", "Random amplitudes range",
                 min = 0, max = 1000, value = 10
     ),

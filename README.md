@@ -27,8 +27,10 @@ runUI()
 A UI for experimentation with synthetic data is provided:
 
 ``` r
+install.packages("devtools")
 library(devtools)
-runUI()
+install_github("rmaestre/variableStars")
+runUISynthetic()
 ```
 
 [![UI](docs/figures/ui_synthetic.png)](docs/figures/ui_synthetic.png)
