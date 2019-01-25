@@ -18,7 +18,8 @@ plot_spectrum <- function(min, max, dt) {
       sep = ""
     )) +
     xlim(min, max) +
-    theme(legend.position = "none")
+    theme(legend.position = "none") +
+    theme(text = element_text(size=20))
   return(p)
 }
 
@@ -30,7 +31,8 @@ plot_apodization <- function(dt) {
     geom_point() +
     geom_line() +
     ggtitle("Apodization- Frequences and amplitudes") +
-    theme_bw()
+    theme_bw() +
+    theme(text = element_text(size=20))
   return(p)
 }
 
@@ -47,6 +49,26 @@ prepare_periodicities_dataset <- function(list) {
                   "fInv" = list[[as.character(range)]][["fInv"]],
                   "b" = list[[as.character(range)]][["b"]],
                   "label" = paste(list[[as.character(range)]][["label"]], " freqs")
+                ))
+  }
+  dt
+}
+
+
+#' @export
+prepare_echelles_dataset <- function(list) {
+  # DS to save all data
+  dt <-
+    setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("x", "y", "label"))
+  # Prepare data
+  ranges <- names(list)
+  for (range in ranges) {
+    dt <- rbind(dt,
+                data.frame(
+                  "x" = list[[as.character(range)]][["modDnuStacked"]],
+                  "y" = list[[as.character(range)]][["freMas"]],
+                  "h" = list[[as.character(range)]][["amplitudes"]],
+                  "label" = paste(range, " freqs")
                 ))
   }
   dt
@@ -74,7 +96,8 @@ plot_periodicities <- function(dt) {
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
     scale_color_lancet() +
-    scale_x_continuous(breaks=round(c(maxs$fInv,seq(0,max(dt$fInv),10)), 1))
+    scale_x_continuous(breaks=round(c(maxs$fInv,seq(0,max(dt$fInv),10)), 1)) +
+    theme(text = element_text(size=20))
 }
 
 
@@ -85,20 +108,46 @@ plot_echelle <- function(dt, dnu, dnuD) {
   rf <- colorRampPalette(rev(brewer.pal(11, 'Spectral')))
   r <- rf(32)
   # plot
+  dt$label <- as.factor(dt$label)
   ggplot(aes(x = x, y = y), data = dt) +
-    stat_density2d(
-      geom = "raster",
-      aes(fill = ..density..),
-      n = 200,
-      #h = 10,
-      contour = FALSE
-    ) +
-    geom_point(aes(size=h, color=h), shape="+") + 
+    #stat_density2d(
+    #  geom = "raster",
+    #  aes(fill = ..density..),
+    #  n = 200,
+    #  #h = 10,
+    #  contour = FALSE
+    #) +
+    geom_point(aes(size=h, shape=label, colour=label, alpha=0.6)) + 
     theme_bw() +
-    scale_fill_gradientn(colours = r) +
+    #scale_fill_gradientn(colours = r) +
     ggtitle("Echelle diagram") +
     xlab(substitute(paste(title," ",Delta,nu," (",dnu," ",mu,"Hz =",dnuD," ",d^-1,")", sep=" "), 
                     list(title="Frequencies mod", dnu=dnu, dnuD=dnuD))) +
     ylab("Frequencies") +
-    scale_color_gradientn(colours = r) 
+    #scale_color_gradientn(colours = r)  +
+    theme(text = element_text(size=20)) +
+    scale_colour_manual(name = "label",
+                        values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")) +
+    xlim(0, 1)
 }
+
+#' @export
+plot_histogram <- function(dt) {
+  ggplot(aes(x = bins, y = values), data = dt) +
+    geom_bar(stat = "identity") +
+    ggtitle("Histogram of differences") +
+    theme_bw() +
+    theme(text = element_text(size=20))
+}
+
+#' @export
+plot_crosscorrelation <- function(dt) {
+  ggplot(aes(x = index, y = autocorre), data = dt) +
+    geom_line(stat = "identity") +
+    ggtitle("Autocorrelacion (Crosscorrelation)") +
+    xlab(expression(paste("Periodicities (", mu, "hz)"))) +
+    ylab("Autocorrelation") +
+    theme_bw() +
+    theme(text = element_text(size=20))
+}
+
