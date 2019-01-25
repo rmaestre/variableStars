@@ -8,27 +8,26 @@ server <- function(input, output, session) {
     reactiveValues(mainResult = NULL, processedDatasets = list())
   
   # Read data from input
-  filedata <- function(){
+  filedata <- function() {
     # Generate synthetic data
-    generate_data(input$numFreqs, input$distance, 
-                  input$baseAMplitudeFirst, input$baseAMplitudeSecond, 
-                  input$shift, input$seed, 
-                  input$freqOneRandRange, input$freqTwoRandRange, 
-                  input$ampRandRange)
+    dt <- generate_data(
+      input$numFreqs,
+      input$distance,
+      input$periodF,
+      input$periofS,
+      input$baseAMplitudeFirst,
+      input$baseAMplitudeSecond,
+      input$seed,
+      input$freqOneRandRange,
+      input$freqTwoRandRange,
+      input$ampRandRange
+    )
+    dt
   }
   
   
   # -----------------------------------------------------------
   main_process <- function() {
-    print(input$apodization)
-    print(input$gRegimen)
-    print(input$minDnu)
-    print(input$maxDnu)
-    print(input$dnuValue)
-    print(input$dnuGuessError)
-    print(input$dnuEstimation)
-    print(input$numFrequencies)
-    
     return(
       process(
         t(filedata()[c("x")]),
@@ -87,13 +86,13 @@ server <- function(input, output, session) {
     # ------------------------------
     dt <- data.frame(filedata()[c("x")],
                      filedata()[c("y")],
-                     filedata()[c("pos")])
+                     filedata()[c("pattern")])
     colnames(dt) <- c("frequency", "amplitude", "pattern")
     # Save global dataset
     globals$processedDatasets[["spectrum"]] = dt
     # Return plot
     plot_spectrum(min(dt$frequency), max(dt$frequency), dt) +
-      geom_bar(aes(fill=as.factor(pattern%%2)), stat="identity")
+      geom_bar(aes(fill = as.factor(pattern %% 2)), stat = "identity")
   })
   apodization <- eventReactive(input$process, {
     dt <- data.frame(
@@ -112,39 +111,26 @@ server <- function(input, output, session) {
     plot_periodicities(dt)
   })
   echelle <- eventReactive(input$process, {
-    dt <- data.frame(
-      "x" = globals$mainResult$echelle$modDnuStacked,
-      "y" = globals$mainResult$echelle$freMas,
-      "h" = globals$mainResult$echelle$amplitudes
-    )
+    dt <- prepare_echelles_dataset(globals$mainResult$echelleRanges)
     # Save global dataset
     globals$processedDatasets[["echelle"]] = dt
-    plot_echelle(dt, globals$mainResult$echelle$dnu, globals$mainResult$echelle$dnuD)
+    plot_echelle(dt,
+                 globals$mainResult$echelle$dnu,
+                 globals$mainResult$echelle$dnuD)
   })
   histogramDiff <- eventReactive(input$process, {
     dt <- data.frame(globals$mainResult$diffHistogram$histogram)
     # Save global dataset
     globals$processedDatasets[["histogramDiff"]] = dt
     # Return plot
-    ggplot(aes(x = bins, y = values), data = dt) +
-      geom_bar(stat = "identity") +
-      ggtitle("Histogram of differences") +
-      theme_bw()
+    plot_histogram(dt)
   })
   autocorrelation <- eventReactive(input$process, {
     dt <- data.frame(globals$mainResult$crossCorrelation)
-    #dt <- dt[dt$index > 5,]
     # Save global dataset
     globals$processedDatasets[["autocorrelation"]] = dt
-    # Get max autocorre
-    max_autocorr <- dt[which.max(dt$autocorre), ]
-    ggplot(aes(x = index, y = autocorre), data = dt) +
-      geom_line(stat = "identity") +
-      geom_vline(xintercept=max_autocorr$index) +
-      ggtitle("Autocorrelacion (Crosscorrelation)") +
-      xlab(expression(paste("Periodicities (", mu, "hz)"))) +
-      ylab("Autocorrelation") +
-      theme_bw()
+    # Return plot
+    plot_crosscorrelation(dt)
   })
   
   

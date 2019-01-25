@@ -1,6 +1,7 @@
 ui <- pageWithSidebar(
   headerPanel('Variable Stars'),
   sidebarPanel(
+    h2("Synthetic data generation"),
     numericInput(
       inputId = 'seed',
       'Random seed',
@@ -8,9 +9,24 @@ ui <- pageWithSidebar(
       min = 0,
       max = 10000
     ),
+    tags$hr(),
     sliderInput("numFreqs", "Frequences number",
-                min = 0, max = 100, value = 20
+                min = 0, max = 100, value = 100
     ),
+    numericInput(
+      inputId = 'periodF',
+      'Period for 1º pattern',
+      min = 0, max = 100, value = 5, step = 0.1
+    ),
+    numericInput(
+      inputId = 'periofS',
+      'Period for 2º pattern',
+      min = 0, max = 100, value = 3.5, step = 0.1
+    ),
+    sliderInput("distance", "Distance between patterns",
+                min = 0, max = 20, value = 2, step = 0.1
+    ),
+    tags$hr(),
     numericInput(
       inputId = 'baseAMplitudeFirst',
       'Base amplitude 1º pattern',
@@ -27,14 +43,7 @@ ui <- pageWithSidebar(
       max = 100,
       step = 0.1
     ),
-    numericInput(
-      inputId = 'shift',
-      'Pattern shift displacement',
-      0,
-      min = -100,
-      max = 100,
-      step = 1
-    ),
+    tags$hr(),
     sliderInput("ampRandRange", "Random amplitudes range",
                 min = 0, max = 1000, value = 0
     ),
@@ -43,9 +52,6 @@ ui <- pageWithSidebar(
     ),
     sliderInput("freqTwoRandRange", "Random frecuence 2º range",
                 min = 0, max = 2, value = 0.0, step = 0.01
-    ),
-    sliderInput("distance", "Distance between patterns",
-                min = 0, max = 20, value = 4, step = 0.1
     ),
     tags$hr(),
     h2("Experiment parameters"),
@@ -124,7 +130,6 @@ ui <- pageWithSidebar(
     downloadButton("downloadData", "Download experiment data")
   ),
   mainPanel(
-    h2("Results"),
     fluidRow(splitLayout(
       cellWidths = c("50%", "50%"),
       plotOutput("plotSpectrum"),
