@@ -560,9 +560,10 @@ List echelle(arma::vec frequencies, arma::vec amplitudes, double dnu) {
   arma::uvec ids = find(modDnuMas < (dnu  + 2.0 * tolerance));
   arma::vec modDnuStacked = arma::join_cols(modDnu, modDnuMas.elem(ids));
   // This vector is normalized between [0 and 1]
-  double minValue = arma::min(modDnuStacked);
-  double maxValue = arma::max(modDnuStacked);
-  modDnuStacked = (modDnuStacked - minValue) / (maxValue-minValue);
+  //double minValue = arma::min(modDnuStacked);
+  //double maxValue = arma::max(modDnuStacked);
+  //modDnuStacked = (modDnuStacked - minValue) / (maxValue-minValue);
+  modDnuStacked = modDnuStacked / dnu;
   
   // Create the y axis
   arma::vec freMas = arma::join_cols(frequencies, frequencies.elem(ids)); 
@@ -571,6 +572,9 @@ List echelle(arma::vec frequencies, arma::vec amplitudes, double dnu) {
   
   return List::create(_["modDnuStacked"]=modDnuStacked,
                       _["freMas"]=freMas,
+                      _["frequencies"]=frequencies,
+                      _["modDnu"] = modDnu,
+                      _["modDnuMas"] = modDnuMas,
                       _["amplitudes"]=amplitudesSelected,
                       _["dnuD"]=dnuD,
                       _["dnu"]=dnu);
@@ -653,14 +657,14 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
   amplitude = amplitude.elem(idsSort);
   if (debug) {
     Rcout << "Frequencies: ";
-    printVector(frequency, 20);
+    printVector(frequency, 50);
     Rcout << "\n";
   }
   // Calculate the range
   arma::ivec range = calculateRange(frequency.n_elem, numFrequencies);
   if (debug) {
     Rcout << "Range: ";
-    printVector(range, 20);
+    printVector(range, 50);
     Rcout << "\n";
   }
 
@@ -757,7 +761,9 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
     
   } // End range loop
   
-  Rcout << "\n Successful process. \n";
+  if (debug) {
+    Rcout << "\n Successful process. \n";
+  }
   
   // Return the output with all valuable elements
   return List::create(_["frequency"] = frequency,
