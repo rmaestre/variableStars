@@ -46,6 +46,8 @@ execute_experiment <- function(numFreqs, distance, shift,
   # Calculate two separations
   firstSeparation <- abs(dt[2,]$x - dt[1,]$x) / 0.0864
   seconSeparation <- abs(dt[2,]$x - dt[3,]$x) / 0.0864
+  res$separations$first <- firstSeparation
+  res$separations$second <- seconSeparation
   
  # --------------- Process data and extract patterns
   result <- process(frequency = dt$x, amplitude = dt$y,
@@ -129,6 +131,10 @@ Number of frequences to be processed: 21 Number of frequences after drop the g r
 
 Successful process.
 
+First separation: 104.166666666667 mHz (d^-1= 9
+
+Second separation: 81.0185185185185 mHz (d^-1= 7
+
 ##### Apodization
 
 ![](PatternsExperiments_files/figure-markdown_github/unnamed-chunk-2-1.png)
@@ -163,6 +169,10 @@ Shift: 2
 Number of frequences to be processed: 21 Number of frequences after drop the g regimen: 20 Frequencies: 115.741, 185.185, 300.926, 370.37, 486.111, 555.556, 671.296, 740.741, 856.481, 925.926, 1041.67, 1111.11, 1226.85, 1296.3, 1412.04, 1481.48, 1597.22, 1666.67, 1782.41, 1851.85, Range: 20, Iteration over range: 20 Frequencies selected: 115.741, 185.185, 300.926, 370.37, 486.111, 555.556, 671.296, 740.741, 856.481, 925.926, Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, Dnu: 23.1463 Dnu Peak: 23.1463 Dnu Guess: 0 Cross correlation calculated:
 
 Successful process.
+
+First separation: 115.740740740741 mHz (d^-1= 10
+
+Second separation: 69.4444444444444 mHz (d^-1= 6
 
 ##### Apodization
 
@@ -199,6 +209,10 @@ Number of frequences to be processed: 21 Number of frequences after drop the g r
 
 Successful process.
 
+First separation: 127.314814814815 mHz (d^-1= 11
+
+Second separation: 57.8703703703704 mHz (d^-1= 5
+
 ##### Apodization
 
 ![](PatternsExperiments_files/figure-markdown_github/unnamed-chunk-2-11.png)
@@ -233,6 +247,10 @@ Shift: 4
 Number of frequences to be processed: 21 Number of frequences after drop the g regimen: 20 Frequencies: 138.889, 185.185, 324.074, 370.37, 509.259, 555.556, 694.444, 740.741, 879.63, 925.926, 1064.81, 1111.11, 1250, 1296.3, 1435.19, 1481.48, 1620.37, 1666.67, 1805.56, 1851.85, Range: 20, Iteration over range: 20 Frequencies selected: 138.889, 185.185, 324.074, 370.37, 509.259, 555.556, 694.444, 740.741, 879.63, 925.926, Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, Dnu: 46.2925 Dnu Peak: 46.2925 Dnu Guess: 0 Cross correlation calculated:
 
 Successful process.
+
+First separation: 138.888888888889 mHz (d^-1= 12
+
+Second separation: 46.2962962962963 mHz (d^-1= 4
 
 ##### Apodization
 
@@ -269,6 +287,10 @@ Number of frequences to be processed: 21 Number of frequences after drop the g r
 
 Successful process.
 
+First separation: 150.462962962963 mHz (d^-1= 13
+
+Second separation: 34.7222222222222 mHz (d^-1= 3
+
 ##### Apodization
 
 ![](PatternsExperiments_files/figure-markdown_github/unnamed-chunk-2-21.png)
@@ -304,6 +326,10 @@ Number of frequences to be processed: 21 Number of frequences after drop the g r
 
 Successful process.
 
+First separation: 162.037037037037 mHz (d^-1= 14
+
+Second separation: 23.1481481481481 mHz (d^-1= 2
+
 ##### Apodization
 
 ![](PatternsExperiments_files/figure-markdown_github/unnamed-chunk-2-26.png)
@@ -338,6 +364,10 @@ Shift: 7
 Number of frequences to be processed: 21 Number of frequences after drop the g regimen: 20 Frequencies: 173.611, 185.185, 358.796, 370.37, 543.981, 555.556, 729.167, 740.741, 914.352, 925.926, 1099.54, 1111.11, 1284.72, 1296.3, 1469.91, 1481.48, 1655.09, 1666.67, 1840.28, 1851.85, Range: 20, Iteration over range: 20 Frequencies selected: 173.611, 185.185, 358.796, 370.37, 543.981, 555.556, 729.167, 740.741, 914.352, 925.926, Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, Dnu: 11.5732 Dnu Peak: 11.5732 Dnu Guess: 0 Cross correlation calculated:
 
 Successful process.
+
+First separation: 173.611111111111 mHz (d^-1= 15
+
+Second separation: 11.5740740740741 mHz (d^-1= 1
 
 ##### Apodization
 
@@ -376,6 +406,10 @@ Number of frequences to be processed: 21 Number of frequences after drop the g r
 
 Successful process.
 
+First separation: 185.185185185185 mHz (d^-1= 16
+
+Second separation: 0 mHz (d^-1= 0
+
 ##### Apodization
 
 ![](PatternsExperiments_files/figure-markdown_github/unnamed-chunk-2-36.png)
@@ -406,6 +440,10 @@ Shift: 9
 Number of frequences to be processed: 21 Number of frequences after drop the g regimen: 20 Frequencies: 196.759, 185.185, 381.944, 370.37, 567.13, 555.556, 752.315, 740.741, 937.5, 925.926, 1122.69, 1111.11, 1307.87, 1296.3, 1493.06, 1481.48, 1678.24, 1666.67, 1863.43, 1851.85, Range: 20, Iteration over range: 20 Frequencies selected: 196.759, 185.185, 381.944, 370.37, 567.13, 555.556, 752.315, 740.741, 937.5, 925.926, Amplitudes selected: 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, Dnu: 11.5732 Dnu Peak: 11.5732 Dnu Guess: 0 Cross correlation calculated:
 
 Successful process.
+
+First separation: 196.759259259259 mHz (d^-1= 17
+
+Second separation: 11.5740740740741 mHz (d^-1= 1
 
 ##### Apodization
 
@@ -750,213 +788,5 @@ Peak 4: 196.7983991996mhz. Value:0.192320943449286![](PatternsExperiments_files/
 Experiments whit random amplitudes. Boostrapping
 ================================================
 
-Execution 9
------------
-
-Num. frequencies: 20
-
-Distance between patterns: 8
-
-Shift: 9
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process.
-
-Successful process. ![](PatternsExperiments_files/figure-markdown_github/unnamed-chunk-4-1.png)
+Experiments with frequence number and shift
+===========================================

@@ -12,6 +12,7 @@ library(ggplot2)
 library(ggsci)
 library(microbenchmark)
 library(RColorBrewer)
+library(mgcv)
 ```
 
 
@@ -39,7 +40,7 @@ find_peaks <- function(x) {
   peaks # return peaks index
 }
 
-execute_experiment <- function(numFreqs, distance, shift,
+execute_experiment <- function(numFreqs, distance, periodF, periodS,
                       seed=123, 
                       baseAMplitudeFirst=10, baseAMplitudeSecond=10, 
                       freqOneRandRange=0, freqTwoRandRange=0, ampRandRange=0,
@@ -49,14 +50,15 @@ execute_experiment <- function(numFreqs, distance, shift,
   res <- list()
   
   # --------------- Data generation
-  dt <- generate_data(numFreqs=numFreqs, distance=distance, shift=shift, seed=seed, 
-                      baseAMplitudeFirst=baseAMplitudeFirst, baseAMplitudeSecond=baseAMplitudeSecond, 
-                      freqOneRandRange=freqOneRandRange, freqTwoRandRange=freqTwoRandRange, 
+  dt <- generate_data(numFreqs=numFreqs, distance=distance, periodF=periodF, periodS=periodS,
+                      seed=seed, 
+                      baseAMplitudeFirst=baseAMplitudeFirst, 
+                      baseAMplitudeSecond=baseAMplitudeSecond, 
+                      freqOneRandRange=freqOneRandRange, 
+                      freqTwoRandRange=freqTwoRandRange, 
                       ampRandRange=ampRandRange)
   
   # Calculate two separations
-  firstSeparation <- abs(dt[2,]$x - dt[1,]$x) / 0.0864
-  seconSeparation <- abs(dt[2,]$x - dt[3,]$x) / 0.0864
   
  # --------------- Process data and extract patterns
   result <- process(frequency = dt$x, amplitude = dt$y,
@@ -128,13 +130,18 @@ execute_experiment <- function(numFreqs, distance, shift,
 
 ```{r, echo=F, results='asis'}
 counter <- 0
-for (shift in seq(0:8)) {
+for (distance in seq(0:4)) {
   cat(paste("\n\n## Execution",counter,"\n"))
   cat(paste("\n\n   Num. frequencies:",20,"\n"))
   cat(paste("\n\n   Distance between patterns:",8,"\n"))
   cat(paste("\n\n   Shift:",shift,"\n\n"))
   
-  res <- execute_experiment(numFreqs=20, distance=8, selectFirstFrequencies=30, shift = shift)
+  res <- execute_experiment(numFreqs=100, distance=2, periodF=5, periodS=3.5, 
+                            selectFirstFrequencies=30)
+  
+  cat(paste("\n\n   First separation:",res$separations$first,"mHz (d^-1=",res$separations$first * 0.0864,"\n\n"))
+  cat(paste("\n\n   Second separation:",res$separations$second,"mHz (d^-1=",res$separations$second * 0.0864,"\n\n"))
+  
   
   cat("\n\n##### Apodization\n")
   plot(res$plots$apo)
@@ -236,36 +243,104 @@ for (shift in seq(0:8)) {
 
 
 ```{r, echo=F, results='asis'}
-cat(paste("\n\n## Execution",counter,"\n"))
-cat(paste("\n\n   Num. frequencies:",20,"\n"))
-cat(paste("\n\n   Distance between patterns:",8,"\n"))
-cat(paste("\n\n   Shift:",shift,"\n\n"))
-
-
-counter <- 0
-shift <- 4
-points <- c()
-for (xx in seq(0:100)) {
-  res <- execute_experiment(numFreqs=30, distance=4, ampRandRange=2, 
-                            freqOneRandRange=2.3,
-                            selectFirstFrequencies=10, shift = shift,
-                            seed=runif(1,0,10000), debug=F)
-  
-  for (perio in res$periodicities$mhz) {
-    points <- c(points, perio)
-  }
-  
-
-  for (i in names(res$histogram)) {
-    points <- c(points, res$histogram[[i]]$mhz)
-  }
-
-  for (i in names(res$cross)) {
-    points <- c(points, res$cross[[i]]$mhz)
-  }
- 
-  counter <- counter + 1
-}
-
-hist(points, n=100)
+# cat(paste("\n\n## Execution",counter,"\n"))
+# cat(paste("\n\n   Num. frequencies:",20,"\n"))
+# cat(paste("\n\n   Distance between patterns:",8,"\n"))
+# cat(paste("\n\n   Shift:",shift,"\n\n"))
+# 
+# counter <- 0
+# shift <- 4
+# points <- c()
+# for (xx in seq(0:100)) {
+#   res <- execute_experiment(numFreqs=30, distance=4, ampRandRange=1, 
+#                             freqOneRandRange=0,
+#                             selectFirstFrequencies=10, shift = 1,
+#                             seed=runif(1,0,10000), debug=F)
+#   
+#   for (perio in res$periodicities$mhz) {
+#     points <- c(points, perio)
+#   }
+#   
+# 
+#   for (i in names(res$histogram)) {
+#     points <- c(points, res$histogram[[i]]$mhz)
+#   }
+# 
+#   for (i in names(res$cross)) {
+#     points <- c(points, res$cross[[i]]$mhz)
+#   }
+#  
+#   counter <- counter + 1
+# }
 ```
+
+
+# Experiments with frequence number and shift
+
+```{r, echo=F, results='asis'}
+# # Constant to define max number of frequencies
+# maxNumFrequencies <- 10
+# 
+# # DS to save intermediate results
+# dtExperiment <- data.table(matrix(ncol = 9, nrow = 0))
+# colnames(dtExperiment) <- c("numFreqs","shift","distance","greaterSeparation","firstSeparation",
+#                             "secondSeparation","Period","Histo",
+#                             "Cross")
+# 
+# # Loop
+# for (xx in seq(0:300)) {
+#   # Random trial
+#   numFreqs <- round(runif(1,5,maxNumFrequencies))
+#   selectFirstFrequencies <- numFreqs + 10
+#   shift <- round(runif(1,1,numFreqs))
+#   distance <- round(runif(1,1,5))
+# 
+#   # Process execution
+#   res <- execute_experiment(numFreqs=numFreqs, 
+#                             distance=distance, 
+#                             ampRandRange=0, 
+#                             freqOneRandRange=0,
+#                             selectFirstFrequencies=selectFirstFrequencies+10, 
+#                             shift = shift,
+#                             seed=runif(1,0,10000), debug=F)
+#   
+#   firstSeparation <- res$separations$first
+#   secondSeparation <- res$separations$second
+#   greaterSeparation <- ifelse(firstSeparation>secondSeparation,secondSeparation,firstSeparation)
+#   
+#   
+#   periods <- c()
+#   for (perio in res$periodicities$mhz) {
+#     periods <- c(periods, perio)
+#   }
+#   hists <- c()
+#   for (i in names(res$histogram)) {
+#     hists <- c(hists, res$histogram[[i]]$mhz)
+#   }
+#   cross <- c()
+#   for (i in names(res$cross)) {
+#     cross <- c(cross, res$cross[[i]]$mhz)
+#   }
+#   
+#   # Append results by using squared error
+#   dtExperiment <- rbind(dtExperiment, data.frame("numFreqs"=numFreqs/2, 
+#                                                  "shift"=shift,
+#                                                  "distance"=distance,
+#                                                  "greaterSeparation"=greaterSeparation,
+#                                                  "firstSeparation"=firstSeparation,
+#                                                  "secondSeparation"=secondSeparation,
+#                                                  "Period"=min((periods[periods!=0] - greaterSeparation)^2) < 1, 
+#                                                  "Histo"=min((hists[hists!=0] - greaterSeparation)^2) < 1, 
+#                                                  "Cross"=min((cross[cross!=0] - greaterSeparation)^2) < 1))
+# }
+# 
+# table(dtExperiment$Period)
+# table(dtExperiment$Histo)
+# table(dtExperiment$Cross)
+# 
+# m <- gam(Period~s(numFreqs, k=1) + s(firstSeparation, k=1), 
+#          family=binomial(link=logit), data=dtExperiment)
+# plot(m,se=1.96,seWithMean=TRUE, rug=TRUE, residuals = T, shift=mean(predict(m)), trans=function(x){exp(x)/(1+exp(x))},
+#      pages = 1)
+```
+
