@@ -7,8 +7,8 @@ plot_spectrum <- function(min, max, dt) {
     geom_point(aes(frequency, amplitude, colour = "#009988"),
                data = max_amplitude) +
     #geom_line() +
-    geom_bar(aes(alpha=0.6), stat="identity") +
-    theme_bw() + ylab("Amplitude") + xlab("Frecuency") +
+    geom_bar(aes(alpha = 0.6), stat = "identity") +
+    ylab("Amplitude") + xlab("Frecuency") +
     ggtitle(paste(
       "First Frequency (F:",
       round(max_amplitude$frequency, 4),
@@ -17,9 +17,14 @@ plot_spectrum <- function(min, max, dt) {
       ")",
       sep = ""
     )) +
-    xlim(min, max) +
-    theme(legend.position = "none") +
-    theme(text = element_text(size=20))
+    theme_bw() +
+    theme(
+      legend.position = "none",
+      text = element_text(size = 20),
+      plot.title = element_text(size = rel(0.8), face = "bold"),
+      axis.title.x = element_text(size = rel(0.8)),
+      axis.title.y = element_text(size = rel(0.8))
+    )
   return(p)
 }
 
@@ -30,124 +35,202 @@ plot_apodization <- function(dt) {
               data = dt) +
     geom_point() +
     geom_line() +
-    ggtitle("Apodization- Frequences and amplitudes") +
+    ggtitle("Apodization") +
+    xlab("Frequencies") +
+    ylab("Normalized amplitudes") +
     theme_bw() +
-    theme(text = element_text(size=20))
+    theme(
+      text = element_text(size = 20),
+      plot.title = element_text(size = rel(0.8), face = "bold"),
+      axis.title.x = element_text(size = rel(0.8)),
+      axis.title.y = element_text(size = rel(0.8))
+    )
   return(p)
 }
 
 #' @export
-prepare_periodicities_dataset <- function(list) {
-  # DS to save all data
-  dt <-
-    setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("fInv", "b", "label"))
-  # Prepare data
-  ranges <- names(list)
-  for (range in ranges) {
-    dt <- rbind(dt,
-                data.frame(
-                  "fInv" = list[[as.character(range)]][["fInv"]],
-                  "b" = list[[as.character(range)]][["b"]],
-                  "label" = paste(list[[as.character(range)]][["label"]], " freqs")
-                ))
-  }
-  dt
-}
-
-
-#' @export
-prepare_echelles_dataset <- function(list) {
-  # DS to save all data
-  dt <-
-    setNames(data.frame(matrix(ncol = 3, nrow = 0)), c("x", "y", "label"))
-  # Prepare data
-  ranges <- names(list)
-  for (range in ranges) {
-    dt <- rbind(dt,
-                data.frame(
-                  "x" = list[[as.character(range)]][["modDnuStacked"]],
-                  "y" = list[[as.character(range)]][["freMas"]],
-                  "h" = list[[as.character(range)]][["amplitudes"]],
-                  "label" = paste(range, " freqs")
-                ))
-  }
-  dt
-}
-
-#' @export
 plot_periodicities <- function(dt) {
-  # Calculate maxs
-  inds <- aggregate(b~label, data = dt, max)
-  maxs <- dt[dt$b %in% inds$b,]
-  # Plot frecuency and amplitude
-  ggplot(aes(
-    x = fInv,
-    y = b,
-    group = label,
-    colour = label
-  ), data = dt) +
-    #geom_point(alpha=0.2) +
-    geom_line(alpha = 0.8) +
-    geom_vline(data=maxs, 
-               mapping=aes(xintercept=fInv, colour=label), linetype=2) +
-    ggtitle(expression(paste("Periodicities (", d ^ -1, ")"))) +
-    xlab(expression(paste("Periodicities (", mu, "hz)"))) +
-    ylab("Amplitude") +
-    theme_bw() +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    scale_color_lancet() +
-    scale_x_continuous(breaks=round(c(maxs$fInv,seq(0,max(dt$fInv),10)), 1)) +
-    theme(text = element_text(size=20))
+  # # Calculate maxs
+  # inds <- aggregate(b ~ label, data = dt, max)
+  # maxs <- dt[dt$b %in% inds$b,]
+  # # Plot frecuency and amplitude
+  # p <- ggplot(aes(
+  #   x = fInv,
+  #   y = b,
+  #   group = label,
+  #   colour = label
+  # ), data = dt) +
+  #   #geom_point(alpha=0.2) +
+  #   geom_line(alpha = 0.8) +
+  #   geom_vline(
+  #     data = maxs,
+  #     mapping = aes(xintercept = fInv, colour = label),
+  #     linetype = 2
+  #   ) +
+  #   
+  #   annotate(geom = "text",
+  #     x = maxs$fInv, y = maxs$b, label=maxs$fInv
+  #   ) +
+  #   
+  #   annotate(geom = "text",
+  #            x = maxs$fInv, y = maxs$b, label=maxs$fInv
+  #   ) +
+  #   
+  #   ggtitle("Periodicities") +
+  #   xlab(expression(paste("Periodicities (", mu, "hz)"))) +
+  #   ylab("Amplitude") +
+  #   theme_bw() +
+  #   theme(
+  #     plot.margin = unit(c(1, 1, 4, 1), "lines"),
+  #     axis.title.x = element_blank(),
+  #     axis.text.x = element_blank(),
+  #     panel.grid.major.x = element_blank(),
+  #     panel.grid.minor.x = element_blank()
+  #   ) +
+  #   scale_color_lancet() +
+  #   scale_x_continuous(breaks = round(seq(
+  #     from = 0, to = 100, by = 25
+  #   )))
+  # g2 <- ggplot_gtable(ggplot_build(p))
+  # g2$layout$clip[g2$layout$name == "panel"] <- "off"
+  # grid::grid.draw(g2)
+  # return(p)
+  # 
+    plot_ly(
+      dt,
+      x = ~ fInv,
+      y = ~ b,
+      type = 'scatter',
+      mode = 'lines',
+      color = ~ label
+      ) %>%
+      layout(xaxis = list(title = "Periodicitie (mHz)"), 
+            yaxis = list(title = "Amplitude")) %>%
+      config(mathjax = 'cdn')
 }
 
 
 #' @export
 plot_echelle <- function(dt, dnu, dnuD) {
-  # colour palette
-  library(RColorBrewer)
-  rf <- colorRampPalette(rev(brewer.pal(11, 'Spectral')))
-  r <- rf(32)
-  # plot
-  dt$label <- as.factor(dt$label)
-  ggplot(aes(x = x, y = y), data = dt) +
-    #stat_density2d(
-    #  geom = "raster",
-    #  aes(fill = ..density..),
-    #  n = 200,
-    #  #h = 10,
-    #  contour = FALSE
-    #) +
-    geom_point(aes(size=h, shape=label, colour=label, alpha=0.6)) + 
-    theme_bw() +
-    #scale_fill_gradientn(colours = r) +
-    ggtitle("Echelle diagram") +
-    xlab(substitute(paste(title," ",Delta,nu," (",dnu," ",mu,"Hz =",dnuD," ",d^-1,")", sep=" "), 
-                    list(title="Frequencies mod", dnu=dnu, dnuD=dnuD))) +
-    ylab("Frequencies") +
-    #scale_color_gradientn(colours = r)  +
-    theme(text = element_text(size=20)) +
-    scale_colour_manual(name = "label",
-                        values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")) +
-    xlim(0, 1)
+  # # colour palette
+  # library(RColorBrewer)
+  # rf <- colorRampPalette(rev(brewer.pal(11, 'Spectral')))
+  # r <- rf(32)
+  # # plot
+  # dt$label <- as.factor(dt$label)
+  # p <- ggplot(aes(x = x, y = y), data = dt) +
+  #   #stat_density2d(
+  #   #  geom = "raster",
+  #   #  aes(fill = ..density..),
+  #   #  n = 200,
+  #   #  #h = 10,
+  #   #  contour = FALSE
+  #   #) +
+  #   geom_point(aes(
+  #     size = h,
+  #     shape = label,
+  #     colour = label,
+  #     alpha = 0.6
+  #   )) +
+  #   theme_bw() +
+  #   #scale_fill_gradientn(colours = r) +
+  #   ggtitle("Echelle diagram") +
+  #   xlab(substitute(
+  #     paste(
+  #       title,
+  #       " ",
+  #       Delta,
+  #       nu,
+  #       " (",
+  #       dnu,
+  #       " ",
+  #       mu,
+  #       "Hz =",
+  #       dnuD,
+  #       " ",
+  #       d ^ -1,
+  #       ")",
+  #       sep = " "
+  #     ),
+  #     list(
+  #       title = "Frequencies mod",
+  #       dnu = dnu,
+  #       dnuD = dnuD
+  #     )
+  #   )) +
+  #   ylab("Frequencies") +
+  #   #scale_color_gradientn(colours = r)  +
+  #   theme(
+  #     text = element_text(size = 20),
+  #     plot.title = element_text(size = rel(0.8), face = "bold"),
+  #     axis.title.x = element_text(size = rel(0.8)),
+  #     axis.title.y = element_text(size = rel(0.8)),
+  #     legend.title = element_text(size = 11),
+  #     legend.text = element_text(size = 10)
+  #   ) +
+  #   scale_colour_manual(
+  #     name = "label",
+  #     values = c("#E41A1C", "#377EB8", "#4DAF4A", "#984EA3", "#FF7F00")
+  #   ) +
+  #   xlim(0, 1)
+  # return(p)
+  
+  plot_ly(
+    dt,
+    x = ~ x,
+    y = ~ y,
+    type = 'scatter',
+    mode = 'markers',
+    color = ~ h,
+    symbol = ~ label,
+    opacity = 0.5
+  ) %>%
+    layout(xaxis = list(title = "Frequencies mod", range = c(0, 1)), 
+           yaxis = list(title = "Frequencies")) %>%
+    config(mathjax = 'cdn')
 }
 
 #' @export
 plot_histogram <- function(dt) {
-  ggplot(aes(x = bins, y = values), data = dt) +
+  p <- ggplot(aes(x = bins, y = values), data = dt) +
     geom_bar(stat = "identity") +
     ggtitle("Histogram of differences") +
+    xlab(expression(paste("Differences (", mu, "hz)"))) +
+    ylab("Frecuency") +
     theme_bw() +
-    theme(text = element_text(size=20))
+    theme(
+      text = element_text(size = 20),
+      plot.title = element_text(size = rel(0.8), face = "bold"),
+      axis.title.x = element_text(size = rel(0.8)),
+      axis.title.y = element_text(size = rel(0.8))
+    )
+  return(p)
 }
 
 #' @export
 plot_crosscorrelation <- function(dt) {
-  ggplot(aes(x = index, y = autocorre), data = dt) +
-    geom_line(stat = "identity") +
-    ggtitle("Autocorrelacion (Crosscorrelation)") +
-    xlab(expression(paste("Periodicities (", mu, "hz)"))) +
-    ylab("Autocorrelation") +
-    theme_bw() +
-    theme(text = element_text(size=20))
+  # p <- ggplot(aes(x = index, y = autocorre), data = dt) +
+  #   geom_line(stat = "identity") +
+  #   ggtitle("Crosscorrelation") +
+  #   xlab(expression(paste("Periodicities (", mu, "hz)"))) +
+  #   ylab("Autocorrelation") +
+  #   theme_bw() +
+  #   theme(
+  #     text = element_text(size = 20),
+  #     plot.title = element_text(size = rel(0.8), face = "bold"),
+  #     axis.title.x = element_text(size = rel(0.8)),
+  #     axis.title.y = element_text(size = rel(0.8))
+  #   )
+  # return(p)
+  
+  plot_ly(
+    dt,
+    x = ~ index,
+    y = ~ autocorre,
+    type = 'scatter',
+    mode = 'lines'
+  ) %>%
+    layout(xaxis = list(title = "Frequencies (mHz)"), 
+           yaxis = list(title = "Crosscorrelation")) %>%
+    config(mathjax = 'cdn')
 }
-
