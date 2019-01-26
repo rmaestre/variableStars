@@ -1,3 +1,5 @@
+library(plotly)
+
 ui <- pageWithSidebar(
   headerPanel('Variable Stars'),
   sidebarPanel(
@@ -137,13 +139,13 @@ ui <- pageWithSidebar(
     )),
     fluidRow(splitLayout(
       cellWidths = c("50%", "50%"),
-      plotOutput("plotPeriodicities"),
-      plotOutput("plotEchelle")
+      plotlyOutput("plotPeriodicities"),
+      plotlyOutput("plotEchelle")
     )),
     fluidRow(splitLayout(
       cellWidths = c("50%", "50%"),
       plotOutput("plotHistogramDiff"),
-      plotOutput("plotAutocorrelation")
+      plotlyOutput("plotAutocorrelation")
     ))
   )
 )

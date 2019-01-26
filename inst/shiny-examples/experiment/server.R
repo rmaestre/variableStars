@@ -2,6 +2,7 @@ library(variableStars)
 library(data.table)
 library(ggplot2)
 library(ggsci)
+library(plotly)
 
 server <- function(input, output, session) {
   globals <-
@@ -91,8 +92,8 @@ server <- function(input, output, session) {
     # Save global dataset
     globals$processedDatasets[["spectrum"]] = dt
     # Return plot
-    plot_spectrum(min(dt$frequency), max(dt$frequency), dt) +
-      geom_bar(aes(fill = as.factor(pattern %% 2)), stat = "identity")
+    plot_spectrum(min(dt$frequency), max(dt$frequency), dt) 
+      #geom_bar(aes(fill = as.factor(pattern %% 2)), stat = "identity")
   })
   apodization <- eventReactive(input$process, {
     dt <- data.frame(
@@ -140,16 +141,16 @@ server <- function(input, output, session) {
   output$plotApodization = renderPlot({
     apodization()
   })
-  output$plotPeriodicities = renderPlot({
+  output$plotPeriodicities = renderPlotly({
     periodicities()
   })
-  output$plotEchelle = renderPlot({
+  output$plotEchelle = renderPlotly({
     echelle()
   })
   output$plotHistogramDiff = renderPlot({
     histogramDiff()
   })
-  output$plotAutocorrelation = renderPlot({
+  output$plotAutocorrelation = renderPlotly({
     autocorrelation()
   })
   
