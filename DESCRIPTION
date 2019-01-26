@@ -16,6 +16,7 @@ Suggests: knitr,
     rmarkdown,
     roxygen2,
     testthat, 
-    shiny
+    shiny,
+    plotly
 SystemRequirements: C++11
 RoxygenNote: 6.1.1
