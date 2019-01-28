@@ -144,7 +144,7 @@ ui <- pageWithSidebar(
     )),
     fluidRow(splitLayout(
       cellWidths = c("50%", "50%"),
-      plotOutput("plotHistogramDiff"),
+      plotlyOutput("plotHistogramDiff"),
       plotlyOutput("plotAutocorrelation")
     ))
   )

@@ -147,7 +147,7 @@ server <- function(input, output, session) {
   output$plotEchelle = renderPlotly({
     echelle()
   })
-  output$plotHistogramDiff = renderPlot({
+  output$plotHistogramDiff = renderPlotly({
     histogramDiff()
   })
   output$plotAutocorrelation = renderPlotly({
