@@ -10,12 +10,11 @@ Authors@R: c(
 Maintainer: Roberto Maestre <rmaestre@gmail.com>
 Description: tbd
 License: GPL (>= 2)
-Imports: Rcpp (>= 0.12.18), RColorBrewer
+Imports: Rcpp (>= 0.12.18), RColorBrewer, plotly, shiny
 LinkingTo: Rcpp, RcppArmadillo
 Suggests: knitr,
     rmarkdown,
     roxygen2,
-    testthat, 
-    shiny
+    testthat
 SystemRequirements: C++11
 RoxygenNote: 6.1.1

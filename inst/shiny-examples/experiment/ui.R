@@ -1,6 +1,9 @@
+library(plotly)
+
 ui <- pageWithSidebar(
   headerPanel('Variable Stars'),
   sidebarPanel(
+    actionButton(inputId = 'process', 'Process'),
     h2("Synthetic data generation"),
     numericInput(
       inputId = 'seed',
@@ -11,20 +14,20 @@ ui <- pageWithSidebar(
     ),
     tags$hr(),
     sliderInput("numFreqs", "Frequences number",
-                min = 0, max = 100, value = 100
+                min = 0, max = 100, value = 10
     ),
     numericInput(
       inputId = 'periodF',
       'Period for 1º pattern',
-      min = 0, max = 100, value = 5, step = 0.1
+      min = 0, max = 100, value = 1, step = 0.1
     ),
     numericInput(
       inputId = 'periofS',
       'Period for 2º pattern',
-      min = 0, max = 100, value = 3.5, step = 0.1
+      min = 0, max = 100, value = 1, step = 0.1
     ),
     sliderInput("distance", "Distance between patterns",
-                min = 0, max = 20, value = 2, step = 0.1
+                min = 0, max = 20, value = 0.5, step = 0.1
     ),
     tags$hr(),
     numericInput(
@@ -45,7 +48,7 @@ ui <- pageWithSidebar(
     ),
     tags$hr(),
     sliderInput("ampRandRange", "Random amplitudes range",
-                min = 0, max = 1000, value = 0
+                min = 0, max = 100, value = 0
     ),
     sliderInput("freqOneRandRange", "Random frecuence 1º range",
                 min = 0, max = 2, value = 0.0, step = 0.01
@@ -114,7 +117,7 @@ ui <- pageWithSidebar(
     numericInput(
       inputId = 'numFrequencies',
       'Number of frecuencies selected',
-      30,
+      10,
       min = 0,
       max = 1000
     ),
@@ -123,27 +126,23 @@ ui <- pageWithSidebar(
       label = 'In terminal debug information',
       value = TRUE
     ),
-    actionButton(inputId = 'process', 'Process'),
-    br(),
-    p("Click the button to perfomr the calculations.")
-    ,
     downloadButton("downloadData", "Download experiment data")
   ),
   mainPanel(
     fluidRow(splitLayout(
       cellWidths = c("50%", "50%"),
-      plotOutput("plotSpectrum"),
+      plotlyOutput("plotSpectrum"),
       plotOutput("plotApodization")
     )),
     fluidRow(splitLayout(
       cellWidths = c("50%", "50%"),
-      plotOutput("plotPeriodicities"),
-      plotOutput("plotEchelle")
+      plotlyOutput("plotPeriodicities"),
+      plotlyOutput("plotEchelle")
     )),
     fluidRow(splitLayout(
       cellWidths = c("50%", "50%"),
-      plotOutput("plotHistogramDiff"),
-      plotOutput("plotAutocorrelation")
+      plotlyOutput("plotHistogramDiff"),
+      plotlyOutput("plotAutocorrelation")
     ))
   )
 )
