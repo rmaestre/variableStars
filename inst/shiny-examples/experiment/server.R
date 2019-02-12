@@ -23,6 +23,7 @@ server <- function(input, output, session) {
       input$freqTwoRandRange,
       input$ampRandRange
     )
+    print(dt)
     dt
   }
   
@@ -135,7 +136,7 @@ server <- function(input, output, session) {
   })
   
   
-  output$plotSpectrum = renderPlot({
+  output$plotSpectrum = renderPlotly({
     spectrum()
   })
   output$plotApodization = renderPlot({
