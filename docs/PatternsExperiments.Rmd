@@ -12,7 +12,9 @@ library(ggplot2)
 library(ggsci)
 library(microbenchmark)
 library(RColorBrewer)
+library(plotly)
 library(mgcv)
+library(vcd)
 ```
 
 
@@ -21,43 +23,139 @@ library(mgcv)
 This results can be calculated through the experimental UI available [here](https://github.com/rmaestre/variableStars/tree/master/inst/shiny-examples/experiment).
 
 
-# Experiment structure
+# Data Generation
 
-```{r, echo=F}
-find_peaks <- function(x) {
-  # Diff series
-  xd <- diff(x)
-  # DS to save peaks
-  peaks <- c()
-  last_sign <- sign(xd[1])
-  # Loop over diff values
-  for (i in seq(1:length(xd))) {
-    if (last_sign != sign(xd[i]) && sign(xd[i]) < 0) {
-      peaks <- c(peaks, i)
-    }
-    last_sign = sign(xd[i])
-  }
-  peaks # return peaks index
-}
-```
+```{r, cache=T}
+# Select experiment parameters
+distance <- 1
+numFreqs <- 100
+#set.seed(82914)
+set.seed(4132093)
+periodF <- 0.192
+periodS <- 5.29
+# Debug info with experiment configuration
+print(
+  paste(
+    " First period:",
+    round(periodF, 3),
+    " (",
+    round(periodF / 0.0864, 3),
+    "muHz)",
+    " Second period:",
+    round(periodS, 3),
+    " (",
+    round(periodS / 0.0864, 3),
+    "muHz)",
+    sep = ""
+  )
+)
 
-
-```{r}
+# Data generation
 dt <- generate_data(
-  numFreqs = 40,
-  distance = 1.1,
-  periodF = 0.4,
-  periodS = 5.1,
+  numFreqs = numFreqs,
+  distance = distance,
+  periodF = periodF,
+  periodS = periodS,
   baseAMplitudeFirst = 10,
   baseAMplitudeSecond = 10,
-  seed = 1234,
+  seed = NULL,
   freqOneRandRange = 0.0,
   freqTwoRandRange = 0.0,
-  ampRandRange = 0.0
-  )
+  ampRandRange = 1.0
+)
+# Execute experiment
+result <- process(
+  frequency = dt$x,
+  amplitude = dt$y,
+  filter = "uniform",
+  gRegimen = 0,
+  maxDnu = 15,
+  minDnu = 15,
+  numFrequencies = ifelse(nrow(dt) == 30, 31, nrow(dt)),
+  dnuGuessError = -1,
+  debug = F
+)
 ```
 
-```{r}
+## Periodicities
+
+```{r, cache=T, echo=FALSE, warning=FALSE}
+#plot_periodicities(prepare_periodicities_dataset(result$fresAmps))
+```
+
+## Histogram
+
+```{r, cache=T, echo=FALSE, warning=FALSE}
+#plot_histogram(data.frame(result$diffHistogram$histogram))
+```
+
+## Crosscorrelation
+
+```{r, echo=FALSE, warning=FALSE}
+#plot_crosscorrelation(data.frame(result$crossCorrelation))
+```
+
+
+# Simple MC
+
+```{r, cache=T}
+# size <- 10001 # for calculated amplitudes and frequencies
+# experiments <- 1 # number of trials
+# percentageOfData <- 100
+# 
+# count <- 1
+# periodicities <-
+#   data.frame(matrix(ncol = size, nrow = experiments)) # empty DS to save results
+# for (i in seq(from = 1, to = experiments, by = 1)) {
+#   percent <- round((nrow(dt) * percentageOfData) / 100)
+#   dtSampling <- dt[sample(nrow(dt), percent), ]
+# 
+#   # Execute experiment
+#   resultSampling <- process(
+#     frequency = dtSampling$x,
+#     amplitude = dtSampling$y,
+#     filter = "uniform",
+#     gRegimen = 0,
+#     maxDnu = 15,
+#     minDnu = 15,
+#     numFrequencies = nrow(dtSampling) + 1,
+#     # process all frecuencies
+#     dnuGuessError = -1,
+#     debug = F
+#   )
+#   # Get perioditicies amplitudes and save
+#   for (name in names(resultSampling$fresAmps)) {
+#     periodicities[count,] <- t(resultSampling$fresAmps[[name]]$b)
+#     count <- count + 1
+#   }
+# }
+# 
+# # Z-scores of SD
+# means <- apply(periodicities, 2, mean, na.rm = TRUE)
+# sds <- apply(periodicities, 2, sd, na.rm = TRUE)
+# periodicitiesZScored <- (periodicities - means) / sds
+# 
+# library(reshape2)
+# dtZScored <- data.frame(as.matrix(periodicitiesZScored))
+# colnames(dtZScored) <- resultSampling$fresAmps[[name]]$fInv
+# dtZScored$experiment <- seq.int(nrow(dtZScored))
+# 
+# 
+# dtZScoredMelted <- melt(dtZScored, id.vars = 'experiment')
+# dtZScoredMelted <- subset(dtZScoredMelted, value>=5&value<=5000)
+# 
+# dtZScoredMelted$variable <- as.numeric(as.character(dtZScoredMelted$variable))
+# 
+# 
+# # ggplot(aes(x = variable, y = value, group=experiment), data=dtZScoredMelted) +
+# #   geom_point(alpha=0.05) +
+# #   scale_x_continuous(breaks=seq(0, ncol(dtZScored), 10)) +
+# #   #geom_vline(mapping=aes(xintercept=periodF/0.0864), color="blue") +
+# #   #geom_vline(mapping=aes(xintercept=periodS/0.0864), color="red") +
+# #   theme_bw()
+
+
+# Calculate normal
 result <- process(
   frequency = dt$x,
   amplitude = dt$y,
@@ -67,27 +165,290 @@ result <- process(
   minDnu = 15,
   numFrequencies = 30,
   dnuGuessError = -1,
-  debug = T
+  debug = F
+)
+
+size <- 10001 
+count <- 1
+periodicities <-
+  data.frame(matrix(ncol = size, nrow = length(names(result$fresAmps))))
+for (name in names(result$fresAmps)) {
+  periodicities[count, ] <- t(result$fresAmps[[name]]$b)
+  count <- count + 1
+}
+
+
+# # # Calculate mean and sd for all periodicities
+dtMerg <- merge(
+   prepare_periodicities_dataset(result$fresAmps),
+   data.frame("fInv" = result$fresAmps[[names(result$fresAmps)[1]]]$fInv),
+   by = "fInv"
+)
+
+dtAgg <- data.frame(aggregate(dtMerg$b, by=list(fInv=dtMerg$fInv), FUN=sum))
+colnames(dtAgg) <- c("fInv", "b")
+```
+
+Get maxs
+
+```{r, cache=T}
+# Get network library
+library(igraph)
+library(rgexf)
+trunc <-
+  function(x, ..., prec = 1)
+    base::trunc(x * 10 ^ prec, ...) / 10 ^ prec
+
+
+# Paramters
+truncPrecision <- 0
+
+# Empty list to save edges
+edges <- c()
+
+# Get n
+dtAgg$b <- dtAgg$b / (dtAgg$fInv^-1)
+hsFreqs <- head(dtAgg[with(dtAgg, order(b)),], 1000)
+fs <- trunc(hsFreqs$fInv, prec = truncPrecision)
+n <- length(fs)
+
+dtHist <- data.frame("freq" = 0,
+                     "residuals" = 0,
+                     "b" = 0)
+
+for (i in seq(1:n)) {
+  m <- c()
+  for (x in seq(from = i + 1, to = n)) {
+    mod = fs[i] %% fs[x]
+    m <- c(m, ifelse(mod < 0.2, fs[x],-1))
+    if (!is.na(mod) & mod < 0.1) {
+      if (fs[i] != fs[x]) {
+        if (fs[i] > 3.0 & fs[x] > 3.0) {
+          edges <- c(fs[i], fs[x], edges)
+          #print(paste(fs[i], " ", fs[x], collapse = " "))
+        }
+      }
+    }
+  }
+}
+
+# Create graph
+g <- graph(as.character(edges),
+           directed = F)
+
+# Calculate degree
+E(g)$weight <- 1
+g <- simplify(g, edge.attr.comb = list(weight = "sum"))
+# Calculate normalized weigths
+E(g)$width <-
+  (E(g)$weight - min(E(g)$weight)) / (max(E(g)$weight) - min(E(g)$weight))
+
+# Calculate amplitude
+amplitudes = c()
+for (vName in V(g)$name) {
+  amplitudes <-
+    c(mean(hsFreqs[trunc(hsFreqs$fInv, prec = truncPrecision) == trunc(as.numeric(vName), prec =
+                                                                         truncPrecision), ]$b), amplitudes)
+}
+
+# normalized amplitudes
+amplitudes <-
+  (amplitudes - min(amplitudes)) / (max(amplitudes) - min(amplitudes))
+# Plot and remove vertex
+clusterlouvain <- cluster_louvain(g)
+e <- get.edgelist(g)
+plot(
+  delete.vertices(simplify(g), degree(g) == 0),
+  edge.width = E(g)$width * 10,
+  vertex.size = amplitudes * 10,
+  node.width = 1,
+  #layout = layout_nicely,
+  layout = layout_as_tree,
+  vertex.color = rainbow(3, alpha = 0.6)[clusterlouvain$membership],
+  vertex.label = trunc(as.numeric(V(g)$name), prec = truncPrecision),
+  rescale = T
+)
+
+#cat("My title", as.character(igraph.to.gexf(g, position=NULL)), file="~/Downloads/perio.gexf", sep="n", append=F)
+```
+
+
+
+
+
+```{r, cache=T}
+# Experiment results
+results <- data.frame(matrix(ncol = 7, nrow = 1))
+colnames(results) <-
+  c("fp", "sp", "fpos", "spos", "nfreq", "distance", "numFreqs")
+count <- 1
+
+for (experiment in seq(1:1000)) {
+  # Select experiment parameters
+  distance <- trunc(runif(1, 0, 10), prec=4)
+  numFreqs <- 100
+  periodF <- trunc(runif(1, 0.1, 6), prec=4)
+  periodS <- trunc(runif(1, 0.1, 6), prec=4)
+  # Debug info with experiment configuration
+  if (count %% 10 == 0) {
+    print(
+      paste(
+        "Experiment:",
+        count,
+        " | distance:",
+        distance,
+        " | numFreqs:",
+        numFreqs,
+        " | 1º period:",
+        round(periodF, 3),
+        " (",
+        round(periodF / 0.0864, 3),
+        "muHz)",
+        " | 2º period:",
+        round(periodS, 3),
+        " (",
+        round(periodS / 0.0864, 3),
+        "muHz)",
+        sep = ""
+      )
+    )
+  }
+  
+  # Data generation
+  dt <- generate_data(
+    numFreqs = numFreqs,
+    distance = distance,
+    periodF = periodF,
+    periodS = periodS,
+    baseAMplitudeFirst = 10,
+    baseAMplitudeSecond = 10,
+    seed = NULL,
+    freqOneRandRange = 0.1,
+    freqTwoRandRange = 0.1,
+    ampRandRange = 1.0
   )
+  # Execute experiment
+  result <- process(
+    frequency = dt$x,
+    amplitude = dt$y,
+    filter = "uniform",
+    gRegimen = 0,
+    maxDnu = 15,
+    minDnu = 15,
+    numFrequencies = ifelse(nrow(dt) == 30, 31, nrow(dt)+1),
+    dnuGuessError = -1,
+    debug = F
+  )
+  
+  #plot_histogram(data.frame(result$diffHistogram$histogram))
+  
+  #Check into histogram by sorting by desc amplitudes
+  dtHist <- data.frame(result$diffHistogram$histogram)
+  dtHist <- dtHist[dtHist$values != 0,]
+  
+  # Match
+  binF <-
+    dtHist[which.min((trunc(dtHist$bins, prec = 1) - trunc(periodF / 0.0864, prec =
+                                                             1)) ^ 2) + 1,]
+  binS <-
+    dtHist[which.min((trunc(dtHist$bins, prec = 1) - trunc(periodS / 0.0864, prec =
+                                                             1)) ^ 2) + 1,]
+  # Reorder
+  dtHist <- dtHist[with(dtHist, order(-values)), ]
+  row.names(dtHist) <- seq(1:dim(dtHist)[1])
+  
+  
+  #print(which(trunc(dtHist$bins, prec = 1) == trunc(binF$bins, prec = 1))[1])
+  #print(which(trunc(dtHist$bins, prec = 1) == trunc(binS$bins, prec = 1))[1])
+  
+  results[count, "fp"] <- periodF / 0.0864
+  results[count, "sp"] <- periodS / 0.0864
+  fposVal <- which(trunc(dtHist$bins, prec = 1) == trunc(binF$bins, prec = 1))[1]
+  sposVal <- which(trunc(dtHist$bins, prec = 1) == trunc(binS$bins, prec = 1))[1]
+  results[count, "fpos"] <- ifelse(is.na(fposVal),stop(),fposVal)
+  results[count, "spos"] <- ifelse(is.na(sposVal),stop(),sposVal)
+  results[count, "nfreq"] <- nrow(dt)
+  results[count, "nBins"] <- nrow(dtHist)
+  results[count, "distance"] <- distance
+  results[count, "numFreqs"] <- numFreqs
+  count <- count + 1
+}
+
+# Feature generation
+results$gap <- (results$fp - results$sp) ^ 2
+results$first <- ifelse(results$fpos < 30, 1, 0)
+results$fpsp <- results$fp + results$sp
+
+results$fpos_norm <- results$fpos / results$numFreqs
+
+# Remove outliers based on boxplot
+resultsFilter <- results[results$nfreq < 1000,]
+resultsFilter <- resultsFilter[resultsFilter$fpos < 400,]
 ```
 
-```{r}
-plot_periodicities(prepare_periodicities_dataset(result$fresAmps))
+
+```{r, cache=F, echo=FALSE, warning=FALSE}
+# Ccheck poisson distribution
+#distplot(resultsFilter$fpos)
 ```
 
-```{r}
-plot_histogram(data.frame(result$diffHistogram$histogram))
+fir non-lineal model
+```{r, cache=F, echo=FALSE, warning=FALSE}
+# Model for sistematic check
+model <-
+  gam(
+    fpos_norm ~ nfreq +  distance,
+    family = poisson(link = "log"),
+    data = resultsFilter
+  )
+summary(model)
+termplot(model,terms="nfreq",se=TRUE)
+termplot(model,terms="distance",se=TRUE)
 ```
 
-```{r}
-ind <- which.max(result$diffHistogram$histogram$values)
-periodicity <- result$diffHistogram$histogram$bins[ind]
-periodicity + periodicity + periodicity + periodicity + periodicity
+```{r, cache=F, echo=FALSE, warning=FALSE}
+# Model for sistematic check
+model <-
+  gam(
+    fpos ~ s(nfreq,k =4) +  s(distance,k=4),
+    family = poisson(link = "log"),
+    data = resultsFilter
+  )
+summary(model)
+plot(
+  model,
+  se = 1.96,
+  seWithMean = TRUE,
+  rug = T,
+  shift = mean(predict(model, type="response")),
+  trans = function(x) {
+    exp(x)
+  }
+)
+```
 
-
+```{r, cache=F, echo=FALSE, warning=FALSE}
+# Probability to match
+modelFirst <-
+  gam(first ~ s(fp), family = binomial(), data = resultsFilter)
+summary(modelFirst)
+plot(
+  modelFirst,
+  se = 1.96,
+  rug = TRUE,
+  trans = function(x) {
+    exp(x) / (1 + exp(x))
+  },
+  residuals = T
+) 
 ```
 
 
-```{r}
-plot_crosscorrelation(data.frame(result$crossCorrelation))
+
+
+
+A MLP approach
+
+```{r, cache=F, echo=FALSE, warning=FALSE}
+
 ```

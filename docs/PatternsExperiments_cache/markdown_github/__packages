@@ -1,0 +1,15 @@
+base
+variableStars
+data.table
+ggplot2
+ggsci
+microbenchmark
+RColorBrewer
+plotly
+nlme
+mgcv
+vcd
+igraph
+XML
+Rook
+rgexf
