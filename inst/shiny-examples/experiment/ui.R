@@ -48,7 +48,7 @@ ui <- pageWithSidebar(
     ),
     tags$hr(),
     sliderInput("ampRandRange", "Random amplitudes range",
-                min = 0, max = 100, value = 0
+                min = 0, max = 10, value = 0, step = 0.01
     ),
     sliderInput("freqOneRandRange", "Random frecuence 1º range",
                 min = 0, max = 2, value = 0.0, step = 0.01
