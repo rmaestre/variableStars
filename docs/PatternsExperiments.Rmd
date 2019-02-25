@@ -274,6 +274,7 @@ plot(
 
 
 
+# Sistematic experiments
 
 
 ```{r, cache=T}
@@ -387,12 +388,15 @@ resultsFilter <- resultsFilter[resultsFilter$fpos < 400,]
 ```
 
 
+# Check poisson distribution
+
 ```{r, cache=F, echo=FALSE, warning=FALSE}
 # Ccheck poisson distribution
-#distplot(resultsFilter$fpos)
+distplot(resultsFilter$fpos)
 ```
 
-fir non-lineal model
+# Fit lineal model
+
 ```{r, cache=F, echo=FALSE, warning=FALSE}
 # Model for sistematic check
 model <-
@@ -405,6 +409,8 @@ summary(model)
 termplot(model,terms="nfreq",se=TRUE)
 termplot(model,terms="distance",se=TRUE)
 ```
+
+# Fit non-lineal model
 
 ```{r, cache=F, echo=FALSE, warning=FALSE}
 # Model for sistematic check
@@ -427,6 +433,9 @@ plot(
 )
 ```
 
+# Fit probability to match frecuency on [0-30] first differences
+
+
 ```{r, cache=F, echo=FALSE, warning=FALSE}
 # Probability to match
 modelFirst <-
@@ -444,11 +453,24 @@ plot(
 ```
 
 
+# Fit probability to match frecuency on [0-30] first differences
 
-
-
-A MLP approach
 
 ```{r, cache=F, echo=FALSE, warning=FALSE}
+
+# create model
+model = Sequential()
+model.add(Dense(8, input_dim=4, activation='relu'))
+model.add(Dense(3, activation='softmax'))
+# Compile model
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+# Configure a model for categorical classification.
+model %>% compile(
+  loss = "categorical_crossentropy",
+  optimizer = optimizer_adam(lr = 0.001),
+  metrics = c("accuracy")
+)
+summary(model) # Plot summary
 
 ```

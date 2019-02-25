@@ -284,6 +284,9 @@ plot(
 #cat("My title", as.character(igraph.to.gexf(g, position=NULL)), file="~/Downloads/perio.gexf", sep="n", append=F)
 ```
 
+Sistematic experiments
+======================
+
 ``` r
 # Experiment results
 results <- data.frame(matrix(ncol = 7, nrow = 1))
@@ -383,106 +386,106 @@ for (experiment in seq(1:1000)) {
 }
 ```
 
-    ## [1] "Experiment:10 | distance:1.9861 | numFreqs:100 | 1º period:1.038 (12.01muHz) | 2º period:4.54 (52.541muHz)"
-    ## [1] "Experiment:20 | distance:4.6922 | numFreqs:100 | 1º period:1.052 (12.177muHz) | 2º period:5.892 (68.198muHz)"
-    ## [1] "Experiment:30 | distance:0.7766 | numFreqs:100 | 1º period:3.855 (44.62muHz) | 2º period:1.381 (15.987muHz)"
-    ## [1] "Experiment:40 | distance:8.7542 | numFreqs:100 | 1º period:0.328 (3.791muHz) | 2º period:0.587 (6.789muHz)"
-    ## [1] "Experiment:50 | distance:6.6556 | numFreqs:100 | 1º period:0.33 (3.821muHz) | 2º period:0.703 (8.137muHz)"
-    ## [1] "Experiment:60 | distance:2.3688 | numFreqs:100 | 1º period:3.146 (36.407muHz) | 2º period:3.663 (42.395muHz)"
-    ## [1] "Experiment:70 | distance:9.3655 | numFreqs:100 | 1º period:5.762 (66.686muHz) | 2º period:2.182 (25.259muHz)"
-    ## [1] "Experiment:80 | distance:7.0593 | numFreqs:100 | 1º period:3.028 (35.051muHz) | 2º period:3.283 (38.002muHz)"
-    ## [1] "Experiment:90 | distance:7.8682 | numFreqs:100 | 1º period:3.678 (42.574muHz) | 2º period:2.588 (29.953muHz)"
-    ## [1] "Experiment:100 | distance:1.0941 | numFreqs:100 | 1º period:1.564 (18.108muHz) | 2º period:1.736 (20.098muHz)"
-    ## [1] "Experiment:110 | distance:5.8672 | numFreqs:100 | 1º period:5.196 (60.133muHz) | 2º period:1.224 (14.169muHz)"
-    ## [1] "Experiment:120 | distance:5.392 | numFreqs:100 | 1º period:1.403 (16.233muHz) | 2º period:0.612 (7.082muHz)"
-    ## [1] "Experiment:130 | distance:8.5769 | numFreqs:100 | 1º period:1.781 (20.609muHz) | 2º period:2.976 (34.442muHz)"
-    ## [1] "Experiment:140 | distance:8.1962 | numFreqs:100 | 1º period:2.264 (26.204muHz) | 2º period:3.82 (44.218muHz)"
-    ## [1] "Experiment:150 | distance:5.6637 | numFreqs:100 | 1º period:5.695 (65.914muHz) | 2º period:2.963 (34.294muHz)"
-    ## [1] "Experiment:160 | distance:9.9889 | numFreqs:100 | 1º period:5.611 (64.939muHz) | 2º period:0.734 (8.497muHz)"
-    ## [1] "Experiment:170 | distance:1.0359 | numFreqs:100 | 1º period:4.861 (56.262muHz) | 2º period:1.45 (16.78muHz)"
-    ## [1] "Experiment:180 | distance:9.1233 | numFreqs:100 | 1º period:5.432 (62.872muHz) | 2º period:5.704 (66.016muHz)"
-    ## [1] "Experiment:190 | distance:6.5211 | numFreqs:100 | 1º period:4.018 (46.508muHz) | 2º period:1.184 (13.707muHz)"
-    ## [1] "Experiment:200 | distance:6.3279 | numFreqs:100 | 1º period:5.216 (60.374muHz) | 2º period:5.486 (63.491muHz)"
-    ## [1] "Experiment:210 | distance:5.5305 | numFreqs:100 | 1º period:3.696 (42.775muHz) | 2º period:4.525 (52.377muHz)"
-    ## [1] "Experiment:220 | distance:4.0405 | numFreqs:100 | 1º period:0.929 (10.751muHz) | 2º period:0.924 (10.697muHz)"
-    ## [1] "Experiment:230 | distance:1.8216 | numFreqs:100 | 1º period:3.589 (41.537muHz) | 2º period:4.792 (55.457muHz)"
-    ## [1] "Experiment:240 | distance:6.9551 | numFreqs:100 | 1º period:5.803 (67.162muHz) | 2º period:0.705 (8.157muHz)"
-    ## [1] "Experiment:250 | distance:9.2691 | numFreqs:100 | 1º period:1.036 (11.986muHz) | 2º period:5.61 (64.933muHz)"
-    ## [1] "Experiment:260 | distance:6.0353 | numFreqs:100 | 1º period:5.905 (68.347muHz) | 2º period:3.698 (42.796muHz)"
-    ## [1] "Experiment:270 | distance:8.8226 | numFreqs:100 | 1º period:1.078 (12.481muHz) | 2º period:3.724 (43.103muHz)"
-    ## [1] "Experiment:280 | distance:9.9415 | numFreqs:100 | 1º period:3.831 (44.339muHz) | 2º period:1.269 (14.69muHz)"
-    ## [1] "Experiment:290 | distance:0.0073 | numFreqs:100 | 1º period:3.666 (42.432muHz) | 2º period:4.978 (57.617muHz)"
-    ## [1] "Experiment:300 | distance:2.8218 | numFreqs:100 | 1º period:5.925 (68.579muHz) | 2º period:3.692 (42.736muHz)"
-    ## [1] "Experiment:310 | distance:1.0173 | numFreqs:100 | 1º period:3.449 (39.92muHz) | 2º period:2.906 (33.638muHz)"
-    ## [1] "Experiment:320 | distance:0.2208 | numFreqs:100 | 1º period:3.805 (44.043muHz) | 2º period:4.453 (51.544muHz)"
-    ## [1] "Experiment:330 | distance:8.9353 | numFreqs:100 | 1º period:1.287 (14.896muHz) | 2º period:2.829 (32.742muHz)"
-    ## [1] "Experiment:340 | distance:9.2455 | numFreqs:100 | 1º period:3.825 (44.266muHz) | 2º period:5.5 (63.662muHz)"
-    ## [1] "Experiment:350 | distance:7.6167 | numFreqs:100 | 1º period:0.804 (9.31muHz) | 2º period:4.859 (56.24muHz)"
-    ## [1] "Experiment:360 | distance:0.6703 | numFreqs:100 | 1º period:2.577 (29.822muHz) | 2º period:3.48 (40.278muHz)"
-    ## [1] "Experiment:370 | distance:9.7452 | numFreqs:100 | 1º period:3.038 (35.156muHz) | 2º period:3.605 (41.721muHz)"
-    ## [1] "Experiment:380 | distance:4.4593 | numFreqs:100 | 1º period:5.261 (60.887muHz) | 2º period:3.924 (45.417muHz)"
-    ## [1] "Experiment:390 | distance:2.3386 | numFreqs:100 | 1º period:4.32 (50.006muHz) | 2º period:2.663 (30.823muHz)"
-    ## [1] "Experiment:400 | distance:2.1111 | numFreqs:100 | 1º period:0.326 (3.779muHz) | 2º period:3.237 (37.462muHz)"
-    ## [1] "Experiment:410 | distance:7.4085 | numFreqs:100 | 1º period:3.017 (34.917muHz) | 2º period:0.364 (4.213muHz)"
-    ## [1] "Experiment:420 | distance:9.4688 | numFreqs:100 | 1º period:3.24 (37.502muHz) | 2º period:5.837 (67.559muHz)"
-    ## [1] "Experiment:430 | distance:9.6912 | numFreqs:100 | 1º period:3.417 (39.551muHz) | 2º period:4.197 (48.578muHz)"
-    ## [1] "Experiment:440 | distance:5.5886 | numFreqs:100 | 1º period:0.989 (11.444muHz) | 2º period:1.939 (22.442muHz)"
-    ## [1] "Experiment:450 | distance:4.2492 | numFreqs:100 | 1º period:3.963 (45.867muHz) | 2º period:0.785 (9.089muHz)"
-    ## [1] "Experiment:460 | distance:7.8396 | numFreqs:100 | 1º period:0.457 (5.285muHz) | 2º period:4.941 (57.193muHz)"
-    ## [1] "Experiment:470 | distance:2.0963 | numFreqs:100 | 1º period:1.119 (12.953muHz) | 2º period:1.446 (16.737muHz)"
-    ## [1] "Experiment:480 | distance:7.5943 | numFreqs:100 | 1º period:4.992 (57.773muHz) | 2º period:1.463 (16.928muHz)"
-    ## [1] "Experiment:490 | distance:0.1312 | numFreqs:100 | 1º period:4.899 (56.699muHz) | 2º period:2.123 (24.566muHz)"
-    ## [1] "Experiment:500 | distance:8.1307 | numFreqs:100 | 1º period:4.502 (52.102muHz) | 2º period:4.825 (55.848muHz)"
-    ## [1] "Experiment:510 | distance:0.622 | numFreqs:100 | 1º period:0.943 (10.911muHz) | 2º period:3.44 (39.812muHz)"
-    ## [1] "Experiment:520 | distance:0.8523 | numFreqs:100 | 1º period:0.498 (5.766muHz) | 2º period:1.31 (15.162muHz)"
-    ## [1] "Experiment:530 | distance:0.9671 | numFreqs:100 | 1º period:4.556 (52.727muHz) | 2º period:4.824 (55.832muHz)"
-    ## [1] "Experiment:540 | distance:4.9047 | numFreqs:100 | 1º period:0.289 (3.347muHz) | 2º period:4.763 (55.126muHz)"
-    ## [1] "Experiment:550 | distance:0.8244 | numFreqs:100 | 1º period:1.86 (21.524muHz) | 2º period:1.456 (16.855muHz)"
-    ## [1] "Experiment:560 | distance:2.4993 | numFreqs:100 | 1º period:3.612 (41.803muHz) | 2º period:1.175 (13.598muHz)"
-    ## [1] "Experiment:570 | distance:9.9025 | numFreqs:100 | 1º period:2.509 (29.042muHz) | 2º period:1.61 (18.637muHz)"
-    ## [1] "Experiment:580 | distance:2.7764 | numFreqs:100 | 1º period:2.749 (31.823muHz) | 2º period:3.871 (44.802muHz)"
-    ## [1] "Experiment:590 | distance:2.072 | numFreqs:100 | 1º period:3.834 (44.377muHz) | 2º period:0.397 (4.593muHz)"
-    ## [1] "Experiment:600 | distance:4.1844 | numFreqs:100 | 1º period:5.983 (69.251muHz) | 2º period:0.145 (1.677muHz)"
-    ## [1] "Experiment:610 | distance:3.4234 | numFreqs:100 | 1º period:3.585 (41.494muHz) | 2º period:0.366 (4.24muHz)"
-    ## [1] "Experiment:620 | distance:6.5689 | numFreqs:100 | 1º period:2.87 (33.219muHz) | 2º period:0.761 (8.811muHz)"
-    ## [1] "Experiment:630 | distance:5.1581 | numFreqs:100 | 1º period:5.347 (61.888muHz) | 2º period:4.951 (57.306muHz)"
-    ## [1] "Experiment:640 | distance:2.2256 | numFreqs:100 | 1º period:1.205 (13.942muHz) | 2º period:1.125 (13.024muHz)"
-    ## [1] "Experiment:650 | distance:9.3504 | numFreqs:100 | 1º period:0.554 (6.418muHz) | 2º period:4.807 (55.632muHz)"
-    ## [1] "Experiment:660 | distance:2.7579 | numFreqs:100 | 1º period:4.53 (52.431muHz) | 2º period:4.386 (50.762muHz)"
-    ## [1] "Experiment:670 | distance:2.431 | numFreqs:100 | 1º period:0.803 (9.294muHz) | 2º period:1.659 (19.206muHz)"
-    ## [1] "Experiment:680 | distance:3.2501 | numFreqs:100 | 1º period:5.985 (69.269muHz) | 2º period:4.782 (55.353muHz)"
-    ## [1] "Experiment:690 | distance:5.0518 | numFreqs:100 | 1º period:5.9 (68.284muHz) | 2º period:2.299 (26.609muHz)"
-    ## [1] "Experiment:700 | distance:0.4783 | numFreqs:100 | 1º period:4.343 (50.262muHz) | 2º period:3.841 (44.451muHz)"
-    ## [1] "Experiment:710 | distance:8.1731 | numFreqs:100 | 1º period:1.398 (16.184muHz) | 2º period:2.142 (24.792muHz)"
-    ## [1] "Experiment:720 | distance:6.2746 | numFreqs:100 | 1º period:3.118 (36.09muHz) | 2º period:4.856 (56.2muHz)"
-    ## [1] "Experiment:730 | distance:6.0764 | numFreqs:100 | 1º period:5.608 (64.911muHz) | 2º period:3.904 (45.182muHz)"
-    ## [1] "Experiment:740 | distance:6.3152 | numFreqs:100 | 1º period:5.903 (68.325muHz) | 2º period:1.233 (14.27muHz)"
-    ## [1] "Experiment:750 | distance:9.5752 | numFreqs:100 | 1º period:1.4 (16.204muHz) | 2º period:5.48 (63.424muHz)"
-    ## [1] "Experiment:760 | distance:4.2488 | numFreqs:100 | 1º period:4.11 (47.571muHz) | 2º period:4.517 (52.275muHz)"
-    ## [1] "Experiment:770 | distance:7.3097 | numFreqs:100 | 1º period:3.175 (36.744muHz) | 2º period:4.898 (56.686muHz)"
-    ## [1] "Experiment:780 | distance:6.0114 | numFreqs:100 | 1º period:1.66 (19.216muHz) | 2º period:0.23 (2.664muHz)"
-    ## [1] "Experiment:790 | distance:9.8906 | numFreqs:100 | 1º period:2.498 (28.91muHz) | 2º period:4.178 (48.359muHz)"
-    ## [1] "Experiment:800 | distance:5.3636 | numFreqs:100 | 1º period:4.752 (55muHz) | 2º period:5.037 (58.301muHz)"
-    ## [1] "Experiment:810 | distance:3.707 | numFreqs:100 | 1º period:5.751 (66.561muHz) | 2º period:5.029 (58.209muHz)"
-    ## [1] "Experiment:820 | distance:6.3685 | numFreqs:100 | 1º period:5.04 (58.334muHz) | 2º period:5.475 (63.368muHz)"
-    ## [1] "Experiment:830 | distance:0.7175 | numFreqs:100 | 1º period:3.46 (40.044muHz) | 2º period:0.497 (5.756muHz)"
-    ## [1] "Experiment:840 | distance:6.4024 | numFreqs:100 | 1º period:5.604 (64.866muHz) | 2º period:1.576 (18.237muHz)"
-    ## [1] "Experiment:850 | distance:6.8335 | numFreqs:100 | 1º period:4.232 (48.985muHz) | 2º period:5.106 (59.1muHz)"
-    ## [1] "Experiment:860 | distance:6.6679 | numFreqs:100 | 1º period:5.05 (58.453muHz) | 2º period:3.324 (38.476muHz)"
-    ## [1] "Experiment:870 | distance:9.9078 | numFreqs:100 | 1º period:1.887 (21.841muHz) | 2º period:4.953 (57.326muHz)"
-    ## [1] "Experiment:880 | distance:2.8977 | numFreqs:100 | 1º period:4.12 (47.686muHz) | 2º period:1.087 (12.582muHz)"
-    ## [1] "Experiment:890 | distance:0.3124 | numFreqs:100 | 1º period:4.068 (47.08muHz) | 2º period:1.016 (11.758muHz)"
-    ## [1] "Experiment:900 | distance:3.0213 | numFreqs:100 | 1º period:5.08 (58.801muHz) | 2º period:3.688 (42.683muHz)"
-    ## [1] "Experiment:910 | distance:6.7861 | numFreqs:100 | 1º period:2.55 (29.52muHz) | 2º period:2.086 (24.141muHz)"
-    ## [1] "Experiment:920 | distance:2.3608 | numFreqs:100 | 1º period:0.416 (4.816muHz) | 2º period:4.8 (55.552muHz)"
-    ## [1] "Experiment:930 | distance:5.6251 | numFreqs:100 | 1º period:4.825 (55.848muHz) | 2º period:0.834 (9.659muHz)"
-    ## [1] "Experiment:940 | distance:8.7887 | numFreqs:100 | 1º period:1.93 (22.334muHz) | 2º period:0.742 (8.583muHz)"
-    ## [1] "Experiment:950 | distance:0.3372 | numFreqs:100 | 1º period:0.748 (8.653muHz) | 2º period:3.766 (43.586muHz)"
-    ## [1] "Experiment:960 | distance:6.7773 | numFreqs:100 | 1º period:1.073 (12.421muHz) | 2º period:2.864 (33.142muHz)"
-    ## [1] "Experiment:970 | distance:5.2601 | numFreqs:100 | 1º period:3.937 (45.569muHz) | 2º period:2.985 (34.545muHz)"
-    ## [1] "Experiment:980 | distance:2.4259 | numFreqs:100 | 1º period:4.096 (47.402muHz) | 2º period:5.314 (61.508muHz)"
-    ## [1] "Experiment:990 | distance:3.3372 | numFreqs:100 | 1º period:0.607 (7.021muHz) | 2º period:3.415 (39.521muHz)"
-    ## [1] "Experiment:1000 | distance:3.2541 | numFreqs:100 | 1º period:1.804 (20.88muHz) | 2º period:3.222 (37.293muHz)"
+    ## [1] "Experiment:10 | distance:6.4456 | numFreqs:100 | 1º period:3.905 (45.192muHz) | 2º period:5.462 (63.213muHz)"
+    ## [1] "Experiment:20 | distance:8.8444 | numFreqs:100 | 1º period:3.28 (37.968muHz) | 2º period:4.276 (49.495muHz)"
+    ## [1] "Experiment:30 | distance:5.6696 | numFreqs:100 | 1º period:4.39 (50.806muHz) | 2º period:1.851 (21.419muHz)"
+    ## [1] "Experiment:40 | distance:2.6413 | numFreqs:100 | 1º period:0.807 (9.336muHz) | 2º period:5.684 (65.789muHz)"
+    ## [1] "Experiment:50 | distance:2.9304 | numFreqs:100 | 1º period:3.504 (40.558muHz) | 2º period:3.313 (38.341muHz)"
+    ## [1] "Experiment:60 | distance:8.9907 | numFreqs:100 | 1º period:5.952 (68.891muHz) | 2º period:2.439 (28.225muHz)"
+    ## [1] "Experiment:70 | distance:9.6057 | numFreqs:100 | 1º period:5.048 (58.421muHz) | 2º period:3.196 (36.987muHz)"
+    ## [1] "Experiment:80 | distance:9.317 | numFreqs:100 | 1º period:4.662 (53.955muHz) | 2º period:5.2 (60.184muHz)"
+    ## [1] "Experiment:90 | distance:3.5453 | numFreqs:100 | 1º period:4.377 (50.661muHz) | 2º period:3.012 (34.858muHz)"
+    ## [1] "Experiment:100 | distance:8.4025 | numFreqs:100 | 1º period:0.959 (11.095muHz) | 2º period:1.018 (11.787muHz)"
+    ## [1] "Experiment:110 | distance:7.7256 | numFreqs:100 | 1º period:4.556 (52.734muHz) | 2º period:2.431 (28.139muHz)"
+    ## [1] "Experiment:120 | distance:1.7142 | numFreqs:100 | 1º period:5.333 (61.73muHz) | 2º period:1.925 (22.282muHz)"
+    ## [1] "Experiment:130 | distance:0.3818 | numFreqs:100 | 1º period:2.397 (27.744muHz) | 2º period:4.601 (53.247muHz)"
+    ## [1] "Experiment:140 | distance:0.0032 | numFreqs:100 | 1º period:3.981 (46.072muHz) | 2º period:1.22 (14.118muHz)"
+    ## [1] "Experiment:150 | distance:1.8747 | numFreqs:100 | 1º period:3.828 (44.304muHz) | 2º period:5.976 (69.162muHz)"
+    ## [1] "Experiment:160 | distance:3.4376 | numFreqs:100 | 1º period:5.49 (63.541muHz) | 2º period:0.988 (11.434muHz)"
+    ## [1] "Experiment:170 | distance:1.7869 | numFreqs:100 | 1º period:5.233 (60.566muHz) | 2º period:1.171 (13.556muHz)"
+    ## [1] "Experiment:180 | distance:6.5874 | numFreqs:100 | 1º period:2.809 (32.516muHz) | 2º period:5.367 (62.112muHz)"
+    ## [1] "Experiment:190 | distance:7.1061 | numFreqs:100 | 1º period:3.99 (46.176muHz) | 2º period:2.379 (27.531muHz)"
+    ## [1] "Experiment:200 | distance:6.0831 | numFreqs:100 | 1º period:0.875 (10.131muHz) | 2º period:5.529 (63.998muHz)"
+    ## [1] "Experiment:210 | distance:2.0183 | numFreqs:100 | 1º period:5.715 (66.15muHz) | 2º period:2.269 (26.264muHz)"
+    ## [1] "Experiment:220 | distance:5.1226 | numFreqs:100 | 1º period:1.225 (14.182muHz) | 2º period:0.23 (2.664muHz)"
+    ## [1] "Experiment:230 | distance:4.2282 | numFreqs:100 | 1º period:3.295 (38.141muHz) | 2º period:4.677 (54.135muHz)"
+    ## [1] "Experiment:240 | distance:4.2897 | numFreqs:100 | 1º period:4.043 (46.791muHz) | 2º period:1.001 (11.583muHz)"
+    ## [1] "Experiment:250 | distance:5.0763 | numFreqs:100 | 1º period:5.1 (59.028muHz) | 2º period:3.971 (45.957muHz)"
+    ## [1] "Experiment:260 | distance:2.0954 | numFreqs:100 | 1º period:1.632 (18.888muHz) | 2º period:2.428 (28.1muHz)"
+    ## [1] "Experiment:270 | distance:4.9855 | numFreqs:100 | 1º period:4.817 (55.753muHz) | 2º period:3.127 (36.192muHz)"
+    ## [1] "Experiment:280 | distance:1.7786 | numFreqs:100 | 1º period:1.995 (23.088muHz) | 2º period:3.77 (43.63muHz)"
+    ## [1] "Experiment:290 | distance:7.6321 | numFreqs:100 | 1º period:3.382 (39.142muHz) | 2º period:1.525 (17.652muHz)"
+    ## [1] "Experiment:300 | distance:0.8735 | numFreqs:100 | 1º period:4.799 (55.542muHz) | 2º period:0.255 (2.949muHz)"
+    ## [1] "Experiment:310 | distance:5.6 | numFreqs:100 | 1º period:3.397 (39.322muHz) | 2º period:1.985 (22.973muHz)"
+    ## [1] "Experiment:320 | distance:3.7467 | numFreqs:100 | 1º period:0.978 (11.324muHz) | 2º period:1.49 (17.243muHz)"
+    ## [1] "Experiment:330 | distance:5.104 | numFreqs:100 | 1º period:2.376 (27.497muHz) | 2º period:4.687 (54.243muHz)"
+    ## [1] "Experiment:340 | distance:3.4623 | numFreqs:100 | 1º period:3.971 (45.966muHz) | 2º period:0.558 (6.457muHz)"
+    ## [1] "Experiment:350 | distance:8.84 | numFreqs:100 | 1º period:2.382 (27.574muHz) | 2º period:4.367 (50.539muHz)"
+    ## [1] "Experiment:360 | distance:6.2531 | numFreqs:100 | 1º period:3.521 (40.75muHz) | 2º period:0.858 (9.928muHz)"
+    ## [1] "Experiment:370 | distance:8.6029 | numFreqs:100 | 1º period:1.346 (15.576muHz) | 2º period:3.204 (37.089muHz)"
+    ## [1] "Experiment:380 | distance:7.0753 | numFreqs:100 | 1º period:3.633 (42.053muHz) | 2º period:0.369 (4.27muHz)"
+    ## [1] "Experiment:390 | distance:3.8193 | numFreqs:100 | 1º period:4.243 (49.113muHz) | 2º period:3.791 (43.874muHz)"
+    ## [1] "Experiment:400 | distance:8.0587 | numFreqs:100 | 1º period:4.033 (46.681muHz) | 2º period:0.981 (11.355muHz)"
+    ## [1] "Experiment:410 | distance:1.131 | numFreqs:100 | 1º period:5.426 (62.803muHz) | 2º period:2.542 (29.421muHz)"
+    ## [1] "Experiment:420 | distance:1.6721 | numFreqs:100 | 1º period:5.814 (67.295muHz) | 2º period:2.64 (30.558muHz)"
+    ## [1] "Experiment:430 | distance:9.9354 | numFreqs:100 | 1º period:3.947 (45.688muHz) | 2º period:5.073 (58.715muHz)"
+    ## [1] "Experiment:440 | distance:9.1226 | numFreqs:100 | 1º period:1.073 (12.419muHz) | 2º period:4.729 (54.737muHz)"
+    ## [1] "Experiment:450 | distance:9.7288 | numFreqs:100 | 1º period:2.333 (27.001muHz) | 2º period:2.042 (23.63muHz)"
+    ## [1] "Experiment:460 | distance:8.6496 | numFreqs:100 | 1º period:5.212 (60.321muHz) | 2º period:1.86 (21.531muHz)"
+    ## [1] "Experiment:470 | distance:5.2828 | numFreqs:100 | 1º period:5.739 (66.429muHz) | 2º period:2.557 (29.595muHz)"
+    ## [1] "Experiment:480 | distance:4.9634 | numFreqs:100 | 1º period:4.626 (53.544muHz) | 2º period:5.882 (68.083muHz)"
+    ## [1] "Experiment:490 | distance:6.426 | numFreqs:100 | 1º period:5.219 (60.409muHz) | 2º period:4.344 (50.284muHz)"
+    ## [1] "Experiment:500 | distance:5.3367 | numFreqs:100 | 1º period:2.182 (25.249muHz) | 2º period:0.717 (8.296muHz)"
+    ## [1] "Experiment:510 | distance:8.7376 | numFreqs:100 | 1º period:2.962 (34.285muHz) | 2º period:4.766 (55.163muHz)"
+    ## [1] "Experiment:520 | distance:4.3275 | numFreqs:100 | 1º period:3.281 (37.972muHz) | 2º period:5.452 (63.105muHz)"
+    ## [1] "Experiment:530 | distance:5.6899 | numFreqs:100 | 1º period:3.857 (44.644muHz) | 2º period:0.335 (3.874muHz)"
+    ## [1] "Experiment:540 | distance:5.4555 | numFreqs:100 | 1º period:5.626 (65.112muHz) | 2º period:1.787 (20.679muHz)"
+    ## [1] "Experiment:550 | distance:5.7853 | numFreqs:100 | 1º period:2.676 (30.973muHz) | 2º period:3.423 (39.618muHz)"
+    ## [1] "Experiment:560 | distance:6.8251 | numFreqs:100 | 1º period:1.452 (16.801muHz) | 2º period:2.11 (24.419muHz)"
+    ## [1] "Experiment:570 | distance:5.9247 | numFreqs:100 | 1º period:1.537 (17.793muHz) | 2º period:2.714 (31.413muHz)"
+    ## [1] "Experiment:580 | distance:8.3336 | numFreqs:100 | 1º period:0.152 (1.755muHz) | 2º period:0.744 (8.612muHz)"
+    ## [1] "Experiment:590 | distance:3.4996 | numFreqs:100 | 1º period:5.085 (58.852muHz) | 2º period:5.114 (59.184muHz)"
+    ## [1] "Experiment:600 | distance:9.3852 | numFreqs:100 | 1º period:1.795 (20.777muHz) | 2º period:2.107 (24.391muHz)"
+    ## [1] "Experiment:610 | distance:8.961 | numFreqs:100 | 1º period:1.886 (21.823muHz) | 2º period:1.717 (19.87muHz)"
+    ## [1] "Experiment:620 | distance:7.4196 | numFreqs:100 | 1º period:4.983 (57.672muHz) | 2º period:0.58 (6.715muHz)"
+    ## [1] "Experiment:630 | distance:6.8919 | numFreqs:100 | 1º period:3.134 (36.277muHz) | 2º period:0.808 (9.354muHz)"
+    ## [1] "Experiment:640 | distance:7.5869 | numFreqs:100 | 1º period:5.367 (62.122muHz) | 2º period:0.268 (3.105muHz)"
+    ## [1] "Experiment:650 | distance:8.1776 | numFreqs:100 | 1º period:0.405 (4.69muHz) | 2º period:1.095 (12.669muHz)"
+    ## [1] "Experiment:660 | distance:0.1842 | numFreqs:100 | 1º period:4.525 (52.377muHz) | 2º period:3.559 (41.189muHz)"
+    ## [1] "Experiment:670 | distance:2.133 | numFreqs:100 | 1º period:2.58 (29.865muHz) | 2º period:2.913 (33.715muHz)"
+    ## [1] "Experiment:680 | distance:1.0081 | numFreqs:100 | 1º period:0.961 (11.12muHz) | 2º period:2.453 (28.39muHz)"
+    ## [1] "Experiment:690 | distance:9.106 | numFreqs:100 | 1º period:0.271 (3.134muHz) | 2º period:0.249 (2.882muHz)"
+    ## [1] "Experiment:700 | distance:8.5858 | numFreqs:100 | 1º period:4.413 (51.08muHz) | 2º period:0.958 (11.083muHz)"
+    ## [1] "Experiment:710 | distance:7.0419 | numFreqs:100 | 1º period:3.303 (38.225muHz) | 2º period:4.593 (53.159muHz)"
+    ## [1] "Experiment:720 | distance:8.6417 | numFreqs:100 | 1º period:0.726 (8.4muHz) | 2º period:3.493 (40.426muHz)"
+    ## [1] "Experiment:730 | distance:4.5484 | numFreqs:100 | 1º period:4.101 (47.464muHz) | 2º period:3.829 (44.321muHz)"
+    ## [1] "Experiment:740 | distance:3.3708 | numFreqs:100 | 1º period:5.805 (67.186muHz) | 2º period:0.755 (8.743muHz)"
+    ## [1] "Experiment:750 | distance:5.5899 | numFreqs:100 | 1º period:4.693 (54.317muHz) | 2º period:0.49 (5.676muHz)"
+    ## [1] "Experiment:760 | distance:1.6021 | numFreqs:100 | 1º period:5.231 (60.544muHz) | 2º period:1.187 (13.735muHz)"
+    ## [1] "Experiment:770 | distance:6.8644 | numFreqs:100 | 1º period:2.803 (32.442muHz) | 2º period:5.936 (68.703muHz)"
+    ## [1] "Experiment:780 | distance:6.6225 | numFreqs:100 | 1º period:3.803 (44.014muHz) | 2º period:3.084 (35.691muHz)"
+    ## [1] "Experiment:790 | distance:6.3871 | numFreqs:100 | 1º period:2.338 (27.058muHz) | 2º period:4.831 (55.917muHz)"
+    ## [1] "Experiment:800 | distance:5.641 | numFreqs:100 | 1º period:5.983 (69.245muHz) | 2º period:4.415 (51.096muHz)"
+    ## [1] "Experiment:810 | distance:3.1395 | numFreqs:100 | 1º period:4.489 (51.954muHz) | 2º period:0.619 (7.167muHz)"
+    ## [1] "Experiment:820 | distance:4.7584 | numFreqs:100 | 1º period:5.258 (60.856muHz) | 2º period:4.512 (52.22muHz)"
+    ## [1] "Experiment:830 | distance:7.2395 | numFreqs:100 | 1º period:2.806 (32.473muHz) | 2º period:5.045 (58.389muHz)"
+    ## [1] "Experiment:840 | distance:3.0911 | numFreqs:100 | 1º period:5.624 (65.09muHz) | 2º period:0.964 (11.154muHz)"
+    ## [1] "Experiment:850 | distance:9.3528 | numFreqs:100 | 1º period:4.753 (55.01muHz) | 2º period:3.408 (39.449muHz)"
+    ## [1] "Experiment:860 | distance:2.7862 | numFreqs:100 | 1º period:1.603 (18.554muHz) | 2º period:1.262 (14.608muHz)"
+    ## [1] "Experiment:870 | distance:9.2139 | numFreqs:100 | 1º period:4.657 (53.897muHz) | 2º period:1.264 (14.635muHz)"
+    ## [1] "Experiment:880 | distance:0.0343 | numFreqs:100 | 1º period:3.032 (35.088muHz) | 2º period:3.174 (36.733muHz)"
+    ## [1] "Experiment:890 | distance:5.1494 | numFreqs:100 | 1º period:5.728 (66.294muHz) | 2º period:1.502 (17.387muHz)"
+    ## [1] "Experiment:900 | distance:4.1014 | numFreqs:100 | 1º period:2.909 (33.672muHz) | 2º period:1.283 (14.851muHz)"
+    ## [1] "Experiment:910 | distance:7.0095 | numFreqs:100 | 1º period:4.827 (55.866muHz) | 2º period:4.89 (56.598muHz)"
+    ## [1] "Experiment:920 | distance:6.994 | numFreqs:100 | 1º period:3.603 (41.698muHz) | 2º period:5.039 (58.325muHz)"
+    ## [1] "Experiment:930 | distance:4.3098 | numFreqs:100 | 1º period:3.393 (39.266muHz) | 2º period:3.24 (37.505muHz)"
+    ## [1] "Experiment:940 | distance:3.4544 | numFreqs:100 | 1º period:2.995 (34.666muHz) | 2º period:3.338 (38.634muHz)"
+    ## [1] "Experiment:950 | distance:8.8913 | numFreqs:100 | 1º period:4.342 (50.255muHz) | 2º period:5.638 (65.253muHz)"
+    ## [1] "Experiment:960 | distance:0.3573 | numFreqs:100 | 1º period:3.403 (39.39muHz) | 2º period:3.008 (34.814muHz)"
+    ## [1] "Experiment:970 | distance:8.8938 | numFreqs:100 | 1º period:4.968 (57.501muHz) | 2º period:1.559 (18.047muHz)"
+    ## [1] "Experiment:980 | distance:0.7941 | numFreqs:100 | 1º period:1.54 (17.828muHz) | 2º period:5.84 (67.591muHz)"
+    ## [1] "Experiment:990 | distance:4.1457 | numFreqs:100 | 1º period:5.622 (65.073muHz) | 2º period:4.519 (52.3muHz)"
+    ## [1] "Experiment:1000 | distance:4.8515 | numFreqs:100 | 1º period:2.754 (31.876muHz) | 2º period:1.335 (15.457muHz)"
 
 ``` r
 # Feature generation
@@ -497,7 +500,13 @@ resultsFilter <- results[results$nfreq < 1000,]
 resultsFilter <- resultsFilter[resultsFilter$fpos < 400,]
 ```
 
-fir non-lineal model
+Check poisson distribution
+==========================
+
+![](PatternsExperiments_files/figure-markdown_github/unnamed-chunk-8-1.png)
+
+Fit lineal model
+================
 
     ## 
     ## Family: poisson 
@@ -508,17 +517,20 @@ fir non-lineal model
     ## 
     ## Parametric coefficients:
     ##               Estimate Std. Error z value Pr(>|z|)    
-    ## (Intercept) -0.6737683  0.0852354  -7.905 2.68e-15 ***
-    ## nfreq        0.0026923  0.0002348  11.469  < 2e-16 ***
-    ## distance    -0.0185983  0.0138230  -1.345    0.178    
+    ## (Intercept) -0.6247481  0.0850292  -7.347 2.02e-13 ***
+    ## nfreq        0.0028952  0.0002128  13.605  < 2e-16 ***
+    ## distance    -0.0257204  0.0141374  -1.819   0.0689 .  
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
     ## 
-    ## R-sq.(adj) =  0.0425   Deviance explained = 12.7%
-    ## UBRE = -0.28751  Scale est. = 1         n = 917
+    ## R-sq.(adj) =  0.0172   Deviance explained = 15.5%
+    ## UBRE = -0.22349  Scale est. = 1         n = 894
 
 ![](PatternsExperiments_files/figure-markdown_github/unnamed-chunk-9-1.png)![](PatternsExperiments_files/figure-markdown_github/unnamed-chunk-9-2.png)
+
+Fit non-lineal model
+====================
 
     ## 
     ## Family: poisson 
@@ -529,21 +541,24 @@ fir non-lineal model
     ## 
     ## Parametric coefficients:
     ##             Estimate Std. Error z value Pr(>|z|)    
-    ## (Intercept) 4.018492   0.004669   860.8   <2e-16 ***
+    ## (Intercept) 4.039591   0.004725     855   <2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
     ## Approximate significance of smooth terms:
     ##               edf Ref.df  Chi.sq p-value    
-    ## s(nfreq)    2.995      3 22163.2  <2e-16 ***
-    ## s(distance) 2.997      3   670.7  <2e-16 ***
+    ## s(nfreq)    2.998      3 27077.6  <2e-16 ***
+    ## s(distance) 2.991      3   695.6  <2e-16 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## R-sq.(adj) =  0.222   Deviance explained = 28.6%
-    ## UBRE = 56.741  Scale est. = 1         n = 917
+    ## R-sq.(adj) =  0.258   Deviance explained = 32.7%
+    ## UBRE =  60.36  Scale est. = 1         n = 894
 
 ![](PatternsExperiments_files/figure-markdown_github/unnamed-chunk-10-1.png)![](PatternsExperiments_files/figure-markdown_github/unnamed-chunk-10-2.png)
+
+Fit probability to match frecuency on \[0-30\] first differences
+================================================================
 
     ## 
     ## Family: binomial 
@@ -554,15 +569,15 @@ fir non-lineal model
     ## 
     ## Parametric coefficients:
     ##             Estimate Std. Error z value Pr(>|z|)
-    ## (Intercept) -0.09174    0.06828  -1.343    0.179
+    ## (Intercept) -0.09452    0.06907  -1.368    0.171
     ## 
     ## Approximate significance of smooth terms:
     ##         edf Ref.df Chi.sq  p-value    
-    ## s(fp) 3.861  4.788  49.94 1.52e-09 ***
+    ## s(fp) 2.996  3.735  49.89 5.61e-10 ***
     ## ---
     ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
     ## 
-    ## R-sq.(adj) =  0.0569   Deviance explained = 4.61%
-    ## UBRE = 0.33166  Scale est. = 1         n = 917
+    ## R-sq.(adj) =  0.0598   Deviance explained = 4.76%
+    ## UBRE = 0.32776  Scale est. = 1         n = 894
 
 ![](PatternsExperiments_files/figure-markdown_github/unnamed-chunk-11-1.png)
