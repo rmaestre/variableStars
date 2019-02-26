@@ -15,6 +15,7 @@ library(RColorBrewer)
 library(plotly)
 library(mgcv)
 library(vcd)
+library(keras)
 ```
 
 
@@ -406,7 +407,16 @@ model <-
     data = resultsFilter
   )
 summary(model)
+```
+
+# number of frequencies lineal effect
+```{r, cache=F, echo=FALSE, warning=FALSE}
 termplot(model,terms="nfreq",se=TRUE)
+```
+
+# distance lineal effect
+
+```{r, cache=F, echo=FALSE, warning=FALSE}
 termplot(model,terms="distance",se=TRUE)
 ```
 
@@ -450,27 +460,4 @@ plot(
   },
   residuals = T
 ) 
-```
-
-
-# Fit probability to match frecuency on [0-30] first differences
-
-
-```{r, cache=F, echo=FALSE, warning=FALSE}
-
-# create model
-model = Sequential()
-model.add(Dense(8, input_dim=4, activation='relu'))
-model.add(Dense(3, activation='softmax'))
-# Compile model
-model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-
-# Configure a model for categorical classification.
-model %>% compile(
-  loss = "categorical_crossentropy",
-  optimizer = optimizer_adam(lr = 0.001),
-  metrics = c("accuracy")
-)
-summary(model) # Plot summary
-
 ```
