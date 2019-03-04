@@ -28,7 +28,7 @@ Thus, given a unseen periodicitiy, the NN will prodives the probabilities over t
 # Synthetic Data generation
 
 ```{r, cache=F, echo=T, warning=FALSE}
-experiment_number <- 10000
+experiment_number <- 1000
 input_dim <- 10001 # the perioditicy itself
 num_classes <-
   length(seq(from = 0.1, to = 6, by = 0.05)) # Buckets of possible classes
@@ -134,10 +134,10 @@ if (T) {
   y_test  <- m_ytrain[-ind,]
   
   # Save to disk
-  save(x_train, file = "~/Downloads/x_train.RData")
-  save(x_test, file = "~/Downloads/x_test.RData")
-  save(y_train, file = "~/Downloads/y_train.RData")
-  save(y_test, file = "~/Downloads/y_test.RData")
+  #save(x_train, file = "~/Downloads/x_train.RData")
+  #save(x_test, file = "~/Downloads/x_test.RData")
+  #save(y_train, file = "~/Downloads/y_train.RData")
+  #save(y_test, file = "~/Downloads/y_test.RData")
 }
 ```
 
@@ -177,7 +177,7 @@ model <- keras_model_sequential() %>%
   # Encoder
   layer_conv_1d(
     filters = 10,
-    kernel_size = 5,
+    kernel_size = 10,
     activation = 'relu',
     input_shape = c(input_dim, 1)
   ) %>%
@@ -202,7 +202,7 @@ model <- keras_model_sequential() %>%
 # Configure a model for categorical classification.
 model %>% compile(
   loss = "categorical_crossentropy",
-  optimizer = optimizer_adadelta(lr = 0.005),
+  optimizer = optimizer_adadelta(lr = 0.05),
   metrics = c("accuracy")
 )
 summary(model) # Plot summary
@@ -262,7 +262,7 @@ All vector prositions (periods frequency patters) must be the same
 ```{r, cache=F, echo=T, warning=FALSE}
 which(sy==1)
 
-sort(sy_hat, index.return=TRUE, decreasing=T)$ix[1:2]
+sort(sy_hat, index.return=TRUE, decreasing=T)$ix[1:4]
 ```
 
 ## Manually test
