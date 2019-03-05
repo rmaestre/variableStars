@@ -1,0 +1,437 @@
+---
+title: "A machine learning approach - Cross categorical crossentropy"
+author: "Roberto Maestre"
+date: "03/26/2019"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+library(variableStars)
+library(data.table)
+library(ggplot2)
+library(RColorBrewer)
+library(plotly)
+library(keras)
+```
+
+
+# A simple MLP classification approach
+
+We propose a MLP to train a NN by generating synthetic data sample given two patterns frequencies and a distance between them. This generated data (the periodicitiy) is the NN input and the output is the two frequency patterns tramsformed into an *one-hot-encode* vector normalized with a *Softmax activation*.
+
+The loss function used by the NN is the categorical crossentropy, and is defined as:
+
+$$H(y, \hat{y}) = \sum_i y_i \log\Big(\frac{1}{\hat{y}}\Big) = -\sum_i y_i \log \hat{y}$$
+
+Thus, given a unseen periodicitiy, the NN will prodives the probabilities over the class oputput distribution. This probabilities plus the periodicitiy itself, can provide an accurate heuristic to find the frequency of the patterns that generate the periodiciticy.
+
+# Synthetic Data generation
+
+```{r, cache=F, echo=T, warning=FALSE}
+experiment_number <- 10000
+input_dim <- 10001 # the perioditicy itself
+num_classes <-
+  length(seq(from = 0.1, to = 6, by = 0.05)) # Buckets of possible classes
+  
+if (T) {
+  # Save to disk
+  load(file = "~/Downloads/x_train.RData")
+  load(file = "~/Downloads/x_test.RData")
+  load(file = "~/Downloads/y_train.RData")
+  load(file = "~/Downloads/y_test.RData")
+} else {
+  # Matrix to save genereated data
+  m_xtrain <- matrix(nrow = experiment_number + 1, ncol = input_dim)
+  m_ytrain <-
+    matrix(nrow = experiment_number + 1, ncol = num_classes)
+  # Loop generating data
+  count <- 1
+  for (experiment in seq(1:experiment_number)) {
+    # Select experiment parameters
+    distance <- trunc(runif(1, 0, 10), prec = 4)
+    numFreqs <- 100
+    periodF <- runif(1, 0.1, 6)
+    periodS <- runif(1, 0.1, 6)
+    # Debug info with experiment configuration
+    if (count %% 250 == 0) {
+      print(
+        paste(
+          "Experiment:",
+          count,
+          " | distance:",
+          distance,
+          " | numFreqs:",
+          numFreqs,
+          " | 1º period:",
+          round(periodF, 3),
+          " (",
+          round(periodF / 0.0864, 3),
+          "muHz)",
+          " | 2º period:",
+          round(periodS, 3),
+          " (",
+          round(periodS / 0.0864, 3),
+          "muHz)",
+          sep = ""
+        )
+      )
+    }
+    
+    # Data generation
+    dt <- generate_data(
+      numFreqs = numFreqs,
+      distance = distance,
+      periodF = periodF,
+      periodS = periodS,
+      baseAMplitudeFirst = 10,
+      baseAMplitudeSecond = 10,
+      seed = NULL,
+      freqOneRandRange = 0.1,
+      freqTwoRandRange = 0.1,
+      ampRandRange = 1.0
+    )
+    # Execute experiment
+    result <- process(
+      frequency = dt$x,
+      amplitude = dt$y,
+      filter = "uniform",
+      gRegimen = 0,
+      maxDnu = 15,
+      minDnu = 15,
+      numFrequencies = ifelse(nrow(dt) < 30, 31, nrow(dt) + 1),
+      dnuGuessError = -1,
+      debug = F
+    )
+    
+    # X data
+    m_xtrain[count, ] <-
+      result$fresAmps[[names(result$fresAmps)[1]]]$b
+    # Y data
+    m_ytrain[count, ] <-
+      to_categorical(round(periodF / 0.0864, 3), num_classes) +
+      to_categorical(round(periodS / 0.0864, 3), num_classes)
+    if (2 %in% m_ytrain[count, ]) {
+      # Same frequency collapse in one position
+      m_ytrain[count, ] <- m_ytrain[count, ] / 2
+    }
+    count <- count + 1
+  }
+  # Remove not valid or empty rows
+  AA <- na.omit(m_xtrain)
+  m_xtrain <- matrix(AA, nrow = nrow(AA) , ncol = ncol(AA))
+  BB <- na.omit(m_ytrain)
+  m_ytrain <- matrix(BB, nrow = nrow(BB) , ncol = ncol(BB))
+  
+  # Split train/test
+  smp_size <- floor(0.75 * nrow(m_xtrain))
+  set.seed(123)
+  ind <- sample(seq_len(nrow(m_xtrain)), size = smp_size)
+  
+  # Prepare partition
+  x_train <- m_xtrain[ind,]
+  x_test  <- m_xtrain[-ind,]
+  y_train <- m_ytrain[ind,]
+  y_test  <- m_ytrain[-ind,]
+  
+  # Save to disk
+  save(x_train, file = "~/Downloads/x_train.RData")
+  save(x_test, file = "~/Downloads/x_test.RData")
+  save(y_train, file = "~/Downloads/y_train.RData")
+  save(y_test, file = "~/Downloads/y_test.RData")
+}
+```
+
+
+# Deep NN
+
+A deep NN with two layers is proposed as a multiclass classificacion problem.
+
+
+## Data asserts and reshaping for NN
+
+```{r, cache=F, echo=T, warning=FALSE}
+# Asserts on data training and test
+stopifnot(dim(x_train)[1] == dim(y_train)[1])
+stopifnot(dim(x_test)[1] == dim(y_test)[1])
+stopifnot(dim(x_train)[2] == dim(x_train)[2])
+stopifnot(dim(y_test)[2] == dim(y_train)[2])
+
+# Get input dimension for NN
+input_dim <- dim(x_train)[2] # (The periodicitiy dimension)
+# Calculate the number of classes
+num_classes <- length(seq(from = 0.1, to = 6, by = 0.05))
+
+# Reshape data input for tensor
+x_train <-
+  array_reshape(x_train, c(nrow(x_train), ncol(x_train), 1))
+x_test <- array_reshape(x_test, c(nrow(x_test), ncol(x_test), 1))
+```
+
+
+## NN architecture and compile
+
+### NN architecture
+```{r, cache=T, echo=T, warning=FALSE}
+# Create a 1d convolutional NN
+model <- keras_model_sequential() %>%
+  #layer_gru(5, return_sequences=F, stateful=T, batch_input_shape=c(50, 10001, 1)) %>%
+  #layer_dropout(0.5) %>%
+  #layer_dense(num_classes, activation = 'softmax')
+
+  layer_conv_1d(
+    filters = 5,
+    kernel_size = 5,
+    activation = 'relu',
+    input_shape = c(input_dim, 1)
+  ) %>%
+  layer_max_pooling_1d(pool_size = 3) %>%
+  layer_dropout(0.5) %>%
+  layer_batch_normalization() %>%
+  
+  layer_conv_1d(
+    filters = 10,
+    kernel_size = 10,
+    activation = 'relu',
+    input_shape = c(input_dim, 1)
+  ) %>%
+  layer_max_pooling_1d(pool_size = 2) %>%
+  layer_dropout(0.5) %>%
+  layer_batch_normalization() %>%
+
+  layer_flatten() %>%
+  layer_dense(num_classes, activation = 'softmax')
+  
+```
+
+
+### Metrics and model compilation
+
+```{r, cache=T, echo=T, warning=FALSE}
+# Configure a model for categorical classification.
+# map@
+top_10_categorical_accuracy <-
+  custom_metric("acc_at_10", function(y_true, y_pred) {
+    metric_top_k_categorical_accuracy(y_true, y_pred, 10)
+  })
+top_2_categorical_accuracy <-
+  custom_metric("acc_at_2", function(y_true, y_pred) {
+    metric_top_k_categorical_accuracy(y_true, y_pred, 2)
+  })
+top_1_categorical_accuracy <-
+  custom_metric("acc_at_1", function(y_true, y_pred) {
+    metric_top_k_categorical_accuracy(y_true, y_pred, 1)
+  })
+
+model %>% compile(
+  loss = "categorical_crossentropy",
+  optimizer = optimizer_adadelta(lr = 0.05),
+  metrics = c(
+    "accuracy",
+    "categorical_crossentropy",
+    top_10_categorical_accuracy,
+    top_2_categorical_accuracy,
+    top_1_categorical_accuracy
+  )
+)
+summary(model) # Plot summary
+```
+
+## NN train
+
+```{r, cache=T, echo=T, warning=FALSE}
+if (T) {
+  # Load model
+  load_model_hdf5("~/Downloads/model.h5")
+} else {
+  history <- model %>% fit(
+    x_train,
+    y_train,
+    epochs = 60,
+    batch_size =  250,
+    validation_split = 0.4,
+    shuffle = T
+  )
+  # Save model
+  save_model_hdf5(model, "~/Downloads/model.h5")
+}
+```
+### Train history
+
+
+```{r, cache=F, echo=T, warning=FALSE}
+plot(history) +
+  theme_bw()
+```
+
+## NN evaluation
+
+### Confusion matrix
+
+```{r, cache=F, echo=T, warning=FALSE}
+Y_test_hat <- predict_classes(model, x_test) + 1
+# Calculate confusion matrix
+cm <- table(apply(y_test,1,which.max), Y_test_hat)
+
+# Show first subset
+range <-1:30
+cm[range, range]
+
+# Plot matrix
+dtCM <- as.data.frame(cm)
+colnames(dtCM) <- c("c1","c2","freq")
+ggplot(data=dtCM, aes(c1, c2, fill = freq)) +
+  geom_raster() +
+  scale_fill_gradientn(colours=c("#0000FFFF","#FFFFFFFF","#FF0000FF"))
+```
+
+
+
+### All test (at least one category)
+
+```{r, cache=F, echo=T, warning=FALSE}
+evaluate(model, x_test, y_test)
+```
+
+### All test ACC@n
+
+The accuracy at the stage is calculated as ACC @ given recall. That means with a precission X (x=1 means the same category), find into the N predictions from the model (where N = recall).
+
+```{r, cache=F, echo=T, warning=FALSE}
+precission <- 1
+recall <- 5
+
+y_hats <- predict(model, x_test)
+n <- dim(x_test)[1]
+matchs <- c()
+for (i in seq(1:n)) {
+  # First diffs (firsts given by the recall) for first frecuency
+  diffsF <-
+    abs(which(y_test[i,] == 1)[1] - sort(y_hats[i,], index.return = TRUE, decreasing =
+                                           T)$ix[1:recall])
+  # First diffs (firsts given by the recall) for second frecuency
+  diffsS <-
+    abs(which(y_test[i,] == 1)[2] - sort(y_hats[i,], index.return = TRUE, decreasing =
+                                           T)$ix[1:recall])
+  
+  # Check precission and match both patterns
+  flag <-
+    (ifelse(length(diffsF[diffsF <= precission]) > 1, 1, 0) +
+       ifelse(length(diffsS[diffsS <= precission]) > 1, 1, 0)) == 2
+  
+  # Concatenate
+  matchs <- c(matchs, flag)
+}
+#table(matchs)
+f <- as.numeric(table(matchs)["FALSE"])
+t <- as.numeric(table(matchs)["TRUE"])
+
+print(paste("Accuracy MAP@: ", recall, ": ", round(t / dim(x_test)[1], 4), sep =
+              ""))
+```
+
+
+
+
+
+#### Manually test
+
+```{r, cache=F, echo=T, warning=FALSE}
+
+
+
+
+
+
+# One manually choosen id
+id <- 99
+x <- x_test[id,,1]
+dim(x) <- c(1, length(x), 1) # Set correct tensor dimension
+y_hat <- predict(model, x) # MLP predictions
+#plot(t(y_hat))
+y <- y_test[id,] # Get real y
+
+# Show real y vs predicted y_hat
+which(y == 1)
+sort(y_hat, index.return=TRUE, decreasing=T)$ix[1:recall]
+```
+
+
+## Manually test on new data
+
+```{r, cache=F, echo=T, warning=FALSE}
+# Select experiment parameters
+distance <- trunc(runif(1, 0, 10), prec = 4)
+numFreqs <- 100
+periodF <- runif(1, 0.1, 6)
+periodS <- runif(1, 0.1, 6)
+# Debug info with experiment configuration
+if (T) {
+  print(
+    paste(
+      " Distance:",
+      distance,
+      " | numFreqs:",
+      numFreqs,
+      " | 1º period:",
+      round(periodF, 3),
+      " (",
+      round(periodF / 0.0864, 3),
+      "muHz)",
+      " | 2º period:",
+      round(periodS, 3),
+      " (",
+      round(periodS / 0.0864, 3),
+      "muHz)",
+      sep = ""
+    )
+  )
+}
+
+# Data generation
+dt <- generate_data(
+  numFreqs = numFreqs,
+  distance = distance,
+  periodF = periodF,
+  periodS = periodS,
+  baseAMplitudeFirst = 10,
+  baseAMplitudeSecond = 10,
+  seed = NULL,
+  freqOneRandRange = 0.1,
+  freqTwoRandRange = 0.1,
+  ampRandRange = 1.0
+)
+# Execute experiment
+result <- process(
+  frequency = dt$x,
+  amplitude = dt$y,
+  filter = "uniform",
+  gRegimen = 0,
+  maxDnu = 15,
+  minDnu = 15,
+  numFrequencies = ifelse(nrow(dt) < 30, 31, nrow(dt) + 1),
+  dnuGuessError = -1,
+  debug = F
+)
+
+# Plot periodicities
+dt <- prepare_periodicities_dataset(result$fresAmps)
+# Prepared MLP probabilities
+prob_threshold <- 0.001
+x <- matrix(result$fresAmps[[names(result$fresAmps)[1]]]$b, nrow = 1)
+
+dim(x) <- c(1, length(x), 1)
+y_hat <- predict(model, x)
+dtNN <- data.frame("fInv"=which(y_hat>prob_threshold), 
+                    "b"=y_hat[which(y_hat>prob_threshold)])
+head(dtNN[order(dtNN$b, decreasing = T), ], recall)
+```
+
+## Plot periodicities and >prob_threshold frequencies from NN
+
+```{r, cache=F, echo=T, warning=FALSE}
+ggplot(aes(fInv, b), data=dt) +
+  geom_line() +
+  geom_point(data=dtNN, shape=3) +
+  theme_bw()
+```
+

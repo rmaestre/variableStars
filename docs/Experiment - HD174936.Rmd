@@ -45,7 +45,7 @@ Data gathering from the Antonio's PhD thesis.
 ### Frequencies and amplitudes
 
 ```{r spectrum}
-plot_spectrum(-5, 80, dt.star)
+plot_spectrum_ggplot(-5, 80, dt.star)
 ```
 
 ### Experiment execution
@@ -70,48 +70,33 @@ result <- process(
 
 ```{r freqs}
 # Plot frecuency and amplitude
-ggplot(
-  aes(x = frequences, y = amplitude),
-  data = data.frame(
+plot_apodization_ggplot(
+  data.frame(
     "frequences" = result$apodization$frequences,
     "amplitude" = result$apodization$amp
   )
-) +
-  geom_point() +
-  geom_line() +
-  ggtitle("Apodization- Frequences and amplitudes") +
-  theme_bw()
+)
 ```
 
 ### Periodicities
 
 ```{r periods}
 dt <- prepare_periodicities_dataset(result$fresAmps)
-plot_periodicities(dt)
+plot_periodicities_ggplot(dt)
 ```
 
 ### Histogram of differences
 
 ```{r differences}
 dt <- data.frame(result$diffHistogram$histogram)
-ggplot(aes(x = bins, y = values), data = dt) +
-  geom_bar(stat = "identity") +
-  ggtitle("Histogram of differences") +
-  theme_bw()
+plot_histogram_ggplot(dt)
 ```
 
 ### Autocorrelation
 
 ```{r autocor}
 dt <- data.frame(result$crossCorrelation)
-
-ggplot(aes(x = index, y = autocorre), data = dt) +
-  geom_line(stat = "identity") +
-  ggtitle("Autocorrelacion (Crosscorrelation)") +
-  xlab(expression(paste("Periodicities (",mu,"hz)"))) +
-  ylab("Autocorrelation") +
-  ylim(c(-0.1, 0.25)) +
-  theme_bw()
+plot_crosscorrelation_ggplot(dt)
 ```
 
 ### Echelle
@@ -125,7 +110,7 @@ dt <- data.frame(
   "y" = result$echelle$freMas,
   "h" = result$echelle$amplitudes
 )
-plot_echelle(dt, result$echelle$dnu, result$echelle$dnuD) 
+plot_echelle_ggplot(dt) 
 ```
 
 #### For first 30 frecuencies
@@ -137,7 +122,7 @@ dt <- data.frame(
   "h" = result$echelleRanges$`30`$amplitudes
 )
 # Plot echelle
-plot_echelle(dt, result$echelle$dnu, result$echelle$dnuD) 
+plot_echelle_ggplot(dt) 
 ```
 
 

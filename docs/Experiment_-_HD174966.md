@@ -45,7 +45,7 @@ Data gathering from the Antonio's PhD thesis.
 ### Frequencies and amplitudes
 
 ``` r
-plot_spectrum(-5, 80, dt.star)
+plot_spectrum_ggplot(-5, 80, dt.star)
 ```
 
 ![](Experiment_-_HD174966_files/figure-markdown_github/spectrum-1.png)
@@ -53,10 +53,10 @@ plot_spectrum(-5, 80, dt.star)
 ### Experiment execution
 
 ``` r
-result <- variableStars::process(
+result <- process(
   dt.star$frequency,
   dt.star$amplitude,
-  filter = "uniform",
+  filter = "gaussian",
   gRegimen = 0,
   minDnu = 15,
   maxDnu = 95,
@@ -72,13 +72,13 @@ result <- variableStars::process(
     ## 
     ## Number of frequences to be processed: 185
     ## Number of frequences after drop the g regimen: 185
-    ## Frequencies: 268.459, 312.02, 247.926, 320.781, 203.964, 580.477, 144.431, 209.899, 0.813717, 1.22332, 0.572917, 589.244, 64.0445, 227.093, 516.415, 180.288, 358.219, 184.168, 187.618, 220.447, 
+    ## Frequencies: 268.459, 312.02, 247.926, 320.781, 203.964, 580.477, 144.431, 209.899, 0.813717, 1.22332, 0.572917, 589.244, 64.0445, 227.093, 516.415, 180.288, 358.219, 184.168, 187.618, 220.447, 137.883, 0.572917, 245.638, 20.585, 1.53127, 72.9452, 80.0116, 268.492, 8.77188, 274.093, 126.305, 64.5769, 2.4563, 238.751, 201.487, 290.434, 1.89104, 281.347, 241.017, 349.85, 276.804, 337.102, 373.958, 6.74187, 42.0906, 312.056, 111.015, 4.21025, 488.9, 2.83232, 
     ## Range: 30, 60, 90, 
     ##  Iteration over range: 30
     ##    Frequencies selected: 268.459, 312.02, 247.926, 320.781, 203.964, 580.477, 144.431, 209.899, 0.813717, 1.22332, 
     ##    Amplitudes selected: 6.2902, 5.1034, 2.0929, 0.9973, 0.6038, 0.3111, 0.2462, 0.2308, 0.172, 0.1694, 
-    ##     Dnu: 7.2568
-    ##     Dnu Peak: 7.2568
+    ##     Dnu: 22.2949
+    ##     Dnu Peak: 22.2949
     ##     Dnu Guess: 0.190972
     ##     Cross correlation calculated:
     ##  Iteration over range: 60
@@ -94,17 +94,12 @@ result <- variableStars::process(
 
 ``` r
 # Plot frecuency and amplitude
-ggplot(
-  aes(x = frequences, y = amplitude),
-  data = data.frame(
+plot_apodization_ggplot(
+  data.frame(
     "frequences" = result$apodization$frequences,
     "amplitude" = result$apodization$amp
   )
-) +
-  geom_point() +
-  geom_line() +
-  ggtitle("Apodization- Frequences and amplitudes") +
-  theme_bw()
+)
 ```
 
 ![](Experiment_-_HD174966_files/figure-markdown_github/freqs-1.png)
@@ -113,7 +108,7 @@ ggplot(
 
 ``` r
 dt <- prepare_periodicities_dataset(result$fresAmps)
-plot_periodicities(dt)
+plot_periodicities_ggplot(dt)
 ```
 
 ![](Experiment_-_HD174966_files/figure-markdown_github/periods-1.png)
@@ -122,10 +117,7 @@ plot_periodicities(dt)
 
 ``` r
 dt <- data.frame(result$diffHistogram$histogram)
-ggplot(aes(x = bins, y = values), data = dt) +
-  geom_bar(stat = "identity") +
-  ggtitle("Histogram of differences") +
-  theme_bw()
+plot_histogram_ggplot(dt)
 ```
 
 ![](Experiment_-_HD174966_files/figure-markdown_github/differences-1.png)
@@ -134,17 +126,8 @@ ggplot(aes(x = bins, y = values), data = dt) +
 
 ``` r
 dt <- data.frame(result$crossCorrelation)
-
-ggplot(aes(x = index, y = autocorre), data = dt) +
-  geom_line(stat = "identity") +
-  ggtitle("Autocorrelacion (Crosscorrelation)") +
-  xlab(expression(paste("Periodicities (",mu,"hz)"))) +
-  ylab("Autocorrelation") +
-  ylim(c(-0.05, 0.25)) +
-  theme_bw()
+plot_crosscorrelation_ggplot(dt)
 ```
-
-    ## Warning: Removed 13 rows containing missing values (geom_path).
 
 ![](Experiment_-_HD174966_files/figure-markdown_github/autocor-1.png)
 
@@ -158,7 +141,7 @@ dt <- data.frame(
   "y" = result$echelle$freMas,
   "h" = result$echelle$amplitudes
 )
-plot_echelle(dt, result$echelle$dnu, result$echelle$dnuD) 
+plot_echelle_ggplot(dt) 
 ```
 
 ![](Experiment_-_HD174966_files/figure-markdown_github/echelle30-1.png)
@@ -172,7 +155,7 @@ dt <- data.frame(
   "h" = result$echelleRanges$`30`$amplitudes
 )
 # Plot echelle
-plot_echelle(dt, result$echelle$dnu, result$echelle$dnuD) 
+plot_echelle_ggplot(dt) 
 ```
 
 ![](Experiment_-_HD174966_files/figure-markdown_github/echelleAll-1.png)
