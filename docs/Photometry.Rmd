@@ -11,11 +11,36 @@ library(variableStars)
 library(data.table)
 library(ggplot2)
 library(microbenchmark)
+library(plotly)
 ```
 
 ## Library Introduction
 
 Talk about variable stars ... (tbd)
+
+```{r setup, include=FALSE}
+plot_spectrum_ggplot <- function(min, max, dt) {
+  max_amplitude <- dt[which.max(dt$amplitude), ]
+  # Plot
+  p <- ggplot(aes(frequency, amplitude), data = dt) +
+    geom_point(aes(alpha = 0.6)) +
+    geom_point(aes(frequency, amplitude, colour = "#009988"),
+               data = max_amplitude) +
+    geom_line() +
+    theme_bw() + ylab("Amplitude") + xlab("Frecuency") +
+    ggtitle(paste(
+      "First Frecuency (F:",
+      round(max_amplitude$frequency, 4),
+      ", A:",
+      round(max_amplitude$amplitude, 4),
+      ")",
+      sep = ""
+    )) +
+    xlim(min, max) +
+    theme(legend.position = "none")
+  return(p)
+}
+```
 
 ## Introduction
 
@@ -50,7 +75,7 @@ dt.spectrum <- data.frame(calculateSpectrum(dt.test$time, dt.test$x))
 # Get max amplitude
 maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude),]
 # Plot amplitudes
-plot_spectrum(0, 0.05, dt.spectrum)
+plot_spectrum_ggplot(0, 0.05, dt.spectrum)
 ```
 
 Therefore, the period is $p=\frac{1}{F}$ = `r 1/maxAmplitude$frequency`
@@ -85,7 +110,7 @@ dt.spectrum <- data.frame(calculateSpectrum(dt.test$time, dt.test$x))
 # Get max amplitude
 maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude),]
 # Plot amplitudes
-plot_spectrum(0, 0.5, dt.spectrum)
+plot_spectrum_ggplot(0, 0.5, dt.spectrum)
 ```
 
 Therefore, the period is $p=\frac{1}{F}$ = `r 1/maxAmplitude$frequency`
@@ -113,7 +138,7 @@ dt.spectrum <-
 # Get max amplitude
 maxAmplitude <- dt.spectrum[which.max(dt.spectrum$amplitude),]
 # Plot amplitudes
-plot_spectrum(20, 25, dt.spectrum)
+plot_spectrum_ggplot(20, 25, dt.spectrum)
 ```
 
 
