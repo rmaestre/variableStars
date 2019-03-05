@@ -19,10 +19,8 @@ Installation
 install.packages("devtools")
 library(devtools)
 install_github("rmaestre/variableStars")
-runUI()
 ```
 
-[![UI](docs/figures/ui.png)](docs/figures/ui.png)
 
 A UI for experimentation with synthetic data is provided:
 
@@ -33,7 +31,7 @@ install_github("rmaestre/variableStars")
 runUISynthetic()
 ```
 
-[![UI](docs/figures/ui_synthetic.png)](docs/figures/ui_synthetic.png)
+[![UI](https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/ui.png)](https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/ui.png)
 
 Example of use on a pulsar data
 -------------------------------
