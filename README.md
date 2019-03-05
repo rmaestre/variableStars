@@ -36,11 +36,14 @@ runUISynthetic()
 Example of use on a pulsar data
 -------------------------------
 
+
 Please, find [here](docs/Experiment_-_HD174936.md) or [here](docs/Experiment_-_HD174966.md) the main execution of the complete package procedure.
 
 Main Workflow
 -------------
 
-[![Workflow](docs/figures/workflow.png)](docs/figures/workflow.png)
+<img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/diagrams.png" data-canonical-src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/diagrams.png" width="500" />
+
+
 
 (The pulsar in the Crab Nebula is composed by images taken by Hubble (red) and Chandra X-Ray(blue))
