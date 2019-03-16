@@ -57,7 +57,7 @@ The first signal is the sin one. This signal is very clear and the period can be
 ```{r sin}
 x <- sin(seq(from = 0,
              to = 20,
-             by = 0.05))
+             by = 0.01))
 # Add secuential times
 dt.test <-
   data.frame("time" = seq(from = 1, to = length(x)), "x" = x)
@@ -79,6 +79,17 @@ plot_spectrum_ggplot(0, 0.05, dt.spectrum)
 ```
 
 Therefore, the period is $p=\frac{1}{F}$ = `r 1/maxAmplitude$frequency`
+
+
+```{r sinspectrum, warning=F}
+# Plot amplitudes
+ggplot(aes(time, x), data = dt.test) +
+  geom_point() +
+  geom_line() +
+  theme_bw() +
+  geom_vline(xintercept = 1/maxAmplitude$frequency)
+```
+
 
 ### 2. A noisy signal example
 
