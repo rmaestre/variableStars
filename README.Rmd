@@ -1,3 +1,7 @@
+---
+output: github_document
+---
+
 [![Build Status](https://travis-ci.org/rmaestre/variableStars.svg?branch=master)](https://travis-ci.org/rmaestre/variableStars)
 
 Introduction
