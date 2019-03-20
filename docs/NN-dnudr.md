@@ -12,6 +12,19 @@ The next figure represents an overview of the main Neural Network architecture u
 
 <img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/nn-approach.png" data-canonical-src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/nn-approach.png" width="500" />
 
+An example of NN output is the following one, in which:
+
+-   Red = Information related to Dnu
+    -   Vertical red line = Real value of Dnu \[unseen for the NN\]
+    -   Red points = Probabilities over Dnu values infered by the NN
+-   Black = Information related to dr
+    -   Vertical black line = Real value of dr \[unseen for the NN\]
+    -   Black points = Probabilities dr infered by the NN
+
+(Because each channel is scaled between \[0,1\], these values and the probabilities can be plotted together)
+
+<img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/NNoutputexample.png" data-canonical-src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/NNoutputexample.png" width="400" />
+
 Methodology
 ===========
 
