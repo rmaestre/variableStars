@@ -18,6 +18,7 @@ All the code is based on these two papers:
 
 -   [An in-depth study of HD 174966 with CoRoT photometry and HARPS spectroscopy](https://www.aanda.org/articles/aa/full_html/2013/11/aa20256-12/aa20256-12.html)
 
+
 Installation
 ------------
 
@@ -102,3 +103,12 @@ result <- process(
   debug = TRUE
 )
 ```
+
+
+
+Deep Neural Networks
+------------
+
+This package is also used as feature engineering in [Deep Neural Network application to *Dnu* and *dr*  estimation](https://github.com/rmaestre/variableStars/blob/master/docs/NN-dnudr.md).
+
+<img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/nn-approach.png" data-canonical-src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/nn-approach.png" width="400" />

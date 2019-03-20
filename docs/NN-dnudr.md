@@ -1,7 +1,3 @@
-Neural Network approach for detecting Dnu and dr
-================
-Roberto Maestre
-10/24/2018
 
 [![Build Status](https://travis-ci.org/rmaestre/variableStars.svg?branch=master)](https://travis-ci.org/rmaestre/variableStars)
 
