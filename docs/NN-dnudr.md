@@ -14,7 +14,7 @@ Neural Network approach for detecting Dnu and dr
 
 The next figure represents an overview of the main Neural Network architecture used to identify Dnu and dr from a given power espectrum of a variable star:
 
-\[meter imagen\]
+<img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/nn-approach.png" data-canonical-src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/nn-approach.png" width="500" />
 
 Methodology
 ===========
