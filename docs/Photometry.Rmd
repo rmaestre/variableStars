@@ -12,6 +12,7 @@ library(data.table)
 library(ggplot2)
 library(microbenchmark)
 library(plotly)
+library(RColorBrewer)
 ```
 
 ## Library Introduction
@@ -56,7 +57,7 @@ The first signal is the sin one. This signal is very clear and the period can be
 
 ```{r sin}
 x <- sin(seq(from = 0,
-             to = 20,
+             to = 18.84,
              by = 0.01))
 # Add secuential times
 dt.test <-
@@ -88,6 +89,17 @@ ggplot(aes(time, x), data = dt.test) +
   geom_line() +
   theme_bw() +
   geom_vline(xintercept = 1/maxAmplitude$frequency)
+```
+
+
+```{r sinspectrum, warning=F}
+#inverseFt <- apodizationFt(frequences = dt.spectrum$frequency, filter = "uniform")
+
+r <- process(dt.spectrum$frequency, dt.spectrum$amplitude, filter = "uniform", 
+             gRegimen=0, numFrequencies=100,
+             maxDnu=100, minDnu=0, dnuGuessError=T)
+
+plot_periodicities(prepare_periodicities_dataset(r$fresAmps))
 ```
 
 
@@ -127,6 +139,8 @@ plot_spectrum_ggplot(0, 0.5, dt.spectrum)
 Therefore, the period is $p=\frac{1}{F}$ = `r 1/maxAmplitude$frequency`
 
 
+
+
 ### 3. Real data from a pulsar star
 
 In this case, we use the photometry of a pulsar star, in which timestamp the magnitude of the pulsar is given. In this case, analize the patter in visually complex.
@@ -154,6 +168,15 @@ plot_spectrum_ggplot(20, 25, dt.spectrum)
 
 
 Therefore, the period of this pulsar is $p=\frac{1}{F}$ = `r 1/maxAmplitude$frequency`.
+
+```{r noisySin}
+r <- process(dt.spectrum$frequency, dt.spectrum$amplitude, filter = "uniform", 
+             gRegimen=0, numFrequencies=30,
+             maxDnu=100, minDnu=0, dnuGuessError=T)
+
+plot_periodicities_ggplot(prepare_periodicities_dataset(r$fresAmps))
+```
+
 
 
 ## Benchmark
