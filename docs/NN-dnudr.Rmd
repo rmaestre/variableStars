@@ -1,0 +1,184 @@
+---
+title: "Neural Network approach for detecting Dnu and dr"
+author: "Roberto Maestre"
+date: "10/24/2018"
+output: github_document
+---
+
+
+[![Build Status](https://travis-ci.org/rmaestre/variableStars.svg?branch=master)](https://travis-ci.org/rmaestre/variableStars)
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(variableStars)
+library(ggplot2)
+library(RColorBrewer)
+```
+
+
+
+```{r data, echo=F, warning=FALSE}
+if (T) {
+  dt.star <- data.frame(read.table("data/table1.dat", sep = "\t"))
+  colnames(dt.star) <- c("Seq","frequency","amplitude","Phase","Sig","S/N","rms","e_Freq","e_Amp","e_Phase")
+} else {
+  dt.star <- data.frame(read.table("data/freqs.dat", sep = " "))
+  colnames(dt.star) <- c("Id","frequency","Freq2","amplitude","Phase","Sig", "S/N","rms", "e_Freq1","e_Amp","e_Phase")
+}
+```
+
+
+Please, [read the package introduction](https://github.com/rmaestre/variableStars/blob/master/README.md) for initial details about the software, algorithms, workflow and data used.
+
+Neural Network approach for detecting Dnu and dr
+=================================================================
+
+[Depthwise separable convolutions](https://arxiv.org/pdf/1610.02357.pdf) for machine learning consists in *spatial convolution performed independently over each channel of an input, followed by a pointwise convolution, projecting the channels output by the depthwise convolution onto a new channel space. *
+
+The next figure represents an overview of the main Neural Network architecture used to identify Dnu and dr from a given power espectrum of a variable star:
+
+<img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/nn-approach.png" data-canonical-src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/nn-approach.png" width="500" />
+
+
+
+
+
+
+
+Methodology
+===============
+
+
+Input data
+-----------
+
+Each input channel channel is processed with the *variableStars* package. The data from the variable star is process by the main method
+
+```{r, echo=T}
+result <- process(
+  dt.star$frequency,
+  dt.star$amplitude,
+  filter = "uniform",
+  gRegimen = 0,
+  minDnu = 15,
+  maxDnu = 95,
+  dnuValue = -1,
+  dnuGuessError = 10,
+  dnuEstimation = TRUE,
+  numFrequencies = 30,
+  debug = F
+)
+```
+
+and each channel is extracted as:
+
+* Fourier transform
+
+```{r, echo=T}
+dt <- prepare_periodicities_dataset(result$fresAmps)
+dt <- dt[dt$label=="30  freqs",]
+plot_periodicities_ggplot(dt)
+```
+
+* Histogram of differences 
+
+```{r, echo=T}
+dt <- data.frame(result$diffHistogram$histogram)
+plot_histogram_ggplot(dt)
+```
+
+* Autocorrelation 
+
+```{r, echo=T}
+dt <- data.frame(result$crossCorrelation)
+plot_crosscorrelation_ggplot(dt)
+```
+
+Note: The informaction of each channel is scaled between [0,1].
+
+Neural Network targets
+-----------
+
+The input for the Nural Network, is bucketized with a given resolution; transforming the frecuency range into classes:
+
+```{r, echo=T}
+resolution <- 0.5
+# Input dimension
+cuts_breaks <- c(-Inf, seq(0, 101, resolution), Inf)
+cuts_breaks
+```
+
+The target output, is bucketized, transforming the frecuency range into classes:
+
+```{r, echo=T}
+# Output dimension
+output_classes <- seq(from = 0,
+                      to = 14 / 0.0864,
+                      by = 1)
+output_classes
+```
+
+Note: Input and output dimension are fixed.
+
+
+Experiment I
+===============
+
+A simple synthetic data without noise added.
+
+```{r, echo=F}
+set.seed(123)
+dt <- generate_data_modes(
+        deltaNu = 10,
+        deltaR = 7,
+        nuRange = c(2.5, 10),
+        numPoints = 7
+      )
+dt$data$amplitude <- 1.0
+ggplot(aes(frequency, amplitude, shape=mode, colour=mode), data=dt$data) +
+  geom_point(size=2) +
+  theme_bw()
+```    
+      
+Experiment II
+===============
+
+A simple synthetic data without noise added.
+
+```{r, echo=F}
+set.seed(123)
+dt <- generate_data_modes(
+        deltaNu = 10,
+        deltaR = 7,
+        nuRange = c(2.5, 10),
+        numPoints = 7
+      )
+dt$data <-
+        rbind(dt$data,
+              data.frame(
+                "frequency" = runif(15, min(dt$data$frequency), max(dt$data$frequency)),
+                "mode" = "random",
+                "amplitude" = 1.0
+              ))
+      dt$data$amplitude <- 1.0
+ggplot(aes(frequency, amplitude, shape=mode, colour=mode), data=dt$data) +
+  geom_point(size=2) +
+  theme_bw()
+```    
+
+
+
+Results
+---------------
+
+```{r, echo=F}
+dt <- data.frame("loss"=   c(1.63,1.801),
+             "acc-at1"= c(0.408,0.482),
+             "acc-at2"= c(0.639,0.672),
+             "acc-at4"= c(0.853,0.812))
+rownames(dt) <- c("Experiment I - Dnu", "Experiment I - Dr")
+
+knitr::kable(dt)
+```
+

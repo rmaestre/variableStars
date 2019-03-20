@@ -218,7 +218,6 @@ plot_periodicities_ggplot <- function(dt) {
     ylab("Amplitude") +
     theme_bw() +
     theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-    scale_color_lancet() +
     scale_x_continuous(breaks=round(c(maxs$fInv,seq(0,max(dt$fInv),10)), 1))
 }
 

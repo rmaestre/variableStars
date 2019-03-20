@@ -4,10 +4,9 @@
 Introduction
 ------------
 
-Variable Star package provides the main funtions to analized patterns on the [oscilation modes of variable stars](https://en.wikipedia.org/wiki/Asteroseismology). 
+Variable Star package provides the main funtions to analized patterns on the [oscilation modes of variable stars](https://en.wikipedia.org/wiki/Asteroseismology).
 
 <img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/oscilationModes.png" data-canonical-src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/oscilationModes.png" width="200" />
-
 
 All the code is based on these two papers:
 
@@ -24,7 +23,6 @@ library(devtools)
 install_github("rmaestre/variableStars")
 ```
 
-
 A UI for experimentation with synthetic data is provided:
 
 ``` r
@@ -37,7 +35,6 @@ runUISynthetic()
 Example of use on a pulsar data
 -------------------------------
 
-
 Please, find [here](docs/Experiment_-_HD174936.md) or [here](docs/Experiment_-_HD174966.md) the main execution of the complete package procedure.
 
 Main Workflow
@@ -45,17 +42,14 @@ Main Workflow
 
 <img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/diagrams.png" data-canonical-src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/diagrams.png" width="500" />
 
-
-
 (The pulsar in the Crab Nebula is composed by images taken by Hubble (red) and Chandra X-Ray(blue))
 
-
 Implementation
--------------
+--------------
 
 All core funcionalities are programmed [in C++ using RcppArmadillo integrated through Rcpp](https://github.com/rmaestre/variableStars/blob/master/src/tools.cpp). An example of function to calculate all differences between pair of element using Armadillo C++ library, iterators and std operattions:
 
-```c
+``` c
   // Calculate all frequences differences
   int n = frequences.n_elem;
   int diagSupElements = n * (n - 1) / 2;
@@ -84,7 +78,8 @@ All core funcionalities are programmed [in C++ using RcppArmadillo integrated th
 ```
 
 However, all code can be call from R easily with the next function
-```r
+
+``` r
 result <- process(
   data$frequency,
   data$amplitude,
