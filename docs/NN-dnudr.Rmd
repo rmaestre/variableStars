@@ -17,10 +17,35 @@ library(RColorBrewer)
 ```{r data, echo=F, warning=FALSE}
 if (T) {
   dt.star <- data.frame(read.table("data/table1.dat", sep = "\t"))
-  colnames(dt.star) <- c("Seq","frequency","amplitude","Phase","Sig","S/N","rms","e_Freq","e_Amp","e_Phase")
+  colnames(dt.star) <-
+    c(
+      "Seq",
+      "frequency",
+      "amplitude",
+      "Phase",
+      "Sig",
+      "S/N",
+      "rms",
+      "e_Freq",
+      "e_Amp",
+      "e_Phase"
+    )
 } else {
   dt.star <- data.frame(read.table("data/freqs.dat", sep = " "))
-  colnames(dt.star) <- c("Id","frequency","Freq2","amplitude","Phase","Sig", "S/N","rms", "e_Freq1","e_Amp","e_Phase")
+  colnames(dt.star) <-
+    c(
+      "Id",
+      "frequency",
+      "Freq2",
+      "amplitude",
+      "Phase",
+      "Sig",
+      "S/N",
+      "rms",
+      "e_Freq1",
+      "e_Amp",
+      "e_Phase"
+    )
 }
 ```
 
@@ -39,11 +64,11 @@ The next figure represents an overview of the main Neural Network architecture u
 
 An example of NN output is the following one, in which:
 
-* Red = Information related to Dnu
+* **Red** = Information related to Dnu
     * Vertical red line = Real value of Dnu [unseen for the NN]
     * Red points = Probabilities over Dnu values infered by the NN
   
-* Black = Information related to dr
+* **Black** = Information related to dr
     * Vertical black line = Real value of dr [unseen for the NN]
     * Black points = Probabilities dr infered by the NN
     
@@ -61,7 +86,7 @@ Methodology
 Input data
 -----------
 
-Each input channel channel is processed with the *variableStars* package. The data from the variable star is process by the main method
+Each input channel channel is processed with the *variableStars* package. The data from the variable star is processed by the main method:
 
 ```{r, echo=T}
 result <- process(
@@ -81,22 +106,22 @@ result <- process(
 
 and each channel is extracted as:
 
-* Fourier transform
+* **Fourier transform**
 
 ```{r, echo=T}
 dt <- prepare_periodicities_dataset(result$fresAmps)
-dt <- dt[dt$label=="30  freqs",]
+dt <- dt[dt$label == "30  freqs", ]
 plot_periodicities_ggplot(dt)
 ```
 
-* Histogram of differences 
+* **Histogram of differences**
 
 ```{r, echo=T}
 dt <- data.frame(result$diffHistogram$histogram)
 plot_histogram_ggplot(dt)
 ```
 
-* Autocorrelation 
+* **Autocorrelation** 
 
 ```{r, echo=T}
 dt <- data.frame(result$crossCorrelation)
@@ -111,19 +136,20 @@ Neural Network targets
 The input for the Nural Network, is bucketized with a given resolution; transforming the frecuency range into classes:
 
 ```{r, echo=T}
-resolution <- 0.5
+input_resolution <- 0.5
 # Input dimension
-cuts_breaks <- c(-Inf, seq(0, 101, resolution), Inf)
+cuts_breaks <- c(seq(0, 101, input_resolution))
 cuts_breaks
 ```
 
 The target output, is bucketized, transforming the frecuency range into classes:
 
 ```{r, echo=T}
+output_resolution <- 1.0
 # Output dimension
 output_classes <- seq(from = 0,
                       to = 14 / 0.0864,
-                      by = 1)
+                      by = output_resolution)
 output_classes
 ```
 
@@ -133,7 +159,7 @@ Note: Input and output dimension are fixed.
 Experiment I
 ===============
 
-A simple synthetic data without noise added.
+A simple synthetic data without noise added. 28 frequencies are generated with four clear patters.
 
 ```{r, echo=F}
 set.seed(123)
@@ -146,13 +172,37 @@ dt <- generate_data_modes(
 dt$data$amplitude <- 1.0
 ggplot(aes(frequency, amplitude, shape=mode, colour=mode), data=dt$data) +
   geom_point(size=2) +
-  theme_bw()
+  theme_bw() +
+  ggtitle(bquote(Delta*nu~"="~.(dt$dnu) ~ delta*r~"="~.(dt$dr)))
 ```    
       
+The variableStars package process all frequencies and produce the input data for each channel in the NN.
+
+```{r, echo=T}
+# Process the data
+result <- process(
+  dt$data$frequency,
+  dt$data$amplitude,
+  filter = "uniform",
+  gRegimen = 0,
+  minDnu = 15,
+  maxDnu = 95,
+  dnuValue = -1,
+  dnuGuessError = 10,
+  dnuEstimation = TRUE,
+  numFrequencies = nrow(dt$data)+1,
+  debug = F
+)
+plot_periodicities_ggplot(prepare_periodicities_dataset(result$fresAmps))
+plot_histogram_ggplot(data.frame(result$diffHistogram$histogram))
+plot_crosscorrelation_ggplot(data.frame(result$crossCorrelation))
+```
+
+
 Experiment II
 ===============
 
-A simple synthetic data without noise added.
+A simple synthetic data noise added. 28 frequencies are generated with four clear patters, plus 15 random frequencies (**53% of random frequencies**). 
 
 ```{r, echo=F}
 set.seed(123)
@@ -172,21 +222,84 @@ dt$data <-
       dt$data$amplitude <- 1.0
 ggplot(aes(frequency, amplitude, shape=mode, colour=mode), data=dt$data) +
   geom_point(size=2) +
-  theme_bw()
+  theme_bw() +
+  ggtitle(bquote(Delta*nu~"="~.(dt$dnu) ~ delta*r~"="~.(dt$dr)))
+```
+
+The variableStars package process all frequencies and produce the input data for each channel in the NN.
+
+```{r, echo=T}
+# Process the data
+resultNoisy <- process(
+  dt$data$frequency,
+  dt$data$amplitude,
+  filter = "uniform",
+  gRegimen = 0,
+  minDnu = 15,
+  maxDnu = 95,
+  dnuValue = -1,
+  dnuGuessError = 10,
+  dnuEstimation = TRUE,
+  numFrequencies = nrow(dt$data) + 1,
+  debug = F
+)
+plot_periodicities_ggplot(prepare_periodicities_dataset(resultNoisy$fresAmps))
+plot_histogram_ggplot(data.frame(resultNoisy$diffHistogram$histogram))
+plot_crosscorrelation_ggplot(data.frame(resultNoisy$crossCorrelation))
 ```    
 
 
 
 Results
----------------
+===================
+
+
+Confusion matrix
+----------------
+
+
+**Experiment I**
+
+* Dnu
+
+<img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/cm-clear-dnu.png" data-canonical-src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/cm-clear-dnu.png" width="400" />
+
+* dr
+
+<img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/cm-clear-dr.png" data-canonical-src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/cm-clear-dr.png" width="400" />
+
+
+**Experiment II**
+
+
+**Experiment III**
+
+Validation accuracy
+----------------
+
+In our approach, we use **recall @N**. This metric means that, the correct category (Dnu or dr bucket) is found in the first **N** sorted probabilities that the model gives.
 
 ```{r, echo=F}
-dt <- data.frame("loss"=   c(1.63,1.801),
-             "acc-at1"= c(0.408,0.482),
-             "acc-at2"= c(0.639,0.672),
-             "acc-at4"= c(0.853,0.812))
-rownames(dt) <- c("Experiment I - Dnu", "Experiment I - Dr")
+dt <- data.frame("loss"=   c(1.63,1.801,1.814,1.896),
+             "acc-at-n=1"= c(0.408,0.482,0.470,0.467),
+             "acc-at-n=2"= c(0.639,0.672,0.653,0.658),
+             "acc-at-n=4"= c(0.853,0.812,0.816,0.802))
+rownames(dt) <- c("Experiment I - Dnu", "Experiment I - Dr", 
+                  "Experiment II - Dnu", "Experiment II - Dr")
 
 knitr::kable(dt)
 ```
+
+
+Limitations
+---------------
+
+* NNs are really sensible to the data input that has been trained. Despite the fact that NN can generalized very well, a robust corresponding between synthetic data generation (theoretical models) and the process itself must be ensured.
+
+* A rigorous NN architecture search must me done. The number of layers and its hyperparameters, dramatically impacts in the NN performance.
+
+* NNs 
+
+
+
 
