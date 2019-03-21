@@ -1,4 +1,10 @@
 
+### VariableStars
+
+This notebook expose the method to apply a *Depthwise separable convolutional NN* on the oscilation star observation. By appliying 
+
+
+
 
 ```R
 library(variableStars)
@@ -8,8 +14,8 @@ library(RColorBrewer)
 library(plotly)
 library(keras)
 library(plotly)
-library(fields)
 library(abind)
+library(fields)
 ```
 
     
@@ -91,72 +97,7 @@ c_dnu <- function(x) {
   c_over <- function(x) {
     length(which(x == 3)) == 1
   }
-```
 
-## Architecture
-
-
-```R
-# Create a 1d convolutional NN
-model <- keras_model_sequential() %>%
-  layer_separable_conv_1d(kernel_size=10,
-                          filters=5,
-                          depth_multiplier=10,
-                          input_shape=c(204,3)) %>%
-  #layer_max_pooling_2d(pool_size = c(1,1)) %>%
-  layer_dropout(0.2) %>%
-  layer_batch_normalization() %>%
-
-  layer_separable_conv_1d(kernel_size=10,
-                          filters=5,
-                          depth_multiplier=10,
-                          input_shape=c(204,3)) %>%
-  #layer_max_pooling_2d(pool_size = c(1,1)) %>%
-  layer_dropout(0.5) %>%
-  layer_batch_normalization() %>%
-
-  layer_flatten() %>%
-  layer_dense(units=num_classes, activation='softmax')
-
-
-# Configure a model for categorical classification.
-model %>% compile(
-  loss = "categorical_crossentropy",
-  optimizer = optimizer_adadelta(lr = 0.01),
-  metrics = c("accuracy")
-)
-summary(model) # Plot summary
-```
-
-    ________________________________________________________________________________
-    Layer (type)                        Output Shape                    Param #     
-    ================================================================================
-    separable_conv1d_1 (SeparableConv1D (None, 195, 5)                  455         
-    ________________________________________________________________________________
-    dropout_1 (Dropout)                 (None, 195, 5)                  0           
-    ________________________________________________________________________________
-    batch_normalization_1 (BatchNormali (None, 195, 5)                  20          
-    ________________________________________________________________________________
-    separable_conv1d_2 (SeparableConv1D (None, 186, 5)                  755         
-    ________________________________________________________________________________
-    dropout_2 (Dropout)                 (None, 186, 5)                  0           
-    ________________________________________________________________________________
-    batch_normalization_2 (BatchNormali (None, 186, 5)                  20          
-    ________________________________________________________________________________
-    flatten_1 (Flatten)                 (None, 930)                     0           
-    ________________________________________________________________________________
-    dense_1 (Dense)                     (None, 162)                     150822      
-    ================================================================================
-    Total params: 152,072
-    Trainable params: 152,052
-    Non-trainable params: 20
-    ________________________________________________________________________________
-
-
-### Data generation of frecuency modes
-
-
-```R
 generate_data_modes <- function(deltaNu, nuRange, deltaR, numPoints) {
   # DS to return data
   df <- data.frame()
@@ -243,33 +184,28 @@ generate_data_modes <- function(deltaNu, nuRange, deltaR, numPoints) {
 }
 ```
 
-### Random experiment generation
+### Specific accuracy metrics
 
 
 ```R
-flag = T
+top_4_categorical_accuracy <-
+  custom_metric("acc_at_4", function(y_true, y_pred) {
+    metric_top_k_categorical_accuracy(y_true, y_pred, 4)
+  })
+top_2_categorical_accuracy <-
+  custom_metric("acc_at_2", function(y_true, y_pred) {
+    metric_top_k_categorical_accuracy(y_true, y_pred, 2)
+  })
+```
 
-for (i in seq(from=1,10)) {
-  if (flag) {
-    # Save to disk
-    load(file = paste("~/Downloads/x_train", i, ".RData", sep = ""))
-    load(file = paste("~/Downloads/x_test", i, ".RData", sep = ""))
-    load(file = paste("~/Downloads/y_train", i, ".RData", sep = ""))
-    load(file = paste("~/Downloads/y_test", i, ".RData", sep = ""))
-    
-    # Variables name
-    assign("x_train", get(paste("x_train", i, sep = "")))
-    assign("x_test", get(paste("x_test", i, sep = "")))
-    assign("y_train", get(paste("y_train", i, sep = "")))
-    assign("y_test", get(paste("y_test", i, sep = "")))
-          
-      
-  } else {
-    # Matrix to save genereated data
-    #m_xtrain <- matrix(nrow = experiment_number + 1, ncol = input_dim, dim=c(1,3))
-    #m_ytrain <- matrix(nrow = experiment_number + 1, ncol = num_classes)
-    
-    # 2D dimensional array for X train
+### Synthetic data generation
+
+
+```R
+# Minibatches samples
+if (F) {
+  for (i in seq(from = 3, to = 10)) {
+    # ND dimensional array for X train
     rows <- experiment_number + 1
     cols <- input_dim
     dimensions <- 3 # Number of channels
@@ -301,6 +237,16 @@ for (i in seq(from=1,10)) {
         nuRange = c(2.5, 10),
         numPoints = 7
       )
+      # Add noise
+      dt$data <-
+        rbind(dt$data,
+              data.frame(
+                "frequency" = runif(15, min(dt$data$frequency), max(dt$data$frequency)),
+                "mode" = "random",
+                "amplitude" = 1.0
+              ))
+      
+      
       # Execute experiment
       result <- process(
         frequency = dt$data$frequency,
@@ -309,12 +255,12 @@ for (i in seq(from=1,10)) {
         gRegimen = 0,
         maxDnu = 1,
         minDnu = 15,
-        numFrequencies = ifelse(nrow(dt$data) < 30, 31, nrow(dt) + 1),
+        numFrequencies = ifelse(nrow(dt$data)==50,51,50),
         dnuGuessError = -1,
         debug = F
       )
       
-      # X data
+      # X data. THe maximum value is processed in each bucket
       # ----------------------
       # Save fourier transform
       ftS <-
@@ -362,8 +308,8 @@ for (i in seq(from=1,10)) {
       # Y data
       # First pattern [dnu] is coded with "1" in the one-hot encoding
       # Second patter [dr] is coded with "2" in the one-hot encodinf
-      m_ytrain[count,] <-
-        to_categorical(trunc(dt$dnu, 3), num_classes) + 
+      m_ytrain[count, ] <-
+        to_categorical(trunc(dt$dnu, 3), num_classes) +
         (to_categorical(trunc(dt$dr, 3), num_classes) * 2)
       count <- count + 1
     }
@@ -374,10 +320,10 @@ for (i in seq(from=1,10)) {
     ind <- sample(seq_len(nrow(m_xtrain)), size = smp_size)
     
     # Prepare partition
-    x_train <- m_xtrain[ind, , ]
-    x_test  <- m_xtrain[-ind, , ]
-    y_train <- m_ytrain[ind, ]
-    y_test  <- m_ytrain[-ind, ]
+    x_train <- m_xtrain[ind, ,]
+    x_test  <- m_xtrain[-ind, ,]
+    y_train <- m_ytrain[ind,]
+    y_test  <- m_ytrain[-ind,]
     
     # Save to disk
     v_name_x_train <- paste("x_train", i, sep = "")
@@ -407,16 +353,611 @@ for (i in seq(from=1,10)) {
       file =  paste("~/Downloads/", v_name_y_test, ".RData", sep = "")
     )
   }
+}
+```
+
+    [1] "Experiment:250 | dnu:6.5529 | dr:1.797"
+    [1] "Experiment:500 | dnu:9.4665 | dr:0.6494"
+    [1] "Experiment:750 | dnu:5.881 | dr:0.2124"
+    [1] "Experiment:1000 | dnu:6.6536 | dr:3.7049"
+    [1] "Experiment:1250 | dnu:9.0111 | dr:4.6031"
+    [1] "Experiment:1500 | dnu:1.8654 | dr:0.7774"
+    [1] "Experiment:1750 | dnu:1.3683 | dr:0.4215"
+    [1] "Experiment:2000 | dnu:4.1219 | dr:3.7328"
+    [1] "Experiment:2250 | dnu:1.1553 | dr:0.4459"
+    [1] "Experiment:2500 | dnu:8.7171 | dr:6.3316"
+    [1] "Experiment:2750 | dnu:7.7662 | dr:1.2349"
+    [1] "Experiment:3000 | dnu:6.9271 | dr:3.9534"
+    [1] "Experiment:3250 | dnu:3.6284 | dr:2.2034"
+    [1] "Experiment:3500 | dnu:9.4314 | dr:7.6642"
+    [1] "Experiment:3750 | dnu:7.8383 | dr:0.1888"
+    [1] "Experiment:4000 | dnu:3.882 | dr:3.5761"
+    [1] "Experiment:4250 | dnu:9.0946 | dr:8.7963"
+    [1] "Experiment:4500 | dnu:3.3049 | dr:0.4361"
+    [1] "Experiment:4750 | dnu:1.421 | dr:1.1423"
+    [1] "Experiment:5000 | dnu:6.5306 | dr:1.8608"
+    [1] "Experiment:5250 | dnu:3.8666 | dr:1.4693"
+    [1] "Experiment:5500 | dnu:9.1146 | dr:4.9423"
+    [1] "Experiment:5750 | dnu:7.0844 | dr:4.8394"
+    [1] "Experiment:6000 | dnu:2.4024 | dr:0.107"
+    [1] "Experiment:6250 | dnu:1.5695 | dr:0.5787"
+    [1] "Experiment:6500 | dnu:7.0364 | dr:6.4789"
+    [1] "Experiment:6750 | dnu:3.004 | dr:2.9152"
+    [1] "Experiment:7000 | dnu:5.1361 | dr:1.6639"
+    [1] "Experiment:7250 | dnu:4.9803 | dr:2.0792"
+    [1] "Experiment:7500 | dnu:3.1318 | dr:1.0373"
+    [1] "Experiment:7750 | dnu:1.5372 | dr:0.1249"
+    [1] "Experiment:8000 | dnu:8.7614 | dr:5.6005"
+    [1] "Experiment:8250 | dnu:9.3397 | dr:5.8611"
+    [1] "Experiment:8500 | dnu:1.6342 | dr:0.0481"
+    [1] "Experiment:8750 | dnu:1.6427 | dr:0.2492"
+    [1] "Experiment:9000 | dnu:9.4651 | dr:2.2348"
+    [1] "Experiment:9250 | dnu:4.0068 | dr:0.2167"
+    [1] "Experiment:9500 | dnu:7.4572 | dr:1.8551"
+    [1] "Experiment:9750 | dnu:6.0154 | dr:5.7113"
+    [1] "Experiment:10000 | dnu:1.7784 | dr:0.5024"
+    [1] "Experiment:250 | dnu:9.7017 | dr:3.5878"
+    [1] "Experiment:500 | dnu:5.7368 | dr:3.3729"
+    [1] "Experiment:750 | dnu:5.4419 | dr:0.8334"
+    [1] "Experiment:1000 | dnu:1.491 | dr:1.0276"
+    [1] "Experiment:1250 | dnu:2.1678 | dr:0.532"
+    [1] "Experiment:1500 | dnu:8.8385 | dr:7.7009"
+    [1] "Experiment:1750 | dnu:6.6744 | dr:0.3348"
+    [1] "Experiment:2000 | dnu:5.8701 | dr:5.5381"
+    [1] "Experiment:2250 | dnu:2.2593 | dr:1.4356"
+    [1] "Experiment:2500 | dnu:9.7108 | dr:2.5385"
+    [1] "Experiment:2750 | dnu:7.34 | dr:2.4805"
+    [1] "Experiment:3000 | dnu:2.1476 | dr:0.7958"
+    [1] "Experiment:3250 | dnu:7.3018 | dr:4.9285"
+    [1] "Experiment:3500 | dnu:1.8084 | dr:1.1362"
+    [1] "Experiment:3750 | dnu:7.9674 | dr:7.7414"
+    [1] "Experiment:4000 | dnu:3.3291 | dr:3.2709"
+    [1] "Experiment:4250 | dnu:7.0486 | dr:2.447"
+    [1] "Experiment:4500 | dnu:4.8219 | dr:3.413"
+    [1] "Experiment:4750 | dnu:7.7321 | dr:7.3705"
+    [1] "Experiment:5000 | dnu:4.9303 | dr:3.7288"
+    [1] "Experiment:5250 | dnu:1.9543 | dr:1.3411"
+    [1] "Experiment:5500 | dnu:3.6783 | dr:2.7983"
+    [1] "Experiment:5750 | dnu:7.2549 | dr:5.1931"
+    [1] "Experiment:6000 | dnu:9.6413 | dr:6.6341"
+    [1] "Experiment:6250 | dnu:2.3168 | dr:0.8103"
+    [1] "Experiment:6500 | dnu:2.3704 | dr:1.2228"
+    [1] "Experiment:6750 | dnu:7.7213 | dr:0.1316"
+    [1] "Experiment:7000 | dnu:7.8636 | dr:7.738"
+    [1] "Experiment:7250 | dnu:4.8592 | dr:0.4575"
+    [1] "Experiment:7500 | dnu:3.3505 | dr:0.0432"
+    [1] "Experiment:7750 | dnu:7.3755 | dr:5.8505"
+    [1] "Experiment:8000 | dnu:9.0106 | dr:8.0101"
+    [1] "Experiment:8250 | dnu:4.8896 | dr:1.8911"
+    [1] "Experiment:8500 | dnu:1.345 | dr:1.0136"
+    [1] "Experiment:8750 | dnu:1.3187 | dr:1.0032"
+    [1] "Experiment:9000 | dnu:2.7472 | dr:1.3225"
+    [1] "Experiment:9250 | dnu:2.4172 | dr:1.5555"
+    [1] "Experiment:9500 | dnu:2.0879 | dr:1.5019"
+    [1] "Experiment:9750 | dnu:4.3723 | dr:2.8116"
+    [1] "Experiment:10000 | dnu:3.2835 | dr:0.0059"
+    [1] "Experiment:250 | dnu:9.7017 | dr:3.5878"
+    [1] "Experiment:500 | dnu:5.7368 | dr:3.3729"
+    [1] "Experiment:750 | dnu:5.4419 | dr:0.8334"
+    [1] "Experiment:1000 | dnu:1.491 | dr:1.0276"
+    [1] "Experiment:1250 | dnu:2.1678 | dr:0.532"
+    [1] "Experiment:1500 | dnu:8.8385 | dr:7.7009"
+    [1] "Experiment:1750 | dnu:6.6744 | dr:0.3348"
+    [1] "Experiment:2000 | dnu:5.8701 | dr:5.5381"
+    [1] "Experiment:2250 | dnu:2.2593 | dr:1.4356"
+    [1] "Experiment:2500 | dnu:9.7108 | dr:2.5385"
+    [1] "Experiment:2750 | dnu:7.34 | dr:2.4805"
+    [1] "Experiment:3000 | dnu:2.1476 | dr:0.7958"
+    [1] "Experiment:3250 | dnu:7.3018 | dr:4.9285"
+    [1] "Experiment:3500 | dnu:1.8084 | dr:1.1362"
+    [1] "Experiment:3750 | dnu:7.9674 | dr:7.7414"
+    [1] "Experiment:4000 | dnu:3.3291 | dr:3.2709"
+    [1] "Experiment:4250 | dnu:7.0486 | dr:2.447"
+    [1] "Experiment:4500 | dnu:4.8219 | dr:3.413"
+    [1] "Experiment:4750 | dnu:7.7321 | dr:7.3705"
+    [1] "Experiment:5000 | dnu:4.9303 | dr:3.7288"
+    [1] "Experiment:5250 | dnu:1.9543 | dr:1.3411"
+    [1] "Experiment:5500 | dnu:3.6783 | dr:2.7983"
+    [1] "Experiment:5750 | dnu:7.2549 | dr:5.1931"
+    [1] "Experiment:6000 | dnu:9.6413 | dr:6.6341"
+    [1] "Experiment:6250 | dnu:2.3168 | dr:0.8103"
+    [1] "Experiment:6500 | dnu:2.3704 | dr:1.2228"
+    [1] "Experiment:6750 | dnu:7.7213 | dr:0.1316"
+    [1] "Experiment:7000 | dnu:7.8636 | dr:7.738"
+    [1] "Experiment:7250 | dnu:4.8592 | dr:0.4575"
+    [1] "Experiment:7500 | dnu:3.3505 | dr:0.0432"
+    [1] "Experiment:7750 | dnu:7.3755 | dr:5.8505"
+    [1] "Experiment:8000 | dnu:9.0106 | dr:8.0101"
+    [1] "Experiment:8250 | dnu:4.8896 | dr:1.8911"
+    [1] "Experiment:8500 | dnu:1.345 | dr:1.0136"
+    [1] "Experiment:8750 | dnu:1.3187 | dr:1.0032"
+    [1] "Experiment:9000 | dnu:2.7472 | dr:1.3225"
+    [1] "Experiment:9250 | dnu:2.4172 | dr:1.5555"
+    [1] "Experiment:9500 | dnu:2.0879 | dr:1.5019"
+    [1] "Experiment:9750 | dnu:4.3723 | dr:2.8116"
+    [1] "Experiment:10000 | dnu:3.2835 | dr:0.0059"
+    [1] "Experiment:250 | dnu:9.7017 | dr:3.5878"
+    [1] "Experiment:500 | dnu:5.7368 | dr:3.3729"
+    [1] "Experiment:750 | dnu:5.4419 | dr:0.8334"
+    [1] "Experiment:1000 | dnu:1.491 | dr:1.0276"
+    [1] "Experiment:1250 | dnu:2.1678 | dr:0.532"
+    [1] "Experiment:1500 | dnu:8.8385 | dr:7.7009"
+    [1] "Experiment:1750 | dnu:6.6744 | dr:0.3348"
+    [1] "Experiment:2000 | dnu:5.8701 | dr:5.5381"
+    [1] "Experiment:2250 | dnu:2.2593 | dr:1.4356"
+    [1] "Experiment:2500 | dnu:9.7108 | dr:2.5385"
+    [1] "Experiment:2750 | dnu:7.34 | dr:2.4805"
+    [1] "Experiment:3000 | dnu:2.1476 | dr:0.7958"
+    [1] "Experiment:3250 | dnu:7.3018 | dr:4.9285"
+    [1] "Experiment:3500 | dnu:1.8084 | dr:1.1362"
+    [1] "Experiment:3750 | dnu:7.9674 | dr:7.7414"
+    [1] "Experiment:4000 | dnu:3.3291 | dr:3.2709"
+    [1] "Experiment:4250 | dnu:7.0486 | dr:2.447"
+    [1] "Experiment:4500 | dnu:4.8219 | dr:3.413"
+    [1] "Experiment:4750 | dnu:7.7321 | dr:7.3705"
+    [1] "Experiment:5000 | dnu:4.9303 | dr:3.7288"
+    [1] "Experiment:5250 | dnu:1.9543 | dr:1.3411"
+    [1] "Experiment:5500 | dnu:3.6783 | dr:2.7983"
+    [1] "Experiment:5750 | dnu:7.2549 | dr:5.1931"
+    [1] "Experiment:6000 | dnu:9.6413 | dr:6.6341"
+    [1] "Experiment:6250 | dnu:2.3168 | dr:0.8103"
+    [1] "Experiment:6500 | dnu:2.3704 | dr:1.2228"
+    [1] "Experiment:6750 | dnu:7.7213 | dr:0.1316"
+    [1] "Experiment:7000 | dnu:7.8636 | dr:7.738"
+    [1] "Experiment:7250 | dnu:4.8592 | dr:0.4575"
+    [1] "Experiment:7500 | dnu:3.3505 | dr:0.0432"
+    [1] "Experiment:7750 | dnu:7.3755 | dr:5.8505"
+    [1] "Experiment:8000 | dnu:9.0106 | dr:8.0101"
+    [1] "Experiment:8250 | dnu:4.8896 | dr:1.8911"
+    [1] "Experiment:8500 | dnu:1.345 | dr:1.0136"
+    [1] "Experiment:8750 | dnu:1.3187 | dr:1.0032"
+    [1] "Experiment:9000 | dnu:2.7472 | dr:1.3225"
+    [1] "Experiment:9250 | dnu:2.4172 | dr:1.5555"
+    [1] "Experiment:9500 | dnu:2.0879 | dr:1.5019"
+    [1] "Experiment:9750 | dnu:4.3723 | dr:2.8116"
+    [1] "Experiment:10000 | dnu:3.2835 | dr:0.0059"
+    [1] "Experiment:250 | dnu:9.7017 | dr:3.5878"
+    [1] "Experiment:500 | dnu:5.7368 | dr:3.3729"
+    [1] "Experiment:750 | dnu:5.4419 | dr:0.8334"
+    [1] "Experiment:1000 | dnu:1.491 | dr:1.0276"
+    [1] "Experiment:1250 | dnu:2.1678 | dr:0.532"
+    [1] "Experiment:1500 | dnu:8.8385 | dr:7.7009"
+    [1] "Experiment:1750 | dnu:6.6744 | dr:0.3348"
+    [1] "Experiment:2000 | dnu:5.8701 | dr:5.5381"
+    [1] "Experiment:2250 | dnu:2.2593 | dr:1.4356"
+    [1] "Experiment:2500 | dnu:9.7108 | dr:2.5385"
+    [1] "Experiment:2750 | dnu:7.34 | dr:2.4805"
+    [1] "Experiment:3000 | dnu:2.1476 | dr:0.7958"
+    [1] "Experiment:3250 | dnu:7.3018 | dr:4.9285"
+    [1] "Experiment:3500 | dnu:1.8084 | dr:1.1362"
+    [1] "Experiment:3750 | dnu:7.9674 | dr:7.7414"
+    [1] "Experiment:4000 | dnu:3.3291 | dr:3.2709"
+    [1] "Experiment:4250 | dnu:7.0486 | dr:2.447"
+    [1] "Experiment:4500 | dnu:4.8219 | dr:3.413"
+    [1] "Experiment:4750 | dnu:7.7321 | dr:7.3705"
+    [1] "Experiment:5000 | dnu:4.9303 | dr:3.7288"
+    [1] "Experiment:5250 | dnu:1.9543 | dr:1.3411"
+    [1] "Experiment:5500 | dnu:3.6783 | dr:2.7983"
+    [1] "Experiment:5750 | dnu:7.2549 | dr:5.1931"
+    [1] "Experiment:6000 | dnu:9.6413 | dr:6.6341"
+    [1] "Experiment:6250 | dnu:2.3168 | dr:0.8103"
+    [1] "Experiment:6500 | dnu:2.3704 | dr:1.2228"
+    [1] "Experiment:6750 | dnu:7.7213 | dr:0.1316"
+    [1] "Experiment:7000 | dnu:7.8636 | dr:7.738"
+    [1] "Experiment:7250 | dnu:4.8592 | dr:0.4575"
+    [1] "Experiment:7500 | dnu:3.3505 | dr:0.0432"
+    [1] "Experiment:7750 | dnu:7.3755 | dr:5.8505"
+    [1] "Experiment:8000 | dnu:9.0106 | dr:8.0101"
+    [1] "Experiment:8250 | dnu:4.8896 | dr:1.8911"
+    [1] "Experiment:8500 | dnu:1.345 | dr:1.0136"
+    [1] "Experiment:8750 | dnu:1.3187 | dr:1.0032"
+    [1] "Experiment:9000 | dnu:2.7472 | dr:1.3225"
+    [1] "Experiment:9250 | dnu:2.4172 | dr:1.5555"
+    [1] "Experiment:9500 | dnu:2.0879 | dr:1.5019"
+    [1] "Experiment:9750 | dnu:4.3723 | dr:2.8116"
+    [1] "Experiment:10000 | dnu:3.2835 | dr:0.0059"
+    [1] "Experiment:250 | dnu:9.7017 | dr:3.5878"
+    [1] "Experiment:500 | dnu:5.7368 | dr:3.3729"
+    [1] "Experiment:750 | dnu:5.4419 | dr:0.8334"
+    [1] "Experiment:1000 | dnu:1.491 | dr:1.0276"
+    [1] "Experiment:1250 | dnu:2.1678 | dr:0.532"
+    [1] "Experiment:1500 | dnu:8.8385 | dr:7.7009"
+    [1] "Experiment:1750 | dnu:6.6744 | dr:0.3348"
+    [1] "Experiment:2000 | dnu:5.8701 | dr:5.5381"
+    [1] "Experiment:2250 | dnu:2.2593 | dr:1.4356"
+    [1] "Experiment:2500 | dnu:9.7108 | dr:2.5385"
+    [1] "Experiment:2750 | dnu:7.34 | dr:2.4805"
+    [1] "Experiment:3000 | dnu:2.1476 | dr:0.7958"
+    [1] "Experiment:3250 | dnu:7.3018 | dr:4.9285"
+    [1] "Experiment:3500 | dnu:1.8084 | dr:1.1362"
+    [1] "Experiment:3750 | dnu:7.9674 | dr:7.7414"
+    [1] "Experiment:4000 | dnu:3.3291 | dr:3.2709"
+    [1] "Experiment:4250 | dnu:7.0486 | dr:2.447"
+    [1] "Experiment:4500 | dnu:4.8219 | dr:3.413"
+    [1] "Experiment:4750 | dnu:7.7321 | dr:7.3705"
+    [1] "Experiment:5000 | dnu:4.9303 | dr:3.7288"
+    [1] "Experiment:5250 | dnu:1.9543 | dr:1.3411"
+    [1] "Experiment:5500 | dnu:3.6783 | dr:2.7983"
+    [1] "Experiment:5750 | dnu:7.2549 | dr:5.1931"
+    [1] "Experiment:6000 | dnu:9.6413 | dr:6.6341"
+    [1] "Experiment:6250 | dnu:2.3168 | dr:0.8103"
+    [1] "Experiment:6500 | dnu:2.3704 | dr:1.2228"
+    [1] "Experiment:6750 | dnu:7.7213 | dr:0.1316"
+    [1] "Experiment:7000 | dnu:7.8636 | dr:7.738"
+    [1] "Experiment:7250 | dnu:4.8592 | dr:0.4575"
+    [1] "Experiment:7500 | dnu:3.3505 | dr:0.0432"
+    [1] "Experiment:7750 | dnu:7.3755 | dr:5.8505"
+    [1] "Experiment:8000 | dnu:9.0106 | dr:8.0101"
+    [1] "Experiment:8250 | dnu:4.8896 | dr:1.8911"
+    [1] "Experiment:8500 | dnu:1.345 | dr:1.0136"
+    [1] "Experiment:8750 | dnu:1.3187 | dr:1.0032"
+    [1] "Experiment:9000 | dnu:2.7472 | dr:1.3225"
+    [1] "Experiment:9250 | dnu:2.4172 | dr:1.5555"
+    [1] "Experiment:9500 | dnu:2.0879 | dr:1.5019"
+    [1] "Experiment:9750 | dnu:4.3723 | dr:2.8116"
+    [1] "Experiment:10000 | dnu:3.2835 | dr:0.0059"
+    [1] "Experiment:250 | dnu:9.7017 | dr:3.5878"
+    [1] "Experiment:500 | dnu:5.7368 | dr:3.3729"
+    [1] "Experiment:750 | dnu:5.4419 | dr:0.8334"
+    [1] "Experiment:1000 | dnu:1.491 | dr:1.0276"
+    [1] "Experiment:1250 | dnu:2.1678 | dr:0.532"
+    [1] "Experiment:1500 | dnu:8.8385 | dr:7.7009"
+    [1] "Experiment:1750 | dnu:6.6744 | dr:0.3348"
+    [1] "Experiment:2000 | dnu:5.8701 | dr:5.5381"
+    [1] "Experiment:2250 | dnu:2.2593 | dr:1.4356"
+    [1] "Experiment:2500 | dnu:9.7108 | dr:2.5385"
+    [1] "Experiment:2750 | dnu:7.34 | dr:2.4805"
+    [1] "Experiment:3000 | dnu:2.1476 | dr:0.7958"
+    [1] "Experiment:3250 | dnu:7.3018 | dr:4.9285"
+    [1] "Experiment:3500 | dnu:1.8084 | dr:1.1362"
+    [1] "Experiment:3750 | dnu:7.9674 | dr:7.7414"
+    [1] "Experiment:4000 | dnu:3.3291 | dr:3.2709"
+    [1] "Experiment:4250 | dnu:7.0486 | dr:2.447"
+    [1] "Experiment:4500 | dnu:4.8219 | dr:3.413"
+    [1] "Experiment:4750 | dnu:7.7321 | dr:7.3705"
+    [1] "Experiment:5000 | dnu:4.9303 | dr:3.7288"
+    [1] "Experiment:5250 | dnu:1.9543 | dr:1.3411"
+    [1] "Experiment:5500 | dnu:3.6783 | dr:2.7983"
+    [1] "Experiment:5750 | dnu:7.2549 | dr:5.1931"
+    [1] "Experiment:6000 | dnu:9.6413 | dr:6.6341"
+    [1] "Experiment:6250 | dnu:2.3168 | dr:0.8103"
+    [1] "Experiment:6500 | dnu:2.3704 | dr:1.2228"
+    [1] "Experiment:6750 | dnu:7.7213 | dr:0.1316"
+    [1] "Experiment:7000 | dnu:7.8636 | dr:7.738"
+    [1] "Experiment:7250 | dnu:4.8592 | dr:0.4575"
+    [1] "Experiment:7500 | dnu:3.3505 | dr:0.0432"
+    [1] "Experiment:7750 | dnu:7.3755 | dr:5.8505"
+    [1] "Experiment:8000 | dnu:9.0106 | dr:8.0101"
+    [1] "Experiment:8250 | dnu:4.8896 | dr:1.8911"
+    [1] "Experiment:8500 | dnu:1.345 | dr:1.0136"
+    [1] "Experiment:8750 | dnu:1.3187 | dr:1.0032"
+    [1] "Experiment:9000 | dnu:2.7472 | dr:1.3225"
+    [1] "Experiment:9250 | dnu:2.4172 | dr:1.5555"
+    [1] "Experiment:9500 | dnu:2.0879 | dr:1.5019"
+    [1] "Experiment:9750 | dnu:4.3723 | dr:2.8116"
+    [1] "Experiment:10000 | dnu:3.2835 | dr:0.0059"
+    [1] "Experiment:250 | dnu:9.7017 | dr:3.5878"
+    [1] "Experiment:500 | dnu:5.7368 | dr:3.3729"
+    [1] "Experiment:750 | dnu:5.4419 | dr:0.8334"
+    [1] "Experiment:1000 | dnu:1.491 | dr:1.0276"
+    [1] "Experiment:1250 | dnu:2.1678 | dr:0.532"
+    [1] "Experiment:1500 | dnu:8.8385 | dr:7.7009"
+    [1] "Experiment:1750 | dnu:6.6744 | dr:0.3348"
+    [1] "Experiment:2000 | dnu:5.8701 | dr:5.5381"
+    [1] "Experiment:2250 | dnu:2.2593 | dr:1.4356"
+    [1] "Experiment:2500 | dnu:9.7108 | dr:2.5385"
+    [1] "Experiment:2750 | dnu:7.34 | dr:2.4805"
+    [1] "Experiment:3000 | dnu:2.1476 | dr:0.7958"
+    [1] "Experiment:3250 | dnu:7.3018 | dr:4.9285"
+    [1] "Experiment:3500 | dnu:1.8084 | dr:1.1362"
+    [1] "Experiment:3750 | dnu:7.9674 | dr:7.7414"
+    [1] "Experiment:4000 | dnu:3.3291 | dr:3.2709"
+    [1] "Experiment:4250 | dnu:7.0486 | dr:2.447"
+    [1] "Experiment:4500 | dnu:4.8219 | dr:3.413"
+    [1] "Experiment:4750 | dnu:7.7321 | dr:7.3705"
+    [1] "Experiment:5000 | dnu:4.9303 | dr:3.7288"
+    [1] "Experiment:5250 | dnu:1.9543 | dr:1.3411"
+    [1] "Experiment:5500 | dnu:3.6783 | dr:2.7983"
+    [1] "Experiment:5750 | dnu:7.2549 | dr:5.1931"
+    [1] "Experiment:6000 | dnu:9.6413 | dr:6.6341"
+    [1] "Experiment:6250 | dnu:2.3168 | dr:0.8103"
+    [1] "Experiment:6500 | dnu:2.3704 | dr:1.2228"
+    [1] "Experiment:6750 | dnu:7.7213 | dr:0.1316"
+    [1] "Experiment:7000 | dnu:7.8636 | dr:7.738"
+    [1] "Experiment:7250 | dnu:4.8592 | dr:0.4575"
+    [1] "Experiment:7500 | dnu:3.3505 | dr:0.0432"
+    [1] "Experiment:7750 | dnu:7.3755 | dr:5.8505"
+    [1] "Experiment:8000 | dnu:9.0106 | dr:8.0101"
+    [1] "Experiment:8250 | dnu:4.8896 | dr:1.8911"
+    [1] "Experiment:8500 | dnu:1.345 | dr:1.0136"
+    [1] "Experiment:8750 | dnu:1.3187 | dr:1.0032"
+    [1] "Experiment:9000 | dnu:2.7472 | dr:1.3225"
+    [1] "Experiment:9250 | dnu:2.4172 | dr:1.5555"
+    [1] "Experiment:9500 | dnu:2.0879 | dr:1.5019"
+    [1] "Experiment:9750 | dnu:4.3723 | dr:2.8116"
+    [1] "Experiment:10000 | dnu:3.2835 | dr:0.0059"
+
+
+### Random experiment generation (Architecture Random Search)
+
+
+```R
+NN_experiments <- 100
+
+# Start log file
+write(
+  paste0(
+    "loss",
+    "\t",
+    " acc",
+    "\t",
+    " acc_at_2",
+    "\t",
+    " acc_at_4",
+    "\t",
+    "architecture"
+  ),
+  file = "~/Downloads/experiments.log",
+  append = T
+)
+
+# Loop over NN search
+for (a in seq(1:NN_experiments)) {
+  # Function to generate a ramdon layer
+  add_layer <- function(model, is_max_pooling, is_dropout) {
+    r_kernel_size = sample(seq(from = 2, to = 10), 1)
+    r_filters = sample(seq(from = 2, to = 10), 1)
+    r_depth_multiplier = sample(seq(from = 2, to = 10), 1)
+    r_pool_size = sample(seq(from = 1, to = 3), 1)
+    r_dropout = round(runif(1, 0.1, 0.5), 1)
+    # Add layers
+    model %>% layer_separable_conv_1d(
+      kernel_size =  r_kernel_size,
+      filters =  r_filters,
+      depth_multiplier =  r_depth_multiplier,
+      input_shape = c(204, 3)
+    )
+    if (is_max_pooling) {
+      model %>% layer_max_pooling_1d(pool_size =  r_pool_size)
+    }
+    if (is_dropout) {
+      model %>% layer_dropout(r_dropout)
+    }
+    return(list(
+      "model" = model,
+      "conf" = list(
+        "k_size" = r_kernel_size,
+        "n_filters" = r_filters,
+        "d_size" = r_depth_multiplier,
+        "p_size" = r_pool_size,
+        "dropout" = r_dropout
+      )
+    ))
+  }
+  
+  # Create a valid NN with random layers and parameters
+  out <- tryCatch({
+    stop("error")
+  }, error = function(e) {
+    e
+  })
+  model <- NULL
+  f_layer <- NULL
+  s_layer <- NULL
+  t_layer <- NULL
+  while (any(class(out) == "error")) {
+    out <- tryCatch({
+      # Create an empy sequential model
+      # Random parameters
+      model <- keras_model_sequential()
+      
+      # Mandatory first layer
+      f_layer <-
+        add_layer(model,
+                  is_max_pooling = T,
+                  is_dropout = T)
+      model <- f_layer$model
+      
+      if (rbinom(1, 1, 0.5)) {
+        s_layer <- add_layer(
+          model,
+          is_max_pooling = rbinom(1, 1, 0.5),
+          is_dropout = rbinom(1, 1, 0.5)
+        )
+        model <- s_layer$model
+      }
+      if (rbinom(1, 1, 0.5)) {
+        t_layer <- add_layer(
+          model,
+          is_max_pooling = rbinom(1, 1, 0.5),
+          is_dropout = rbinom(1, 1, 0.5)
+        )
+        model <- s_layer$model
+      }
+      
+      # Add last fixed layer
+      model %>%
+        layer_flatten() %>%
+        layer_dense(units = num_classes, activation = 'softmax')
+      
+      
+      # Configure a model for categorical classification.
+      model %>% compile(
+        loss = "categorical_crossentropy",
+        optimizer = optimizer_adadelta(lr = 0.01),
+        metrics = c(
+          "accuracy",
+          top_2_categorical_accuracy,
+          top_4_categorical_accuracy
+        )
+      )
+    }, error = function(e) {
+      e
+    })
+  }
+  
+  
+  # Train network over all minibatches
+  for (i in seq(from = 1, to = 10)) {
+    # Save to disk
+    load(file = paste("~/Downloads/x_train", i, ".RData", sep = ""))
+    load(file = paste("~/Downloads/x_test", i, ".RData", sep = ""))
+    load(file = paste("~/Downloads/y_train", i, ".RData", sep = ""))
+    load(file = paste("~/Downloads/y_test", i, ".RData", sep = ""))
+    
+    # Variables name
+    assign("x_train", get(paste("x_train", i, sep = "")))
+    assign("x_test", get(paste("x_test", i, sep = "")))
+    assign("y_train", get(paste("y_train", i, sep = "")))
+    assign("y_test", get(paste("y_test", i, sep = "")))
+    
+    
+    # Check kind of data
+    type = "dr"
+    
+    if (type == "dnu") {
+      # Train
+      y_train[which(y_train == 2)] <- 0
+      y_train[which(y_train == 3)] <- 1
+      # Test
+      y_test[which(y_test == 2)] <- 0
+      y_test[which(y_test == 3)] <- 0
+      
+    } else if (type == "dr") {
+      # Train
+      y_train[which(y_train == 1)] <- 0
+      y_train[which(y_train == 2)] <- 1
+      y_train[which(y_train == 3)] <- 1
+      # Test
+      y_test[which(y_test == 1)] <- 0
+      y_test[which(y_test == 2)] <- 1
+      y_test[which(y_test == 3)] <- 1
+    } else if (type == "both") {
+      # Train
+      y_train[which(y_train == 1)] <- 1
+      y_train[which(y_train == 2)] <- 1
+      y_train[which(y_train == 3)] <- 1
+      # Test
+      y_test[which(y_test == 1)] <- 1
+      y_test[which(y_test == 2)] <- 1
+      y_test[which(y_test == 3)] <- 1
+    } else {
+      stop()
+    }
+    
+    # Fit model
+    history <- model %>% fit(
+      x_train,
+      y_train,
+      epochs = 1000,
+      batch_size =  250,
+      validation_split = 0.2,
+      shuffle = T,
+      verbose = 2
+    )
+  }
+  
+  r = evaluate(model, x_test, y_test)
+  write(
+    paste0(
+      trunc(r$loss, prec = 4),
+      "\t",
+      trunc(r$acc, prec = 4),
+      "\t",
+      trunc(r$acc_at_2, prec = 4),
+      "\t",
+      trunc(r$acc_at_4, prec = 4),
+      "\t",
+      paste(c(
+        paste("[", paste0(f_layer$conf, collapse = "|"), "]"),
+        paste("[", paste0(s_layer$conf, collapse = "|"), "]"),
+        paste("[", paste0(t_layer$conf, collapse = "|"), "]")
+      ),
+      collapse = " ")
+    ),
+    file = "~/Downloads/experiments.log",
+    append = T
+  )
+  
+}
+```
+
+### After NN serach, train a specific arquitecture
+
+
+```R
+# Create a 1d convolutional NN
+model <- keras_model_sequential() %>%
+  layer_separable_conv_1d(
+    kernel_size = 5,
+    filters = 10,
+    depth_multiplier = 9,
+    input_shape = c(204, 3)
+  ) %>%
+  layer_max_pooling_1d(pool_size = 2) %>%
+  layer_dropout(0.1) %>%
+  layer_batch_normalization() %>%
+  
+  layer_separable_conv_1d(
+    kernel_size = 5,
+    filters = 10,
+    depth_multiplier = 9,
+    input_shape = c(204, 3)
+  ) %>%
+  layer_max_pooling_1d(pool_size = 2) %>%
+  layer_dropout(0.2) %>%
+  layer_batch_normalization() %>%
+
+  layer_separable_conv_1d(
+    kernel_size = 5,
+    filters = 5,
+    depth_multiplier = 8,
+    input_shape = c(204, 3)
+  ) %>%
+  layer_max_pooling_1d(pool_size = 3) %>%
+  layer_dropout(0.4) %>%
+  layer_batch_normalization() %>%
+  
+  layer_flatten() %>%
+  layer_dense(units = num_classes, activation = 'softmax')
+
+
+
+# Configure a model for categorical classification.
+model %>% compile(
+  loss = "categorical_crossentropy",
+  optimizer = optimizer_adadelta(lr = 0.01),
+  metrics = c(
+          "accuracy",
+          top_2_categorical_accuracy,
+          top_4_categorical_accuracy
+        )
+)
+summary(model) # Plot summary
+
+
+for (i in seq(from = 3, to = 10)) {
+  # Save to disk
+  load(file = paste("~/Downloads/x_train", i, ".RData", sep = ""))
+  load(file = paste("~/Downloads/x_test", i, ".RData", sep = ""))
+  load(file = paste("~/Downloads/y_train", i, ".RData", sep = ""))
+  load(file = paste("~/Downloads/y_test", i, ".RData", sep = ""))
+  
+  # Variables name
+  assign("x_train", get(paste("x_train", i, sep = "")))
+  assign("x_test", get(paste("x_test", i, sep = "")))
+  assign("y_train", get(paste("y_train", i, sep = "")))
+  assign("y_test", get(paste("y_test", i, sep = "")))
   
   
   # Check kind of data
-  type = "dr"
+  type = "dnu"
   
   if (type == "dnu") {
     # Train
     y_train[which(y_train == 2)] <- 0
     y_train[which(y_train == 3)] <- 1
-    # Test  
+    # Test
     y_test[which(y_test == 2)] <- 0
     y_test[which(y_test == 3)] <- 0
     
@@ -425,7 +966,7 @@ for (i in seq(from=1,10)) {
     y_train[which(y_train == 1)] <- 0
     y_train[which(y_train == 2)] <- 1
     y_train[which(y_train == 3)] <- 1
-    # Test 
+    # Test
     y_test[which(y_test == 1)] <- 0
     y_test[which(y_test == 2)] <- 1
     y_test[which(y_test == 3)] <- 1
@@ -442,43 +983,57 @@ for (i in seq(from=1,10)) {
     stop()
   }
   
+  
   # Fit model
   history <- model %>% fit(
     x_train,
     y_train,
-    epochs = 2000,
+    epochs = 5000,
     batch_size =  250,
     validation_split = 0.2,
     shuffle = T,
-    verbose = 1
+    verbose = 2
   )
-  
-  metrics = evaluate(model, x_test, y_test)
 }
+save_model_hdf5(model, paste0("~/Downloads/model_",type,".h5"))
 ```
 
+    ________________________________________________________________________________
+    Layer (type)                        Output Shape                    Param #     
+    ================================================================================
+    separable_conv1d_4 (SeparableConv1D (None, 200, 10)                 415         
+    ________________________________________________________________________________
+    max_pooling1d_4 (MaxPooling1D)      (None, 100, 10)                 0           
+    ________________________________________________________________________________
+    dropout_4 (Dropout)                 (None, 100, 10)                 0           
+    ________________________________________________________________________________
+    batch_normalization_4 (BatchNormali (None, 100, 10)                 40          
+    ________________________________________________________________________________
+    separable_conv1d_5 (SeparableConv1D (None, 96, 10)                  1360        
+    ________________________________________________________________________________
+    max_pooling1d_5 (MaxPooling1D)      (None, 48, 10)                  0           
+    ________________________________________________________________________________
+    dropout_5 (Dropout)                 (None, 48, 10)                  0           
+    ________________________________________________________________________________
+    batch_normalization_5 (BatchNormali (None, 48, 10)                  40          
+    ________________________________________________________________________________
+    separable_conv1d_6 (SeparableConv1D (None, 44, 5)                   805         
+    ________________________________________________________________________________
+    max_pooling1d_6 (MaxPooling1D)      (None, 14, 5)                   0           
+    ________________________________________________________________________________
+    dropout_6 (Dropout)                 (None, 14, 5)                   0           
+    ________________________________________________________________________________
+    batch_normalization_6 (BatchNormali (None, 14, 5)                   20          
+    ________________________________________________________________________________
+    flatten_2 (Flatten)                 (None, 70)                      0           
+    ________________________________________________________________________________
+    dense_2 (Dense)                     (None, 162)                     11502       
+    ================================================================================
+    Total params: 14,182
+    Trainable params: 14,132
+    Non-trainable params: 50
+    ________________________________________________________________________________
 
-```R
-evaluate(model, x_test, y_test)
-```
-
-
-<dl>
-	<dt>$loss</dt>
-		<dd>1.48381997069946</dd>
-	<dt>$acc</dt>
-		<dd>0.493402638956338</dd>
-</dl>
-
-
-
-#### Load/Save model to sidk
-
-
-```R
-#save_model_hdf5(model, "~/Downloads/model_both.h5")
-#model <- load_model_hdf5("~/Downloads/model_dnu.h5")
-```
 
 #### Model training
 
@@ -516,53 +1071,16 @@ ggplot(data=dtCM, aes(c1, c2, fill = freq)) +
 ![png](conv_3channels_files/conv_3channels_17_1.png)
 
 
-#### Precission @
-
-
-```R
-precission <- 1
-recall <- 4
-
-y_hats <- predict(model, x_test)
-n <- dim(x_test)[1]
-matchs <- c()
-for (i in seq(1:n)) {
-  # First diffs (firsts given by the recall) for first frecuency
-  diffsF <-
-    abs(which(y_test[i, ] == 1)[1] - sort(y_hats[i, ], index.return = TRUE, decreasing =
-                                            T)$ix[1:recall])
-  # First diffs (firsts given by the recall) for second frecuency
-  diffsS <-
-    abs(which(y_test[i, ] == 1)[2] - sort(y_hats[i, ], index.return = TRUE, decreasing =
-                                            T)$ix[1:recall])
-  
-  # Check precission and match both patterns
-  flag <-
-    (ifelse(length(diffsF[diffsF <= precission]) > 1, 1, 0) +
-       ifelse(length(diffsS[diffsS <= precission]) > 1, 1, 0)) == 2
-  
-  # Concatenate
-  matchs <- c(matchs, flag)
-}
-#table(matchs)
-f <- as.numeric(table(matchs)["FALSE"])
-t <- as.numeric(table(matchs)["TRUE"])
-
-print(paste("Accuracy MAP@: ", recall, ": ", round(t / dim(x_test)[1], 4), sep =
-              ""))
-```
-
-    [1] "Accuracy MAP@: 4: 0.447"
-
-
 #### Manual test on validation data
 
 
 ```R
-select_test <- 1021
+select_test <- 120
+
+y_hats <- predict(model, x_test)
 
 plot(
-  y_hats[select_test, ],
+  y_hats[select_test,],
   lty = 1,
   ylim = c(0, 1),
   xlim = c(0, 120),
@@ -599,15 +1117,148 @@ legend(
 ```
 
 
-![png](conv_3channels_files/conv_3channels_21_0.png)
+![png](conv_3channels_files/conv_3channels_19_0.png)
+
+
+### Load models
+
+
+```R
+model_dnu <-
+  load_model_hdf5(
+    "~/Downloads/model_dnu.h5",
+    custom_objects = c(acc_at_2 = top_2_categorical_accuracy, acc_at_4 = top_4_categorical_accuracy)
+  )
+model_dr <-
+  load_model_hdf5(
+    "~/Downloads/model_dr.h5",
+    custom_objects = c(acc_at_2 = top_2_categorical_accuracy, acc_at_4 = top_4_categorical_accuracy)
+  )
+```
+
+
+```R
+i <- 1
+load(file = paste("~/Downloads/x_test", i, ".RData", sep = ""))
+load(file = paste("~/Downloads/y_test", i, ".RData", sep = ""))
+assign("x_test", get(paste("x_test", i, sep = "")))
+assign("y_test", get(paste("y_test", i, sep = "")))
+
+# Check kind of data
+type = "dnu"
+if (type == "dnu") {
+  y_test[which(y_test == 2)] <- 0
+  y_test[which(y_test == 3)] <- 1
+} else if (type == "dr") {
+  y_test[which(y_test == 1)] <- 0
+  y_test[which(y_test == 2)] <- 1
+  y_test[which(y_test == 3)] <- 1
+} else if (type == "both") {
+  y_test[which(y_test == 1)] <- 1
+  y_test[which(y_test == 2)] <- 1
+  y_test[which(y_test == 3)] <- 1
+} else {
+  stop()
+}
+evaluate(model_dnu, x_test, y_test)
+```
+
+    Warning message in readChar(con, 5L, useBytes = TRUE):
+    "cannot open compressed file '/home/roberto/Downloads/x_test1.RData', probable reason 'No such file or directory'"
+
+
+    Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection
+    Traceback:
+
+
+    1. load(file = paste("~/Downloads/x_test", i, ".RData", sep = ""))
+
+    2. readChar(con, 5L, useBytes = TRUE)
+
+
+
+```R
+Y_test_hat <- predict_classes(model_dnu, x_test) + 1
+# Calculate confusion matrix
+cm <- table(apply(y_test,1,which.max), Y_test_hat)
+
+# Plot matrix
+dtCM <- as.data.frame(cm)
+colnames(dtCM) <- c("c1","c2","freq")
+ggplot(data=dtCM, aes(c1, c2, fill = freq)) +
+  geom_raster() +
+  scale_fill_gradientn(colours=c("#0000FFFF","#FFFFFFFF","#FF0000FF"))
+```
+
+
+```R
+i <- 3
+load(file = paste("~/Downloads/x_test", i, ".RData", sep = ""))
+load(file = paste("~/Downloads/y_test", i, ".RData", sep = ""))
+assign("x_test", get(paste("x_test", i, sep = "")))
+assign("y_test", get(paste("y_test", i, sep = "")))
+
+# Check kind of data
+type = "dr"
+if (type == "dnu") {
+  y_test[which(y_test == 2)] <- 0
+  y_test[which(y_test == 3)] <- 1
+} else if (type == "dr") {
+  y_test[which(y_test == 1)] <- 0
+  y_test[which(y_test == 2)] <- 1
+  y_test[which(y_test == 3)] <- 1
+} else if (type == "both") {
+  y_test[which(y_test == 1)] <- 1
+  y_test[which(y_test == 2)] <- 1
+  y_test[which(y_test == 3)] <- 1
+} else {
+  stop()
+}
+evaluate(model_dr, x_test, y_test)
+```
+
+
+<dl>
+	<dt>$loss</dt>
+		<dd>1.89652628605006</dd>
+	<dt>$acc</dt>
+		<dd>0.467812874861976</dd>
+	<dt>$acc_at_2</dt>
+		<dd>0.658536585389686</dd>
+	<dt>$acc_at_4</dt>
+		<dd>0.802079168356499</dd>
+</dl>
+
+
+
+#### Confusion matrix
+
+
+```R
+Y_test_hat <- predict_classes(model_dr, x_test) + 1
+# Calculate confusion matrix
+cm <- table(apply(y_test,1,which.max), Y_test_hat)
+
+# Plot matrix
+dtCM <- as.data.frame(cm)
+colnames(dtCM) <- c("c1","c2","freq")
+ggplot(data=dtCM, aes(c1, c2, fill = freq)) +
+  geom_raster() +
+  scale_fill_gradientn(colours=c("#0000FFFF","#FFFFFFFF","#FF0000FF"))
+```
+
+
+
+
+![png](conv_3channels_files/conv_3channels_26_1.png)
 
 
 #### Generated test
 
 
 ```R
-selected_dnu <- 5
-selected_dr  <- 3
+selected_dnu <- trunc(runif(1, 1, 10), prec = 4)
+selected_dr  <- dr <- trunc(runif(1, 0, selected_dnu), prec = 4)
 
 # Data generation
 dt <- generate_data_modes(
@@ -619,6 +1270,17 @@ dt <- generate_data_modes(
 
 print(paste("Dnu:",trunc(dt$dnu,2)," Dr:",trunc(dt$dr,2), sep=""))
 
+# Add noise
+      dt$data <-
+        rbind(dt$data,
+              data.frame(
+                "frequency" = runif(15, min(dt$data$frequency), max(dt$data$frequency)),
+                "mode" = "random",
+                "amplitude" = 1.0
+              ))
+      dt$data$amplitude <- 1.0
+
+
 # Execute experiment
 result <- process(
   frequency = dt$data$frequency,
@@ -627,7 +1289,7 @@ result <- process(
   gRegimen = 0,
   maxDnu = 1,
   minDnu = 15,
-  numFrequencies = ifelse(nrow(dt$data) < 30, 31, nrow(dt) + 1),
+  numFrequencies = nrow(dt$data) + 1,
   dnuGuessError = -1,
   debug = F
 )
@@ -696,19 +1358,13 @@ random_y[1,] <- to_categorical(trunc(dt$dnu, 3), num_classes) +
   }
 ```
 
-    [1] "Dnu:54.2 Dr:27.4"
+    [1] "Dnu:64.8 Dr:37.6"
 
-
-
-```R
-model_dnu <- load_model_hdf5("~/Downloads/model_dnu.h5")
-model_dr <- load_model_hdf5("~/Downloads/model_dr.h5")
-```
 
 
 ```R
 y_hats_dnu <- predict(model_dnu, random_x)
-y_hats_dr <-  predict(model, random_x)
+y_hats_dr <-  predict(model_dr, random_x)
 
 plot(
   t(y_hats_dnu),
@@ -720,15 +1376,12 @@ plot(
   ylab = "Prob / Value"
 )
 
-
 points(
   t(y_hats_dr),
   lty = 1,
   ylim = c(0, 1),
   xlim = c(0, 120),
   col = "black",
-  xlab = "Frequency",
-  ylab = "Prob / Value"
 )
 
 lines(random_x[1, , 1], lty = 1, col = "blue")
@@ -756,7 +1409,14 @@ legend(
   lty = c(1, 2, 3, 4),
   col = c("blue", "grey", "orange")
 )
+```
 
+
+![png](conv_3channels_files/conv_3channels_29_0.png)
+
+
+
+```R
 dt$data
 ```
 
@@ -764,39 +1424,50 @@ dt$data
 <table>
 <thead><tr><th scope=col>frequency</th><th scope=col>mode</th><th scope=col>amplitude</th></tr></thead>
 <tbody>
-	<tr><td>17.20000</td><td>l0      </td><td>1.00    </td></tr>
-	<tr><td>21.88571</td><td>l0      </td><td>1.00    </td></tr>
-	<tr><td>26.57143</td><td>l0      </td><td>1.00    </td></tr>
-	<tr><td>31.25714</td><td>l0      </td><td>1.00    </td></tr>
-	<tr><td>35.94286</td><td>l0      </td><td>1.00    </td></tr>
-	<tr><td>40.62857</td><td>l0      </td><td>1.00    </td></tr>
-	<tr><td>45.31429</td><td>l0      </td><td>1.00    </td></tr>
-	<tr><td>21.72000</td><td>l1      </td><td>0.80    </td></tr>
-	<tr><td>25.76000</td><td>l1      </td><td>0.80    </td></tr>
-	<tr><td>29.80000</td><td>l1      </td><td>0.80    </td></tr>
-	<tr><td>33.84000</td><td>l1      </td><td>0.80    </td></tr>
-	<tr><td>37.88000</td><td>l1      </td><td>0.80    </td></tr>
-	<tr><td>41.92000</td><td>l1      </td><td>0.80    </td></tr>
-	<tr><td>45.96000</td><td>l1      </td><td>0.80    </td></tr>
-	<tr><td>24.09000</td><td>mp1     </td><td>0.75    </td></tr>
-	<tr><td>28.13000</td><td>mp1     </td><td>0.75    </td></tr>
-	<tr><td>32.17000</td><td>mp1     </td><td>0.75    </td></tr>
-	<tr><td>36.21000</td><td>mp1     </td><td>0.75    </td></tr>
-	<tr><td>40.25000</td><td>mp1     </td><td>0.75    </td></tr>
-	<tr><td>44.29000</td><td>mp1     </td><td>0.75    </td></tr>
-	<tr><td>48.33000</td><td>mp1     </td><td>0.75    </td></tr>
-	<tr><td>19.35000</td><td>ml1     </td><td>0.75    </td></tr>
-	<tr><td>23.39000</td><td>ml1     </td><td>0.75    </td></tr>
-	<tr><td>27.43000</td><td>ml1     </td><td>0.75    </td></tr>
-	<tr><td>31.47000</td><td>ml1     </td><td>0.75    </td></tr>
-	<tr><td>35.51000</td><td>ml1     </td><td>0.75    </td></tr>
-	<tr><td>39.55000</td><td>ml1     </td><td>0.75    </td></tr>
-	<tr><td>43.59000</td><td>ml1     </td><td>0.75    </td></tr>
+	<tr><td>16.20900</td><td>l0      </td><td>1       </td></tr>
+	<tr><td>21.81286</td><td>l0      </td><td>1       </td></tr>
+	<tr><td>27.41671</td><td>l0      </td><td>1       </td></tr>
+	<tr><td>33.02057</td><td>l0      </td><td>1       </td></tr>
+	<tr><td>38.62443</td><td>l0      </td><td>1       </td></tr>
+	<tr><td>44.22829</td><td>l0      </td><td>1       </td></tr>
+	<tr><td>49.83214</td><td>l0      </td><td>1       </td></tr>
+	<tr><td>17.71900</td><td>l1      </td><td>1       </td></tr>
+	<tr><td>23.10714</td><td>l1      </td><td>1       </td></tr>
+	<tr><td>28.49529</td><td>l1      </td><td>1       </td></tr>
+	<tr><td>33.88343</td><td>l1      </td><td>1       </td></tr>
+	<tr><td>39.27157</td><td>l1      </td><td>1       </td></tr>
+	<tr><td>44.65971</td><td>l1      </td><td>1       </td></tr>
+	<tr><td>50.04786</td><td>l1      </td><td>1       </td></tr>
+	<tr><td>20.96900</td><td>mp1     </td><td>1       </td></tr>
+	<tr><td>26.35714</td><td>mp1     </td><td>1       </td></tr>
+	<tr><td>31.74529</td><td>mp1     </td><td>1       </td></tr>
+	<tr><td>37.13343</td><td>mp1     </td><td>1       </td></tr>
+	<tr><td>42.52157</td><td>mp1     </td><td>1       </td></tr>
+	<tr><td>47.90971</td><td>mp1     </td><td>1       </td></tr>
+	<tr><td>53.29786</td><td>mp1     </td><td>1       </td></tr>
+	<tr><td>14.46900</td><td>ml1     </td><td>1       </td></tr>
+	<tr><td>19.85714</td><td>ml1     </td><td>1       </td></tr>
+	<tr><td>25.24529</td><td>ml1     </td><td>1       </td></tr>
+	<tr><td>30.63343</td><td>ml1     </td><td>1       </td></tr>
+	<tr><td>36.02157</td><td>ml1     </td><td>1       </td></tr>
+	<tr><td>41.40971</td><td>ml1     </td><td>1       </td></tr>
+	<tr><td>46.79786</td><td>ml1     </td><td>1       </td></tr>
+	<tr><td>17.24170</td><td>random  </td><td>1       </td></tr>
+	<tr><td>15.91128</td><td>random  </td><td>1       </td></tr>
+	<tr><td>43.26767</td><td>random  </td><td>1       </td></tr>
+	<tr><td>38.23039</td><td>random  </td><td>1       </td></tr>
+	<tr><td>43.70874</td><td>random  </td><td>1       </td></tr>
+	<tr><td>24.65377</td><td>random  </td><td>1       </td></tr>
+	<tr><td>45.73732</td><td>random  </td><td>1       </td></tr>
+	<tr><td>46.55025</td><td>random  </td><td>1       </td></tr>
+	<tr><td>21.64828</td><td>random  </td><td>1       </td></tr>
+	<tr><td>15.41027</td><td>random  </td><td>1       </td></tr>
+	<tr><td>27.65674</td><td>random  </td><td>1       </td></tr>
+	<tr><td>34.54178</td><td>random  </td><td>1       </td></tr>
+	<tr><td>53.10397</td><td>random  </td><td>1       </td></tr>
+	<tr><td>30.48906</td><td>random  </td><td>1       </td></tr>
+	<tr><td>30.18142</td><td>random  </td><td>1       </td></tr>
 </tbody>
 </table>
 
-
-
-
-![png](conv_3channels_files/conv_3channels_25_1.png)
 
