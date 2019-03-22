@@ -691,11 +691,8 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
     arma::uvec pos( * numIt);
     std::iota(pos.begin(), pos.end(), 0);
     // Loop subselection of frecuences and amplitudes
-    Rcout << "1";
     frequencyGlobal = frequency.elem(pos);
-    Rcout << "2";
     amplitudeGlobal = amplitude.elem(pos);
-    Rcout << "3";
     if (debug) {
         Rcout << "   Frequencies selected: ";
         printVector(frequencyGlobal, 10);
