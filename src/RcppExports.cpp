@@ -160,8 +160,8 @@ BEGIN_RCPP
 END_RCPP
 }
 // process
-List process(arma::vec frequency, arma::vec amplitude, String filter, double gRegimen, double numFrequencies, double maxDnu, double minDnu, double dnuGuessError, double dnuValue, bool dnuEstimation, bool debug);
-RcppExport SEXP _variableStars_process(SEXP frequencySEXP, SEXP amplitudeSEXP, SEXP filterSEXP, SEXP gRegimenSEXP, SEXP numFrequenciesSEXP, SEXP maxDnuSEXP, SEXP minDnuSEXP, SEXP dnuGuessErrorSEXP, SEXP dnuValueSEXP, SEXP dnuEstimationSEXP, SEXP debugSEXP) {
+List process(arma::vec frequency, arma::vec amplitude, String filter, double gRegimen, double numFrequencies, double maxDnu, double minDnu, double dnuGuessError, double dnuValue, bool dnuEstimation, bool debug, bool processFirstRangeOnly);
+RcppExport SEXP _variableStars_process(SEXP frequencySEXP, SEXP amplitudeSEXP, SEXP filterSEXP, SEXP gRegimenSEXP, SEXP numFrequenciesSEXP, SEXP maxDnuSEXP, SEXP minDnuSEXP, SEXP dnuGuessErrorSEXP, SEXP dnuValueSEXP, SEXP dnuEstimationSEXP, SEXP debugSEXP, SEXP processFirstRangeOnlySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -176,7 +176,8 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< double >::type dnuValue(dnuValueSEXP);
     Rcpp::traits::input_parameter< bool >::type dnuEstimation(dnuEstimationSEXP);
     Rcpp::traits::input_parameter< bool >::type debug(debugSEXP);
-    rcpp_result_gen = Rcpp::wrap(process(frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue, dnuEstimation, debug));
+    Rcpp::traits::input_parameter< bool >::type processFirstRangeOnly(processFirstRangeOnlySEXP);
+    rcpp_result_gen = Rcpp::wrap(process(frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue, dnuEstimation, debug, processFirstRangeOnly));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -195,7 +196,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_variableStars_calculateRange", (DL_FUNC) &_variableStars_calculateRange, 2},
     {"_variableStars_crosscorrelation", (DL_FUNC) &_variableStars_crosscorrelation, 3},
     {"_variableStars_echelle", (DL_FUNC) &_variableStars_echelle, 3},
-    {"_variableStars_process", (DL_FUNC) &_variableStars_process, 11},
+    {"_variableStars_process", (DL_FUNC) &_variableStars_process, 12},
     {NULL, NULL, 0}
 };
 
