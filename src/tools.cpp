@@ -633,7 +633,7 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
              double gRegimen, double numFrequencies,
              double maxDnu, double minDnu, double dnuGuessError,
              double dnuValue = -1, bool dnuEstimation = false,
-             bool debug = false) {
+             bool debug = false, bool processFirstRangeOnly = false) {
   // Work in muHz
   frequency /= 0.0864;
   
@@ -761,7 +761,14 @@ List process(arma::vec frequency, arma::vec amplitude, String filter,
     
     // Calculate echelle diagram and save inter loop results
     interEchelle[std::to_string(*numIt)] = echelle(frequencyGlobal, amplitudeGlobal, dnu);
-    
+  
+  // If flag is activated, break loop and process only the first N frequencies
+  if (processFirstRangeOnly) { 
+    if (debug) {
+      Rcout << "\n By function parameter, only the first N frequencies are processed, discarding the rest. \n";
+    }
+    break;
+  }
   } // End range loop
   
   if (debug) {

@@ -22,3 +22,5 @@ README\.Rmd
 NEWS\.md
 .Rproj.user
 inst/doc
+# Jupiter
+.ipynb_checkpoints

@@ -324,7 +324,7 @@ echelle <- function(frequencies, amplitudes, dnu) {
 
 #' }
 #' @export
-process <- function(frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue = -1, dnuEstimation = FALSE, debug = FALSE) {
-    .Call(`_variableStars_process`, frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue, dnuEstimation, debug)
+process <- function(frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue = -1, dnuEstimation = FALSE, debug = FALSE, processFirstRangeOnly = FALSE) {
+    .Call(`_variableStars_process`, frequency, amplitude, filter, gRegimen, numFrequencies, maxDnu, minDnu, dnuGuessError, dnuValue, dnuEstimation, debug, processFirstRangeOnly)
 }
 
