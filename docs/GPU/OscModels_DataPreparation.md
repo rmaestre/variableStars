@@ -18,41 +18,6 @@ library(abind)
 library(fields)
 ```
 
-    
-    Attaching package: 'plotly'
-    
-    The following object is masked from 'package:ggplot2':
-    
-        last_plot
-    
-    The following object is masked from 'package:stats':
-    
-        filter
-    
-    The following object is masked from 'package:graphics':
-    
-        layout
-    
-    Loading required package: spam
-    Loading required package: dotCall64
-    Loading required package: grid
-    Spam version 2.2-0 (2018-06-19) is loaded.
-    Type 'help( Spam)' or 'demo( spam)' for a short introduction 
-    and overview of this package.
-    Help for individual functions is also obtained by adding the
-    suffix '.spam' to the function name, e.g. 'help( chol.spam)'.
-    
-    Attaching package: 'spam'
-    
-    The following objects are masked from 'package:base':
-    
-        backsolve, forwardsolve
-    
-    Loading required package: maps
-    See www.image.ucar.edu/~nychka/Fields for
-     a vignette and other supplements. 
-
-
 ### Global parameters
 
 
@@ -208,6 +173,10 @@ for (dir in dirs[grepl("*VO*", list.dirs(recursive = T))]) {
         col.names = c("n", "l", "m", "nu", "f", "no",
                       "pc", "i0")
       )
+    
+      # Transform fequencies
+      data$nu <-  data$nu * 0.086
+        
       if (nrow(data) != 0) {
         # DR estimation
         dr <-
@@ -216,11 +185,10 @@ for (dir in dirs[grepl("*VO*", list.dirs(recursive = T))]) {
           )[14:14], "\\s+")[[1]][3])
         
         # DNU estimation
-        dnu <- data[data$l == 0 & data$n >= 2 & data$n <= 8, ]$nu
-        dnu
-        if (length(dnu) > 1) {
-          dnu <- median(diff(dnu))
-        }
+        dnu <- data[data$n >= 2 & data$n <= 8 & data$m == 0, ]
+        dnu <- mean(aggregate(nu ~ l, data=dnu, function(x) mean(diff(x)))$nu)
+
+                       
         # Generate random frequencies
         data$amp <- runif(length(data$nu), 0, 1)
         
@@ -229,8 +197,7 @@ for (dir in dirs[grepl("*VO*", list.dirs(recursive = T))]) {
         # Keep only l modes 2,3
         data <- data[!data$l %in% c(2, 3), ]
         
-        # Transform fequencies
-        data$nu <-  data$nu * 0.086
+        
         
         # Save data file and create a new one
         if (count %% number_lines_to_split_file == 0 ||
