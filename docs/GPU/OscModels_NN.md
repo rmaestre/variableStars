@@ -12,36 +12,67 @@ library(abind)
 library(fields)
 ```
 
+    
+    Attaching package: 'plotly'
+    
+    The following object is masked from 'package:ggplot2':
+    
+        last_plot
+    
+    The following object is masked from 'package:stats':
+    
+        filter
+    
+    The following object is masked from 'package:graphics':
+    
+        layout
+    
+    Loading required package: spam
+    Loading required package: dotCall64
+    Loading required package: grid
+    Spam version 2.2-0 (2018-06-19) is loaded.
+    Type 'help( Spam)' or 'demo( spam)' for a short introduction 
+    and overview of this package.
+    Help for individual functions is also obtained by adding the
+    suffix '.spam' to the function name, e.g. 'help( chol.spam)'.
+    
+    Attaching package: 'spam'
+    
+    The following objects are masked from 'package:base':
+    
+        backsolve, forwardsolve
+    
+    Loading required package: maps
+    See www.image.ucar.edu/~nychka/Fields for
+     a vignette and other supplements. 
+
+
 ### Read processed files and create big matrix with all rows
 
 
 ```R
-setwd("~/Downloads/")
-df_all <- NA
-count <- 1
-for (file in list.files(pattern = "*log")) {
-    print(file)
-    if (is.null(df_all)) {
-        df_all <- data.frame(read.csv(file, sep=",", header = F))
-    } else {
-        df_all <- rbind(df_all, data.frame(read.csv(file, sep=",", header = F)))
-    }
-    if (count==40) {
-        break
-    }
-    count <- count + 1
-}
+setwd("~/Downloads/data/")
+system("find . -type f -name \"*.log\" -print0 | xargs -0 cat > ALL.data")
+df_all <- data.frame(fread("ALL.data", sep=",", header = F), stringsAsFactors=F)
+dim(df_all)
 df_all <- df_all[complete.cases(df_all),]
+dim(df_all)
 ```
 
-    [1] "data0.log"
-    [1] "data1.log"
-    [1] "data2.log"
-    [1] "data3.log"
-    [1] "data4.log"
-    [1] "data5.log"
-    [1] "data6.log"
-    [1] "data7.log"
+
+<ol class=list-inline>
+	<li>524099</li>
+	<li>614</li>
+</ol>
+
+
+
+
+<ol class=list-inline>
+	<li>523833</li>
+	<li>614</li>
+</ol>
+
 
 
 ### Experiment parameters
@@ -83,7 +114,7 @@ ind_data <- seq(from=1,to=rows)
 X[ind_data, , 1] <- as.matrix(df_all[ind_data, 1:204])
 X[ind_data, , 2] <- as.matrix(df_all[ind_data, 204:((204 * 2) - 1)])
 X[ind_data, , 3] <- as.matrix(df_all[ind_data, (204 * 2):((204 * 3) - 1)])
-Y <- to_categorical(df_all[ind_data, 613:613], num_classes)
+Y <- to_categorical(df_all[ind_data, 614:614] / 0.0864, num_classes)
 
 dim(X)
 dim(Y)
@@ -91,7 +122,7 @@ dim(Y)
 
 
 <ol class=list-inline>
-	<li>71105</li>
+	<li>523833</li>
 	<li>204</li>
 	<li>3</li>
 </ol>
@@ -100,7 +131,7 @@ dim(Y)
 
 
 <ol class=list-inline>
-	<li>71105</li>
+	<li>523833</li>
 	<li>162</li>
 </ol>
 
@@ -108,23 +139,23 @@ dim(Y)
 
 
 ```R
-ind_remove_no_target <- which(apply(Y,2,sum)==0)
-paste0("Remiving ",length(ind_remove_no_target)," rows with NO target")
+ind_remove_no_target <- which(apply(Y,1,sum)==1)
+paste0("Removing ",length(ind_remove_no_target[ind_remove_no_target==TRUE])," rows with NO target")
 
-X <- X[-ind_remove_no_target,,]
-Y <- Y[-ind_remove_no_target,]
+X <- X[ind_remove_no_target,,]
+Y <- Y[ind_remove_no_target,]
 
 dim(X)
 dim(Y)
 ```
 
 
-'Remiving 140 rows with NO target'
+'Removing 1 rows with NO target'
 
 
 
 <ol class=list-inline>
-	<li>70965</li>
+	<li>523833</li>
 	<li>204</li>
 	<li>3</li>
 </ol>
@@ -133,7 +164,7 @@ dim(Y)
 
 
 <ol class=list-inline>
-	<li>70965</li>
+	<li>523833</li>
 	<li>162</li>
 </ol>
 
@@ -166,7 +197,7 @@ dim(y_test)
 
 
 <ol class=list-inline>
-	<li>53223</li>
+	<li>392874</li>
 	<li>204</li>
 	<li>3</li>
 </ol>
@@ -175,7 +206,7 @@ dim(y_test)
 
 
 <ol class=list-inline>
-	<li>53223</li>
+	<li>392874</li>
 	<li>162</li>
 </ol>
 
@@ -183,7 +214,7 @@ dim(y_test)
 
 
 <ol class=list-inline>
-	<li>17742</li>
+	<li>130959</li>
 	<li>204</li>
 	<li>3</li>
 </ol>
@@ -192,7 +223,7 @@ dim(y_test)
 
 
 <ol class=list-inline>
-	<li>17742</li>
+	<li>130959</li>
 	<li>162</li>
 </ol>
 
@@ -203,19 +234,26 @@ dim(y_test)
 
 ```R
 hist(apply(y_test,1,function(x) which(x==1)))
+summary(df_all[ind_data, 614:614])
+#stop()
 ```
 
 
-![png](OscModels_NN_files/OscModels_NN_11_0.png)
+       Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+      1.133   3.013   4.127   4.134   5.125  10.482 
+
+
+
+![png](OscModels_NN_files/OscModels_NN_11_1.png)
 
 
 ### NN train
 
 
 ```R
-top_12_categorical_accuracy <-
-  custom_metric("rec_at_12", function(y_true, y_pred) {
-    metric_top_k_categorical_accuracy(y_true, y_pred, 12)
+top_8_categorical_accuracy <-
+  custom_metric("rec_at_8", function(y_true, y_pred) {
+    metric_top_k_categorical_accuracy(y_true, y_pred, 8)
   })
 top_6_categorical_accuracy <-
   custom_metric("recat_6", function(y_true, y_pred) {
@@ -243,6 +281,7 @@ model <- keras_model_sequential() %>%
   layer_dropout(0.2) %>%
   layer_batch_normalization() %>%
 
+
 layer_separable_conv_1d(
     kernel_size = 5,
     filters = 8,
@@ -268,7 +307,7 @@ model %>% compile(
           top_2_categorical_accuracy,
           top_4_categorical_accuracy,
           top_6_categorical_accuracy,
-          top_12_categorical_accuracy
+          top_8_categorical_accuracy
         )
 )
 summary(model) # Plot summary
@@ -277,36 +316,38 @@ summary(model) # Plot summary
   history <- model %>% fit(
     x_train,
     y_train,
-    epochs = 8000,
+    epochs = 1000,
     batch_size =  250,
     validation_split = 0.2,
     shuffle = T,
     verbose = 2
   )
+
+save_model_hdf5(model, paste0("~/Downloads/model_dnu.h5"))
 ```
 
     ________________________________________________________________________________
     Layer (type)                        Output Shape                    Param #     
     ================================================================================
-    separable_conv1d_11 (SeparableConv1 (None, 200, 8)                  593         
+    separable_conv1d_1 (SeparableConv1D (None, 200, 8)                  593         
     ________________________________________________________________________________
-    max_pooling1d_11 (MaxPooling1D)     (None, 100, 8)                  0           
+    max_pooling1d_1 (MaxPooling1D)      (None, 100, 8)                  0           
     ________________________________________________________________________________
-    dropout_11 (Dropout)                (None, 100, 8)                  0           
+    dropout_1 (Dropout)                 (None, 100, 8)                  0           
     ________________________________________________________________________________
-    batch_normalization_11 (BatchNormal (None, 100, 8)                  32          
+    batch_normalization_1 (BatchNormali (None, 100, 8)                  32          
     ________________________________________________________________________________
-    separable_conv1d_12 (SeparableConv1 (None, 96, 8)                   1568        
+    separable_conv1d_2 (SeparableConv1D (None, 96, 8)                   1568        
     ________________________________________________________________________________
-    max_pooling1d_12 (MaxPooling1D)     (None, 48, 8)                   0           
+    max_pooling1d_2 (MaxPooling1D)      (None, 48, 8)                   0           
     ________________________________________________________________________________
-    dropout_12 (Dropout)                (None, 48, 8)                   0           
+    dropout_2 (Dropout)                 (None, 48, 8)                   0           
     ________________________________________________________________________________
-    batch_normalization_12 (BatchNormal (None, 48, 8)                   32          
+    batch_normalization_2 (BatchNormali (None, 48, 8)                   32          
     ________________________________________________________________________________
-    flatten_6 (Flatten)                 (None, 384)                     0           
+    flatten_1 (Flatten)                 (None, 384)                     0           
     ________________________________________________________________________________
-    dense_6 (Dense)                     (None, 162)                     62370       
+    dense_1 (Dense)                     (None, 162)                     62370       
     ================================================================================
     Total params: 64,595
     Trainable params: 64,563
@@ -316,54 +357,15 @@ summary(model) # Plot summary
 
 
 ```R
-#save_model_hdf5(model, paste0("~/Downloads/model_dnu",".h5"))
+#model <- load_model_hdf5(paste0("~/Downloads/model_dnu.h5"))
 evaluate(model, x_test, y_test)
 ```
-
-
-<dl>
-	<dt>$loss</dt>
-		<dd>1.1696930918194</dd>
-	<dt>$acc</dt>
-		<dd>0.604450499545867</dd>
-	<dt>$rec_at_2</dt>
-		<dd>0.816984559491371</dd>
-	<dt>$rec_at_4</dt>
-		<dd>0.962609748713291</dd>
-	<dt>$recat_6</dt>
-		<dd>0.991522858007872</dd>
-	<dt>$rec_at_12</dt>
-		<dd>0.997729336966394</dd>
-</dl>
-
-
 
 
 ```R
 plot(history) +
   theme_bw()
 ```
-
-
-    Error in .External2(C_savehistory, file): no history available to save
-    Traceback:
-
-
-    1. plot(history)
-
-    2. plot.function(history)
-
-    3. curve(expr = x, from = from, to = to, xlim = xlim, ylab = ylab, 
-     .     ...)
-
-    4. eval(expr, envir = ll, enclos = parent.frame())
-
-    5. eval(expr, envir = ll, enclos = parent.frame())
-
-    6. x(x)
-
-    7. savehistory(file1)
-
 
 ### Confusion matrix
 
@@ -382,19 +384,8 @@ ggplot(data=dtCM, aes(c1, c2, fill = freq)) +
 ```
 
 
-
-
-![png](OscModels_NN_files/OscModels_NN_17_1.png)
-
-
-
 ```R
-
-```
-
-
-```R
-select_test <- 500
+select_test <- 3909
 
 y_hats <- predict(model, x_test)
 
@@ -434,7 +425,3 @@ legend(
   col = c("blue", "grey", "orange")
 )
 ```
-
-
-![png](OscModels_NN_files/OscModels_NN_19_0.png)
-

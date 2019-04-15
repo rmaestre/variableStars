@@ -583,7 +583,19 @@ legend(
 ```
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_27_0.png)
+    Error in py_call_impl(callable, dots$args, dots$keywords): MemoryError: 
+    Traceback:
+
+
+    1. predict(model, x_test)
+
+    2. predict.keras.engine.training.Model(model, x_test)
+
+    3. keras_array(x)
+
+    4. x$astype(dtype = dtype, order = "C", copy = FALSE)
+
+    5. py_call_impl(callable, dots$args, dots$keywords)
 
 
 ### Auxiliar functions for Validation on $\delta$-scuti stars
@@ -1019,8 +1031,8 @@ d <- read.csv(paste0(stars_base_dir,"kic10661783.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
 max <- validate_real_star(d, 39, 30)
-#errors <- rbind(errors, data.frame("star"="kic10661783", "error"=39-max, "n"=dim(d)[1]))
-#errors
+errors <- rbind(errors, data.frame("star"="kic10661783", "error"=39-max, "n"=dim(d)[1]))
+errors
 ```
 
 
@@ -1042,7 +1054,23 @@ max <- validate_real_star(d, 39, 30)
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_45_2.png)
+<table>
+<thead><tr><th scope=col>star</th><th scope=col>error</th><th scope=col>n</th></tr></thead>
+<tbody>
+	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
+	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
+	<tr><td>HD15082     </td><td>-15         </td><td> 71         </td></tr>
+	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
+	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
+	<tr><td>KIC10080943 </td><td> 35         </td><td>321         </td></tr>
+	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
+</tbody>
+</table>
+
+
+
+
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_45_3.png)
 
 
 ## KIC3858884.lis
@@ -1085,6 +1113,7 @@ errors
 	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
 	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
 	<tr><td>KIC10080943 </td><td> 35         </td><td>321         </td></tr>
+	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
 	<tr><td>KIC3858884  </td><td> 13         </td><td>400         </td></tr>
 </tbody>
 </table>
@@ -1135,6 +1164,7 @@ errors
 	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
 	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
 	<tr><td>KIC10080943 </td><td> 35         </td><td>321         </td></tr>
+	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
 	<tr><td>KIC3858884  </td><td> 13         </td><td>400         </td></tr>
 	<tr><td>kic4544587  </td><td>  5         </td><td> 16         </td></tr>
 </tbody>
@@ -1186,6 +1216,7 @@ errors
 	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
 	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
 	<tr><td>KIC10080943 </td><td> 35         </td><td>321         </td></tr>
+	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
 	<tr><td>KIC3858884  </td><td> 13         </td><td>400         </td></tr>
 	<tr><td>kic4544587  </td><td>  5         </td><td> 16         </td></tr>
 	<tr><td>KIC8262223  </td><td> 17         </td><td> 60         </td></tr>
@@ -1238,6 +1269,7 @@ errors
 	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
 	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
 	<tr><td>KIC10080943 </td><td> 35         </td><td>321         </td></tr>
+	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
 	<tr><td>KIC3858884  </td><td> 13         </td><td>400         </td></tr>
 	<tr><td>kic4544587  </td><td>  5         </td><td> 16         </td></tr>
 	<tr><td>KIC8262223  </td><td> 17         </td><td> 60         </td></tr>
