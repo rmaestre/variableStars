@@ -111,12 +111,13 @@ ind_data <- seq(from=1,to=rows)
 
 
 ```R
-# Reshaoe dataframe to matrix slices
+# Reshape dataframe to matrix slices
 X[ind_data, , 1] <- as.matrix(df_all[ind_data, 1:406])
 X[ind_data, , 2] <- as.matrix(df_all[ind_data, 406:((406 * 2) - 1)])
 X[ind_data, , 3] <- as.matrix(df_all[ind_data, (406 * 2):((406 * 3) - 1)])
+#X[ind_data, , 4] <- as.matrix(df_all[ind_data, (406 * 3):((406 * 4) - 1)])
 X[ind_data, , 4] <- as.matrix(df_all[ind_data, (406 * 3):((406 * 4) - 1)])
-Y <- to_categorical(df_all[ind_data, 1626:1626] / 0.0864, num_classes)
+Y <- to_categorical(df_all[ind_data, 1625:1625] / 0.0864, num_classes)
 
 dim(X)
 dim(Y)
@@ -146,26 +147,26 @@ dim(Y)
 print(paste0("Check for target 1:"))
 flags <- c()
 for (i in seq(from=1,to=rows)){
-    flags <- c(flags, df_all[i, 1220:1220] %in% rbind(X[i,,1],X[i,,2],X[i,,3]))
+    flags <- c(flags, df_all[i, 1626:1626] %in% rbind(X[i,,1],X[i,,2],X[i,,3]))
 }
 print(table(flags))
 
 flags <- c()
 print(paste0("Check for target 2:"))
 for (i in seq(from=1,to=rows)){
-    flags <- c(flags, df_all[i, 1219:1219] %in% rbind(X[i,,1],X[i,,2],X[i,,3]))
+    flags <- c(flags, df_all[i, 1625:1625] %in% rbind(X[i,,1],X[i,,2],X[i,,3]))
 }
 print(table(flags))
 ```
 
     [1] "Check for target 1:"
     flags
-      TRUE 
+     FALSE 
     506557 
     [1] "Check for target 2:"
     flags
-      TRUE 
-    506557 
+     FALSE   TRUE 
+    504259   2298 
 
 
 
@@ -295,7 +296,7 @@ top_2_categorical_accuracy <-
 
 
 ```R
-checkpoint_dir <- "~/Downloads/checkpointsDnuData2/"
+checkpoint_dir <- "~/Downloads/checkpointsDrData2/"
 if (T) {
     unlink(checkpoint_dir, recursive = TRUE)
     dir.create(checkpoint_dir)
@@ -324,18 +325,15 @@ model <- keras_model_sequential() %>%
   layer_dropout(0.2) %>%
   layer_batch_normalization() %>%
 
-
 layer_separable_conv_1d(
     kernel_size = 4,
     filters = 8,
-    depth_multiplier = 10,
-    input_shape = c(204, 3)
+    depth_multiplier = 10
   ) %>%
   layer_max_pooling_1d(pool_size = 2) %>%
   layer_dropout(0.2) %>%
   layer_batch_normalization() %>%
 
-  
   layer_flatten() %>%
   layer_dense(units = num_classes, activation = 'softmax')
 
@@ -373,25 +371,25 @@ if (T) {
     ________________________________________________________________________________
     Layer (type)                        Output Shape                    Param #     
     ================================================================================
-    separable_conv1d_7 (SeparableConv1D (None, 403, 8)                  488         
+    separable_conv1d_1 (SeparableConv1D (None, 403, 8)                  488         
     ________________________________________________________________________________
-    max_pooling1d_7 (MaxPooling1D)      (None, 201, 8)                  0           
+    max_pooling1d_1 (MaxPooling1D)      (None, 201, 8)                  0           
     ________________________________________________________________________________
-    dropout_7 (Dropout)                 (None, 201, 8)                  0           
+    dropout_1 (Dropout)                 (None, 201, 8)                  0           
     ________________________________________________________________________________
-    batch_normalization_7 (BatchNormali (None, 201, 8)                  32          
+    batch_normalization_1 (BatchNormali (None, 201, 8)                  32          
     ________________________________________________________________________________
-    separable_conv1d_8 (SeparableConv1D (None, 198, 8)                  968         
+    separable_conv1d_2 (SeparableConv1D (None, 198, 8)                  968         
     ________________________________________________________________________________
-    max_pooling1d_8 (MaxPooling1D)      (None, 99, 8)                   0           
+    max_pooling1d_2 (MaxPooling1D)      (None, 99, 8)                   0           
     ________________________________________________________________________________
-    dropout_8 (Dropout)                 (None, 99, 8)                   0           
+    dropout_2 (Dropout)                 (None, 99, 8)                   0           
     ________________________________________________________________________________
-    batch_normalization_8 (BatchNormali (None, 99, 8)                   32          
+    batch_normalization_2 (BatchNormali (None, 99, 8)                   32          
     ________________________________________________________________________________
-    flatten_4 (Flatten)                 (None, 792)                     0           
+    flatten_1 (Flatten)                 (None, 792)                     0           
     ________________________________________________________________________________
-    dense_4 (Dense)                     (None, 162)                     128466      
+    dense_1 (Dense)                     (None, 162)                     128466      
     ================================================================================
     Total params: 129,986
     Trainable params: 129,954
@@ -401,34 +399,26 @@ if (T) {
 
 
 ```R
-model %>% load_model_weights_hdf5(
-  file.path("~/Downloads/checkpointsDnuData2/weights.350-2.16.hdf5")
-)
-
-#model <- load_model_hdf5(paste0("~/Downloads/model_dnu.h5"),
-#                        custom_objects = c(rec_at_8 = top_8_categorical_accuracy, 
-#                                           recat_6 = top_6_categorical_accuracy,
-#                                           rec_at_4 = top_4_categorical_accuracy,
-#                                           rec_at_2 = top_2_categorical_accuracy
-#                                          ))
-#save_model_hdf5(model, paste0("~/Downloads/model_dnu.h5"))
+#model %>% load_model_weights_hdf5(
+#  file.path("~/Downloads/checkpointsDnuData2/weights.390-2.26.hdf5")
+#)
 evaluate(model, x_test, y_test)
 ```
 
 
 <dl>
 	<dt>$loss</dt>
-		<dd>2.15925034217569</dd>
+		<dd>1.75567244639972</dd>
 	<dt>$acc</dt>
-		<dd>0.283085912823752</dd>
+		<dd>0.367056222362603</dd>
 	<dt>$rec_at_2</dt>
-		<dd>0.479864181933039</dd>
+		<dd>0.599336702463677</dd>
 	<dt>$rec_at_4</dt>
-		<dd>0.697180985470625</dd>
+		<dd>0.833330701200253</dd>
 	<dt>$recat_6</dt>
-		<dd>0.8150979153506</dd>
+		<dd>0.927045167403664</dd>
 	<dt>$rec_at_8</dt>
-		<dd>0.886252368919773</dd>
+		<dd>0.966756159191409</dd>
 </dl>
 
 
@@ -438,27 +428,6 @@ evaluate(model, x_test, y_test)
 plot(history) +
   theme_bw()
 ```
-
-
-    Error in .External2(C_savehistory, file): no history available to save
-    Traceback:
-
-
-    1. plot(history)
-
-    2. plot.function(history)
-
-    3. curve(expr = x, from = from, to = to, xlim = xlim, ylab = ylab, 
-     .     ...)
-
-    4. eval(expr, envir = ll, enclos = parent.frame())
-
-    5. eval(expr, envir = ll, enclos = parent.frame())
-
-    6. x(x)
-
-    7. savehistory(file1)
-
 
 ### Confusion matrix
 
@@ -478,24 +447,11 @@ dim(dtCM)
 
 
 <ol class=list-inline>
-	<li>11021</li>
+	<li>506</li>
 	<li>3</li>
 </ol>
 
 
-
-
-```R
-# insert 0 values if not exists
-#for(x in seq(0,120)) {
-#    for (y in seq(1,120)) {
-#        if (is.null(dtCM[x, y])) {
-#            dtCM <- rbind(dtCM, data.frame("c1"=x,"c2"=y,"freq"=0))
-#        } 
-#    }
-#}
-#dim(dtCM)
-```
 
 
 ```R
@@ -511,7 +467,7 @@ ggplot(data=dtCM, aes(c1, c2, fill = freq)) +
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_23_1.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_22_1.png)
 
 
 ### MSE error acc_at_1
@@ -530,13 +486,8 @@ hist(((classes[Y_test_hat]) - (classes[apply(y_test,1,function(x) which(x==1))])
 ```
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_25_0.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_24_0.png)
 
-
-
-```R
-
-```
 
 
 ```R
@@ -583,26 +534,14 @@ legend(
 ```
 
 
-    Error in py_call_impl(callable, dots$args, dots$keywords): MemoryError: 
-    Traceback:
-
-
-    1. predict(model, x_test)
-
-    2. predict.keras.engine.training.Model(model, x_test)
-
-    3. keras_array(x)
-
-    4. x$astype(dtype = dtype, order = "C", copy = FALSE)
-
-    5. py_call_impl(callable, dots$args, dots$keywords)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_25_0.png)
 
 
 ### Auxiliar functions for Validation on $\delta$-scuti stars
 
 
 ```R
-  trunc <-
+trunc <-
     function(x, ..., prec = 1)
       base::trunc(x * 10 ^ prec, ...) / 10 ^ prec
   
@@ -611,8 +550,13 @@ legend(
     return(paste0(trunc(c(x), prec = 4), collapse = ","))
   }
 
+normalized <- function(x) {
+        (x - min(x)) / (max(x) - min(x))
+      }
+
 validate_real_star <- function(data, real_dnu, numFrequencies=30) {
-    
+
+
   # Execute experiment
   result <- process(
     frequency = data$V1,
@@ -628,7 +572,7 @@ validate_real_star <- function(data, real_dnu, numFrequencies=30) {
   )
   
   
-  
+    # Save ft of diffs
   ftS <-
     stats.bin(as.numeric(result$fresAmps[[names(result$fresAmps)[1]]]$fInv),
               as.numeric(result$fresAmps[[names(result$fresAmps)[1]]]$b),
@@ -636,42 +580,42 @@ validate_real_star <- function(data, real_dnu, numFrequencies=30) {
   ft_1D <- ftS[8, 1:(length(cuts_breaks) - 1)]
   ft_1D[is.na(ft_1D)] <- 0
   
-  
-  # Save histogram of diffs
-  diffS <-
-    stats.bin(
-      as.numeric(result$diffHistogram$histogram$bins),
-      as.numeric(result$diffHistogram$histogram$values),
+
+    # Save histogram of diffs
+    diffS <-
+      stats.bin(
+        as.numeric(result$diffHistogram$histogram$bins),
+        as.numeric(result$diffHistogram$histogram$values),
+        breaks = cuts_breaks
+      )$stats
+    diff_2D <- diffS[8, 1:(length(cuts_breaks) - 1)]
+    diff_2D[is.na(diff_2D)] <- 0
+    
+    # Save crosscorrelation
+    cross <- stats.bin(
+      as.numeric(result$crossCorrelation$index),
+      as.numeric(result$crossCorrelation$autocorre),
       breaks = cuts_breaks
     )$stats
-  diff_2D <- diffS[8, 1:(length(cuts_breaks) - 1)]
-  diff_2D[is.na(diff_2D)] <- 0
-  
-  # Save crosscorrelation
-  cross <- stats.bin(
-    as.numeric(result$crossCorrelation$index),
-    as.numeric(result$crossCorrelation$autocorre),
-    breaks = cuts_breaks
-  )$stats
-  cross_3D <- cross[8, 1:(length(cuts_breaks) - 1)]
-  cross_3D[is.na(cross_3D)] <- 0
-  
-  # Raw information
-  rawS <-
-    stats.bin(as.numeric(data$V1),
-              as.numeric(data$V2),
-              breaks = cuts_breaks)$stats
-  raw_1D <- rawS[8, 1:(length(cuts_breaks) - 1)]
-  raw_1D[is.na(raw_1D)] <- 0
-  
-  # Assert all dimensions are equal
-  stopifnot((length(ft_1D) == length(diff_2D)) ==
-              ((length(diff_2D) == length(cross_3D)) ==
-                 (
-                   length(cross_3D) == length(cuts_breaks) - 1
-                 )))
-  
-  
+    cross_3D <- cross[8, 1:(length(cuts_breaks) - 1)]
+    cross_3D[is.na(cross_3D)] <- 0
+          
+    # Raw information
+    rawS <-
+      stats.bin(as.numeric(data$V1),
+                as.numeric(data$V2),
+                breaks = cuts_breaks)$stats
+    raw_1D <- rawS[8, 1:(length(cuts_breaks) - 1)]
+    raw_1D[is.na(raw_1D)] <- 0
+    
+    # Assert all dimensions are equal
+    stopifnot((length(ft_1D) == length(diff_2D)) ==
+                ((length(diff_2D) == length(cross_3D)) ==
+                   (
+                     length(cross_3D) == length(cuts_breaks) - 1
+                   )))
+    
+
   rows <- dim(df_all)[1]
   cols <- (dim(df_all)[2] - 2) / 4
   dimensions <- 4 # Number of channels
@@ -680,41 +624,61 @@ validate_real_star <- function(data, real_dnu, numFrequencies=30) {
   Y <- matrix(0, nrow = 1, ncol = num_classes)
   ind_data <- seq(from = 1, to = rows)
   
-  X[1, , 1] <- as.numeric(normalized(ft_1D))
-  X[1, , 2] <- as.numeric(normalized(diff_2D))
-  X[1, , 3] <- as.numeric(normalized(cross_3D))
-  X[1, , 4] <- as.numeric(normalized(raw_1D))
-  
+  X[1, , 1] <- normalized(ft_1D)
+  X[1, , 2] <- normalized(diff_2D)
+  X[1, , 3] <- normalized(cross_3D)
+  X[1, , 4] <- normalized(raw_1D)
+
+
   plot(
-    t(predict(model, X)),
+    seq(
+    from = 0.1,
+    to = 14 / 0.0864,
+    by = 1),
+    t(predict(modelDnu, X)),
     lty = 1,
     ylim = c(0, 1),
-    xlim = c(0, 120),
+    xlim = c(0, 100),
     col = "black",
     xlab = "Frequency",
     ylab = "Prob / Value"
-  )
+   )
+    
+  points(
+    seq(
+    from = 0.1,
+    to = 14 / 0.0864,
+    by = 1),
+    t(predict(modelDr, X)),
+    lty = 1,
+    pch = 3,
+    ylim = c(0, 1),
+    xlim = c(0, 100),
+    col = "black",
+    xlab = "Frequency",
+    ylab = "Prob / Value"
+   )
   
-  
-  lines(X[1, , 1], lty = 1, col = "blue")
-  lines(X[1, , 2], lty = 2, col = "grey")
-  lines(X[1, , 3], lty = 3, col = "orange")
-  
+  lines(cuts_breaks[1:(length(cuts_breaks)-1)], X[1, , 1], lty = 1, col = alpha("blue", 0.4))
+  lines(cuts_breaks[1:(length(cuts_breaks)-1)], X[1, , 2], lty = 1, col = alpha("grey", 0.4))
+  lines(cuts_breaks[1:(length(cuts_breaks)-1)], X[1, , 3], lty = 1, col = alpha("orange", 0.4))
+  lines(cuts_breaks[1:(length(cuts_breaks)-1)], X[1, , 4], lty = 1, col = alpha("brown", 0.4))
+
   abline(
-  v = real_dnu,
-  col = "red",
-  lwd = 3,
-  lty = 2
-)
+   v = real_dnu,
+   col = "red",
+   lwd = 3,
+   lty = 2
+  )
     
   legend(
     "topright",
-    c("FT", "Diffs", "Autocorrelation"),
+    c("FT", "Diffs", "Autocorrelation", "Raw"),
     lty = c(1, 2, 3, 4),
-    col = c("blue", "grey", "orange")
+    col = c("blue", "grey", "orange", "brown")
   )
     
-    return(as.numeric(which.max(t(predict(model, X)))))
+    return(as.numeric(which.max(t(predict(modelDnu, X)))))
 }
 
 ```
@@ -723,6 +687,94 @@ validate_real_star <- function(data, real_dnu, numFrequencies=30) {
 
 
 ```R
+#Read models
+# Create a 1d convolutional NN
+modelDnu <- keras_model_sequential() %>%
+  layer_separable_conv_1d(
+    kernel_size = 4,
+    filters = 8,
+    depth_multiplier = 10,
+    input_shape = c(406, 4)
+  ) %>%
+  layer_max_pooling_1d(pool_size = 2) %>%
+  layer_dropout(0.2) %>%
+  layer_batch_normalization() %>%
+layer_separable_conv_1d(
+    kernel_size = 4,
+    filters = 8,
+    depth_multiplier = 10
+  ) %>%
+  layer_max_pooling_1d(pool_size = 2) %>%
+  layer_dropout(0.2) %>%
+  layer_batch_normalization() %>%
+layer_separable_conv_1d(
+    kernel_size = 4,
+    filters = 8,
+    depth_multiplier = 10
+  ) %>%
+  layer_max_pooling_1d(pool_size = 2) %>%
+  layer_dropout(0.2) %>%
+  layer_batch_normalization() %>%
+
+  layer_flatten() %>%
+  layer_dense(units = num_classes, activation = 'softmax')
+# Configure a model for categorical classification.
+modelDnu %>% compile(
+  loss = "categorical_crossentropy",
+  optimizer = optimizer_adadelta(lr = 0.01),
+  metrics = c(
+          "accuracy",
+          top_2_categorical_accuracy,
+          top_4_categorical_accuracy,
+          top_6_categorical_accuracy,
+          top_8_categorical_accuracy
+        )
+)
+modelDnu %>% load_model_weights_hdf5(
+  file.path("~/Downloads/checkpointsDnuData2/weights.605-2.21.hdf5")
+)
+
+
+
+
+modelDr <- keras_model_sequential() %>%
+  layer_separable_conv_1d(
+    kernel_size = 4,
+    filters = 8,
+    depth_multiplier = 10,
+    input_shape = c(406, 4)
+  ) %>%
+  layer_max_pooling_1d(pool_size = 2) %>%
+  layer_dropout(0.2) %>%
+  layer_batch_normalization() %>%
+layer_separable_conv_1d(
+    kernel_size = 4,
+    filters = 8,
+    depth_multiplier = 10
+  ) %>%
+  layer_max_pooling_1d(pool_size = 2) %>%
+  layer_dropout(0.2) %>%
+  layer_batch_normalization() %>%
+  layer_flatten() %>%
+  layer_dense(units = num_classes, activation = 'softmax')
+# Configure a model for categorical classification.
+modelDr %>% compile(
+  loss = "categorical_crossentropy",
+  optimizer = optimizer_adadelta(lr = 0.01),
+  metrics = c(
+          "accuracy",
+          top_2_categorical_accuracy,
+          top_4_categorical_accuracy,
+          top_6_categorical_accuracy,
+          top_8_categorical_accuracy
+        )
+)
+modelDr %>% load_model_weights_hdf5(
+  file.path("~/Downloads/checkpointsDrData2/weights.80-1.76.hdf5")
+)
+
+
+
 # Read file stars
 stars_base_dir <- "~/Projects/variableStars/data/deltaScuti/"
 setwd(stars_base_dir)
@@ -800,7 +852,7 @@ errors
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_33_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_31_3.png)
 
 
 ## CID105906206.lis
@@ -845,7 +897,7 @@ errors
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_35_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_33_3.png)
 
 
 ## HD15082.lis
@@ -884,14 +936,14 @@ errors
 <tbody>
 	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
 	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-15         </td><td> 71         </td></tr>
+	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
 </tbody>
 </table>
 
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_37_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_35_3.png)
 
 
 ## HD159561.lis
@@ -930,7 +982,7 @@ errors
 <tbody>
 	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
 	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-15         </td><td> 71         </td></tr>
+	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
 	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
 </tbody>
 </table>
@@ -938,7 +990,7 @@ errors
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_39_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_37_3.png)
 
 
 ## HD172189.lis
@@ -948,6 +1000,8 @@ errors
 d <- read.csv(paste0(stars_base_dir,"HD172189.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
+
+
 max <- validate_real_star(d, 19)
 errors <- rbind(errors, data.frame("star"="HD172189", "error"=19-max, "n"=dim(d)[1]))
 errors
@@ -977,7 +1031,7 @@ errors
 <tbody>
 	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
 	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-15         </td><td> 71         </td></tr>
+	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
 	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
 	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
 </tbody>
@@ -986,7 +1040,7 @@ errors
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_41_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_39_3.png)
 
 
 ## KIC10080943.lis
@@ -1020,7 +1074,7 @@ errors <- rbind(errors, data.frame("star"="KIC10080943", "error"=52-max, "n"=dim
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_43_2.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_41_2.png)
 
 
 ## kic10661783.lis
@@ -1059,10 +1113,10 @@ errors
 <tbody>
 	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
 	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-15         </td><td> 71         </td></tr>
+	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
 	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
 	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
-	<tr><td>KIC10080943 </td><td> 35         </td><td>321         </td></tr>
+	<tr><td>KIC10080943 </td><td> 27         </td><td>321         </td></tr>
 	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
 </tbody>
 </table>
@@ -1070,7 +1124,7 @@ errors
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_45_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_43_3.png)
 
 
 ## KIC3858884.lis
@@ -1080,7 +1134,7 @@ errors
 d <- read.csv(paste0(stars_base_dir,"KIC3858884.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
-max <- validate_real_star(d, 29)
+max <- validate_real_star(d, 29, 30)
 errors <- rbind(errors, data.frame("star"="KIC3858884", "error"=29-max, "n"=dim(d)[1]))
 errors
 ```
@@ -1109,19 +1163,19 @@ errors
 <tbody>
 	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
 	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-15         </td><td> 71         </td></tr>
+	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
 	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
 	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
-	<tr><td>KIC10080943 </td><td> 35         </td><td>321         </td></tr>
+	<tr><td>KIC10080943 </td><td> 27         </td><td>321         </td></tr>
 	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
-	<tr><td>KIC3858884  </td><td> 13         </td><td>400         </td></tr>
+	<tr><td>KIC3858884  </td><td> 11         </td><td>400         </td></tr>
 </tbody>
 </table>
 
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_47_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_45_3.png)
 
 
 ## kic4544587.lis
@@ -1160,12 +1214,12 @@ errors
 <tbody>
 	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
 	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-15         </td><td> 71         </td></tr>
+	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
 	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
 	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
-	<tr><td>KIC10080943 </td><td> 35         </td><td>321         </td></tr>
+	<tr><td>KIC10080943 </td><td> 27         </td><td>321         </td></tr>
 	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
-	<tr><td>KIC3858884  </td><td> 13         </td><td>400         </td></tr>
+	<tr><td>KIC3858884  </td><td> 11         </td><td>400         </td></tr>
 	<tr><td>kic4544587  </td><td>  5         </td><td> 16         </td></tr>
 </tbody>
 </table>
@@ -1173,7 +1227,7 @@ errors
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_49_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_47_3.png)
 
 
 ## KIC8262223.lis
@@ -1212,21 +1266,21 @@ errors
 <tbody>
 	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
 	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-15         </td><td> 71         </td></tr>
+	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
 	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
 	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
-	<tr><td>KIC10080943 </td><td> 35         </td><td>321         </td></tr>
+	<tr><td>KIC10080943 </td><td> 27         </td><td>321         </td></tr>
 	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
-	<tr><td>KIC3858884  </td><td> 13         </td><td>400         </td></tr>
+	<tr><td>KIC3858884  </td><td> 11         </td><td>400         </td></tr>
 	<tr><td>kic4544587  </td><td>  5         </td><td> 16         </td></tr>
-	<tr><td>KIC8262223  </td><td> 17         </td><td> 60         </td></tr>
+	<tr><td>KIC8262223  </td><td> 16         </td><td> 60         </td></tr>
 </tbody>
 </table>
 
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_51_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_49_3.png)
 
 
 ## KIC9851944.lis
@@ -1265,22 +1319,22 @@ errors
 <tbody>
 	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
 	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-15         </td><td> 71         </td></tr>
+	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
 	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
 	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
-	<tr><td>KIC10080943 </td><td> 35         </td><td>321         </td></tr>
+	<tr><td>KIC10080943 </td><td> 27         </td><td>321         </td></tr>
 	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
-	<tr><td>KIC3858884  </td><td> 13         </td><td>400         </td></tr>
+	<tr><td>KIC3858884  </td><td> 11         </td><td>400         </td></tr>
 	<tr><td>kic4544587  </td><td>  5         </td><td> 16         </td></tr>
-	<tr><td>KIC8262223  </td><td> 17         </td><td> 60         </td></tr>
-	<tr><td>KIC9851944  </td><td>  4         </td><td> 52         </td></tr>
+	<tr><td>KIC8262223  </td><td> 16         </td><td> 60         </td></tr>
+	<tr><td>KIC9851944  </td><td> -4         </td><td> 52         </td></tr>
 </tbody>
 </table>
 
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_53_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_51_3.png)
 
 
 ## All errors
@@ -1296,14 +1350,15 @@ errors
 <tbody>
 	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
 	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-15         </td><td> 71         </td></tr>
+	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
 	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
 	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
-	<tr><td>KIC10080943 </td><td> 35         </td><td>321         </td></tr>
-	<tr><td>KIC3858884  </td><td> 13         </td><td>400         </td></tr>
+	<tr><td>KIC10080943 </td><td> 27         </td><td>321         </td></tr>
+	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
+	<tr><td>KIC3858884  </td><td> 11         </td><td>400         </td></tr>
 	<tr><td>kic4544587  </td><td>  5         </td><td> 16         </td></tr>
-	<tr><td>KIC8262223  </td><td> 17         </td><td> 60         </td></tr>
-	<tr><td>KIC9851944  </td><td>  4         </td><td> 52         </td></tr>
+	<tr><td>KIC8262223  </td><td> 16         </td><td> 60         </td></tr>
+	<tr><td>KIC9851944  </td><td> -4         </td><td> 52         </td></tr>
 </tbody>
 </table>
 
@@ -1313,13 +1368,13 @@ errors
 ```R
 ggplot(aes(y=abs(error), x=1), data=errors) +
     geom_point() +
-    geom_text(aes(label=star),hjust=0, vjust=0) +
+    geom_text(aes(label=paste0(star,", data=(",n,")")),hjust=-0.5, vjust=0) +
     ggtitle("Validation on delta scuti stars") +
-    ylab("Aboslute error = |dnu - nn(dnu)|")
+    ylab("Absolute difference = |paper(dnu) - nn(dnu)|")
 ```
 
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_56_1.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_54_1.png)
 
