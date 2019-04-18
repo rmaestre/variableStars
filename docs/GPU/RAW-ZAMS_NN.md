@@ -211,7 +211,7 @@ stopifnot(which(is.na(X))==FALSE)
 
 ```R
 # Split train/test
-smp_size <- floor(0.75 * nrow(X))
+smp_size <- floor(0.98 * nrow(X))
 set.seed(123)
 ind <- sample(seq_len(nrow(X)), size = smp_size)
 
@@ -229,7 +229,7 @@ dim(y_test)
 
 
 <ol class=list-inline>
-	<li>379917</li>
+	<li>496425</li>
 	<li>406</li>
 	<li>4</li>
 </ol>
@@ -238,7 +238,7 @@ dim(y_test)
 
 
 <ol class=list-inline>
-	<li>379917</li>
+	<li>496425</li>
 	<li>162</li>
 </ol>
 
@@ -246,7 +246,7 @@ dim(y_test)
 
 
 <ol class=list-inline>
-	<li>126640</li>
+	<li>10132</li>
 	<li>406</li>
 	<li>4</li>
 </ol>
@@ -255,7 +255,7 @@ dim(y_test)
 
 
 <ol class=list-inline>
-	<li>126640</li>
+	<li>10132</li>
 	<li>162</li>
 </ol>
 
@@ -325,13 +325,14 @@ model <- keras_model_sequential() %>%
   layer_dropout(0.2) %>%
   layer_batch_normalization() %>%
 layer_separable_conv_1d(
-    kernel_size = 4,
-    filters = 8,
-    depth_multiplier = 10
+    kernel_size = 2,
+    filters = 4,
+    depth_multiplier = 20
   ) %>%
-  layer_max_pooling_1d(pool_size = 2) %>%
+  layer_max_pooling_1d(pool_size = 4) %>%
   layer_dropout(0.2) %>%
   layer_batch_normalization() %>%
+
   layer_flatten() %>%
   layer_dense(units = num_classes, activation = 'softmax')
 
@@ -340,7 +341,7 @@ layer_separable_conv_1d(
 # Configure a model for categorical classification.
 model %>% compile(
   loss = "categorical_crossentropy",
-  optimizer = optimizer_adadelta(lr = 0.001),
+  optimizer = optimizer_adadelta(lr = 0.01),
   metrics = c(
           "accuracy",
           top_2_categorical_accuracy,
@@ -355,21 +356,29 @@ summary(model) # Plot summary
     ________________________________________________________________________________
     Layer (type)                        Output Shape                    Param #     
     ================================================================================
-    separable_conv1d_73 (SeparableConv1 (None, 403, 8)                  248         
+    separable_conv1d_9 (SeparableConv1D (None, 403, 8)                  488         
     ________________________________________________________________________________
-    max_pooling1d_73 (MaxPooling1D)     (None, 100, 8)                  0           
+    max_pooling1d_9 (MaxPooling1D)      (None, 201, 8)                  0           
     ________________________________________________________________________________
-    dropout_73 (Dropout)                (None, 100, 8)                  0           
+    dropout_9 (Dropout)                 (None, 201, 8)                  0           
     ________________________________________________________________________________
-    batch_normalization_73 (BatchNormal (None, 100, 8)                  32          
+    batch_normalization_9 (BatchNormali (None, 201, 8)                  32          
     ________________________________________________________________________________
-    flatten_44 (Flatten)                (None, 800)                     0           
+    separable_conv1d_10 (SeparableConv1 (None, 200, 4)                  964         
     ________________________________________________________________________________
-    dense_44 (Dense)                    (None, 162)                     129762      
+    max_pooling1d_10 (MaxPooling1D)     (None, 50, 4)                   0           
+    ________________________________________________________________________________
+    dropout_10 (Dropout)                (None, 50, 4)                   0           
+    ________________________________________________________________________________
+    batch_normalization_10 (BatchNormal (None, 50, 4)                   16          
+    ________________________________________________________________________________
+    flatten_5 (Flatten)                 (None, 200)                     0           
+    ________________________________________________________________________________
+    dense_5 (Dense)                     (None, 162)                     32562       
     ================================================================================
-    Total params: 130,042
-    Trainable params: 130,026
-    Non-trainable params: 16
+    Total params: 34,062
+    Trainable params: 34,038
+    Non-trainable params: 24
     ________________________________________________________________________________
 
 
@@ -380,9 +389,9 @@ if (T) {
   history <- model %>% fit(
     x_train,
     y_train,
-    epochs = 800,
+    epochs = 700,
     batch_size =  250,
-    validation_split = 0.2,
+    validation_split = 0.1,
     shuffle = T,
     verbose = 2,
     callbacks = list(cp_callback) 
@@ -396,22 +405,44 @@ if (T) {
 #  file.path("~/Downloads/checkpointsDnuData2/weights.390-2.26.hdf5")
 #)
 evaluate(model, x_test, y_test)
+# evaluate on delta scuti stars
+load("../../docs/GPU/X_scuti.rda")
+load("../../docs/GPU/Y_scuti.rda")
+evaluate(model, X_scuti, Y_scuti)
 ```
 
 
 <dl>
 	<dt>$loss</dt>
-		<dd>2.47127751154936</dd>
+		<dd>2.4871075745397</dd>
 	<dt>$acc</dt>
-		<dd>0.225933599472949</dd>
+		<dd>0.200355309910669</dd>
 	<dt>$rec_at_2</dt>
-		<dd>0.393627773005205</dd>
+		<dd>0.356395578365574</dd>
 	<dt>$rec_at_4</dt>
-		<dd>0.597263631313336</dd>
+		<dd>0.573332017382472</dd>
 	<dt>$recat_6</dt>
-		<dd>0.720362322508424</dd>
+		<dd>0.715455981073669</dd>
 	<dt>$rec_at_8</dt>
-		<dd>0.803565111924847</dd>
+		<dd>0.817508882700667</dd>
+</dl>
+
+
+
+
+<dl>
+	<dt>$loss</dt>
+		<dd>0</dd>
+	<dt>$acc</dt>
+		<dd>0</dd>
+	<dt>$rec_at_2</dt>
+		<dd>0.0909090936183929</dd>
+	<dt>$rec_at_4</dt>
+		<dd>0.0909090936183929</dd>
+	<dt>$recat_6</dt>
+		<dd>0.0909090936183929</dd>
+	<dt>$rec_at_8</dt>
+		<dd>0.0909090936183929</dd>
 </dl>
 
 
@@ -694,13 +725,14 @@ modelDnu <- keras_model_sequential() %>%
   layer_dropout(0.2) %>%
   layer_batch_normalization() %>%
 layer_separable_conv_1d(
-    kernel_size = 4,
-    filters = 8,
-    depth_multiplier = 10
+    kernel_size = 2,
+    filters = 4,
+    depth_multiplier = 20
   ) %>%
-  layer_max_pooling_1d(pool_size = 2) %>%
+  layer_max_pooling_1d(pool_size = 4) %>%
   layer_dropout(0.2) %>%
   layer_batch_normalization() %>%
+
   layer_flatten() %>%
   layer_dense(units = num_classes, activation = 'softmax')
 # Configure a model for categorical classification.
@@ -716,7 +748,7 @@ modelDnu %>% compile(
         )
 )
 modelDnu %>% load_model_weights_hdf5(
-  file.path("~/Downloads/test/weights.800-2.37.hdf5")
+  file.path("~/Downloads/test/weights.60-2.50.hdf5")
 )
 
 
@@ -1164,28 +1196,27 @@ mean((errors$difference)^2)
 <table>
 <thead><tr><th scope=col>star</th><th scope=col>difference</th><th scope=col>n</th></tr></thead>
 <tbody>
-	<tr><td>CID100866999</td><td>-38         </td><td>  8         </td></tr>
-	<tr><td>CID105906206</td><td>  2         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-13         </td><td> 71         </td></tr>
-	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
-	<tr><td>HD172189    </td><td>-30         </td><td> 50         </td></tr>
+	<tr><td>CID100866999</td><td>-42         </td><td>  8         </td></tr>
+	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
+	<tr><td>HD15082     </td><td>-16         </td><td> 71         </td></tr>
+	<tr><td>HD172189    </td><td> -8         </td><td> 50         </td></tr>
 	<tr><td>KIC10080943 </td><td> 35         </td><td>321         </td></tr>
-	<tr><td>kic10661783 </td><td>-17         </td><td> 12         </td></tr>
-	<tr><td>KIC3858884  </td><td> 12         </td><td>400         </td></tr>
-	<tr><td>kic4544587  </td><td>  6         </td><td> 16         </td></tr>
-	<tr><td>KIC8262223  </td><td> 15         </td><td> 60         </td></tr>
-	<tr><td>KIC9851944  </td><td>-70         </td><td> 52         </td></tr>
+	<tr><td>kic10661783 </td><td>  7         </td><td> 12         </td></tr>
+	<tr><td>KIC3858884  </td><td> 11         </td><td>400         </td></tr>
+	<tr><td>kic4544587  </td><td>  7         </td><td> 16         </td></tr>
+	<tr><td>KIC8262223  </td><td> 19         </td><td> 60         </td></tr>
+	<tr><td>KIC9851944  </td><td> -4         </td><td> 52         </td></tr>
 </tbody>
 </table>
 
 
 
 
--8.54545454545454
+1.2
 
 
 
-850.181818181818
+391.4
 
 
 
