@@ -117,7 +117,7 @@ X[ind_data, , 2] <- as.matrix(df_all[ind_data, 406:((406 * 2) - 1)])
 X[ind_data, , 3] <- as.matrix(df_all[ind_data, (406 * 2):((406 * 3) - 1)])
 #X[ind_data, , 4] <- as.matrix(df_all[ind_data, (406 * 3):((406 * 4) - 1)])
 X[ind_data, , 4] <- as.matrix(df_all[ind_data, (406 * 3):((406 * 4) - 1)])
-Y <- to_categorical(df_all[ind_data, 1625:1625] / 0.0864, num_classes)
+Y <- to_categorical(df_all[ind_data, 1626:1626] / 0.0864, num_classes)
 
 dim(X)
 dim(Y)
@@ -161,12 +161,12 @@ print(table(flags))
 
     [1] "Check for target 1:"
     flags
-     FALSE 
-    506557 
+     FALSE   TRUE 
+    258929      5 
     [1] "Check for target 2:"
     flags
      FALSE   TRUE 
-    504259   2298 
+    258711    223 
 
 
 
@@ -296,7 +296,7 @@ top_2_categorical_accuracy <-
 
 
 ```R
-checkpoint_dir <- "~/Downloads/checkpointsDrData2/"
+checkpoint_dir <- "~/Downloads/test/"
 if (T) {
     unlink(checkpoint_dir, recursive = TRUE)
     dir.create(checkpoint_dir)
@@ -324,7 +324,6 @@ model <- keras_model_sequential() %>%
   layer_max_pooling_1d(pool_size = 2) %>%
   layer_dropout(0.2) %>%
   layer_batch_normalization() %>%
-
 layer_separable_conv_1d(
     kernel_size = 4,
     filters = 8,
@@ -333,7 +332,6 @@ layer_separable_conv_1d(
   layer_max_pooling_1d(pool_size = 2) %>%
   layer_dropout(0.2) %>%
   layer_batch_normalization() %>%
-
   layer_flatten() %>%
   layer_dense(units = num_classes, activation = 'softmax')
 
@@ -342,7 +340,7 @@ layer_separable_conv_1d(
 # Configure a model for categorical classification.
 model %>% compile(
   loss = "categorical_crossentropy",
-  optimizer = optimizer_adadelta(lr = 0.01),
+  optimizer = optimizer_adadelta(lr = 0.001),
   metrics = c(
           "accuracy",
           top_2_categorical_accuracy,
@@ -352,7 +350,31 @@ model %>% compile(
         )
 )
 summary(model) # Plot summary
+```
 
+    ________________________________________________________________________________
+    Layer (type)                        Output Shape                    Param #     
+    ================================================================================
+    separable_conv1d_73 (SeparableConv1 (None, 403, 8)                  248         
+    ________________________________________________________________________________
+    max_pooling1d_73 (MaxPooling1D)     (None, 100, 8)                  0           
+    ________________________________________________________________________________
+    dropout_73 (Dropout)                (None, 100, 8)                  0           
+    ________________________________________________________________________________
+    batch_normalization_73 (BatchNormal (None, 100, 8)                  32          
+    ________________________________________________________________________________
+    flatten_44 (Flatten)                (None, 800)                     0           
+    ________________________________________________________________________________
+    dense_44 (Dense)                    (None, 162)                     129762      
+    ================================================================================
+    Total params: 130,042
+    Trainable params: 130,026
+    Non-trainable params: 16
+    ________________________________________________________________________________
+
+
+
+```R
 if (T) {
 # Fit model
   history <- model %>% fit(
@@ -368,35 +390,6 @@ if (T) {
 }
 ```
 
-    ________________________________________________________________________________
-    Layer (type)                        Output Shape                    Param #     
-    ================================================================================
-    separable_conv1d_1 (SeparableConv1D (None, 403, 8)                  488         
-    ________________________________________________________________________________
-    max_pooling1d_1 (MaxPooling1D)      (None, 201, 8)                  0           
-    ________________________________________________________________________________
-    dropout_1 (Dropout)                 (None, 201, 8)                  0           
-    ________________________________________________________________________________
-    batch_normalization_1 (BatchNormali (None, 201, 8)                  32          
-    ________________________________________________________________________________
-    separable_conv1d_2 (SeparableConv1D (None, 198, 8)                  968         
-    ________________________________________________________________________________
-    max_pooling1d_2 (MaxPooling1D)      (None, 99, 8)                   0           
-    ________________________________________________________________________________
-    dropout_2 (Dropout)                 (None, 99, 8)                   0           
-    ________________________________________________________________________________
-    batch_normalization_2 (BatchNormali (None, 99, 8)                   32          
-    ________________________________________________________________________________
-    flatten_1 (Flatten)                 (None, 792)                     0           
-    ________________________________________________________________________________
-    dense_1 (Dense)                     (None, 162)                     128466      
-    ================================================================================
-    Total params: 129,986
-    Trainable params: 129,954
-    Non-trainable params: 32
-    ________________________________________________________________________________
-
-
 
 ```R
 #model %>% load_model_weights_hdf5(
@@ -408,17 +401,17 @@ evaluate(model, x_test, y_test)
 
 <dl>
 	<dt>$loss</dt>
-		<dd>1.75567244639972</dd>
+		<dd>2.47127751154936</dd>
 	<dt>$acc</dt>
-		<dd>0.367056222362603</dd>
+		<dd>0.225933599472949</dd>
 	<dt>$rec_at_2</dt>
-		<dd>0.599336702463677</dd>
+		<dd>0.393627773005205</dd>
 	<dt>$rec_at_4</dt>
-		<dd>0.833330701200253</dd>
+		<dd>0.597263631313336</dd>
 	<dt>$recat_6</dt>
-		<dd>0.927045167403664</dd>
+		<dd>0.720362322508424</dd>
 	<dt>$rec_at_8</dt>
-		<dd>0.966756159191409</dd>
+		<dd>0.803565111924847</dd>
 </dl>
 
 
@@ -447,7 +440,7 @@ dim(dtCM)
 
 
 <ol class=list-inline>
-	<li>506</li>
+	<li>9464</li>
 	<li>3</li>
 </ol>
 
@@ -467,7 +460,7 @@ ggplot(data=dtCM, aes(c1, c2, fill = freq)) +
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_22_1.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_23_1.png)
 
 
 ### MSE error acc_at_1
@@ -486,7 +479,7 @@ hist(((classes[Y_test_hat]) - (classes[apply(y_test,1,function(x) which(x==1))])
 ```
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_24_0.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_25_0.png)
 
 
 
@@ -534,7 +527,7 @@ legend(
 ```
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_25_0.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_26_0.png)
 
 
 ### Auxiliar functions for Validation on $\delta$-scuti stars
@@ -579,9 +572,7 @@ validate_real_star <- function(data, real_dnu, numFrequencies=30) {
               breaks = cuts_breaks)$stats
   ft_1D <- ftS[8, 1:(length(cuts_breaks) - 1)]
   ft_1D[is.na(ft_1D)] <- 0
-  
 
-    # Save histogram of diffs
     diffS <-
       stats.bin(
         as.numeric(result$diffHistogram$histogram$bins),
@@ -624,10 +615,11 @@ validate_real_star <- function(data, real_dnu, numFrequencies=30) {
   Y <- matrix(0, nrow = 1, ncol = num_classes)
   ind_data <- seq(from = 1, to = rows)
   
-  X[1, , 1] <- normalized(ft_1D)
-  X[1, , 2] <- normalized(diff_2D)
-  X[1, , 3] <- normalized(cross_3D)
-  X[1, , 4] <- normalized(raw_1D)
+  X[1, , 1] <- ft_1D
+  X[1, , 2] <- diff_2D
+  X[1, , 3] <- cross_3D
+  X[1, , 4] <- raw_1D
+
 
 
   plot(
@@ -637,6 +629,7 @@ validate_real_star <- function(data, real_dnu, numFrequencies=30) {
     by = 1),
     t(predict(modelDnu, X)),
     lty = 1,
+    pch = 2,
     ylim = c(0, 1),
     xlim = c(0, 100),
     col = "black",
@@ -659,10 +652,10 @@ validate_real_star <- function(data, real_dnu, numFrequencies=30) {
     ylab = "Prob / Value"
    )
   
-  lines(cuts_breaks[1:(length(cuts_breaks)-1)], X[1, , 1], lty = 1, col = alpha("blue", 0.4))
-  lines(cuts_breaks[1:(length(cuts_breaks)-1)], X[1, , 2], lty = 1, col = alpha("grey", 0.4))
-  lines(cuts_breaks[1:(length(cuts_breaks)-1)], X[1, , 3], lty = 1, col = alpha("orange", 0.4))
-  lines(cuts_breaks[1:(length(cuts_breaks)-1)], X[1, , 4], lty = 1, col = alpha("brown", 0.4))
+  lines(cuts_breaks[1:(length(cuts_breaks)-1)], normalized(X[1, , 1]), lty = 1, col = alpha("blue", 0.4))
+  lines(cuts_breaks[1:(length(cuts_breaks)-1)], normalized(X[1, , 2]), lty = 1, col = alpha("grey", 0.4))
+  lines(cuts_breaks[1:(length(cuts_breaks)-1)], normalized(X[1, , 3]), lty = 1, col = alpha("orange", 0.4))
+  lines(cuts_breaks[1:(length(cuts_breaks)-1)], normalized(X[1, , 4]), lty = 1, col = alpha("brown", 0.4))
 
   abline(
    v = real_dnu,
@@ -673,9 +666,10 @@ validate_real_star <- function(data, real_dnu, numFrequencies=30) {
     
   legend(
     "topright",
-    c("FT", "Diffs", "Autocorrelation", "Raw"),
-    lty = c(1, 2, 3, 4),
-    col = c("blue", "grey", "orange", "brown")
+    c("FT", "Diffs", "Autocorrelation", "Raw", "NN-Dnu", "NN-dr"),
+    lty = c(1, 2, 3, 4,NA,NA),
+    pch = c(NA,NA,NA,NA,2,3),
+    col = c("blue", "grey", "orange", "brown", "black", "black")
   )
     
     return(as.numeric(which.max(t(predict(modelDnu, X)))))
@@ -707,15 +701,6 @@ layer_separable_conv_1d(
   layer_max_pooling_1d(pool_size = 2) %>%
   layer_dropout(0.2) %>%
   layer_batch_normalization() %>%
-layer_separable_conv_1d(
-    kernel_size = 4,
-    filters = 8,
-    depth_multiplier = 10
-  ) %>%
-  layer_max_pooling_1d(pool_size = 2) %>%
-  layer_dropout(0.2) %>%
-  layer_batch_normalization() %>%
-
   layer_flatten() %>%
   layer_dense(units = num_classes, activation = 'softmax')
 # Configure a model for categorical classification.
@@ -731,7 +716,7 @@ modelDnu %>% compile(
         )
 )
 modelDnu %>% load_model_weights_hdf5(
-  file.path("~/Downloads/checkpointsDnuData2/weights.605-2.21.hdf5")
+  file.path("~/Downloads/test/weights.800-2.37.hdf5")
 )
 
 
@@ -784,8 +769,8 @@ for (file in list.files()) {
     #validate_real_star(data)
 }
 errors <- data.frame(matrix(ncol=3, nrow=0))
-colnames(errors) <- c("star", "error", "n")
-errors
+colnames(errors) <- c("star", "difference", "n")
+#errors
 ```
 
     [1] "CID100866999.lis"
@@ -801,15 +786,6 @@ errors
     [1] "KIC9851944.lis"
 
 
-
-<table>
-<thead><tr><th scope=col>star</th><th scope=col>error</th><th scope=col>n</th></tr></thead>
-<tbody>
-</tbody>
-</table>
-
-
-
 ## CID100866999.lis
 
 
@@ -818,9 +794,7 @@ d <- read.csv(paste0(stars_base_dir,"CID100866999.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
 max <- validate_real_star(d, 56)
-
-errors <- rbind(errors, data.frame("star"="CID100866999", "error"=56-max, "n"=dim(d)[1]))
-errors
+errors <- rbind(errors, data.frame("star"="CID100866999", "difference"=56-max, "n"=dim(d)[1]))
 ```
 
 
@@ -842,17 +816,7 @@ errors
 
 
 
-<table>
-<thead><tr><th scope=col>star</th><th scope=col>error</th><th scope=col>n</th></tr></thead>
-<tbody>
-	<tr><td>CID100866999</td><td>-48         </td><td>8           </td></tr>
-</tbody>
-</table>
-
-
-
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_31_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_32_2.png)
 
 
 ## CID105906206.lis
@@ -863,8 +827,7 @@ d <- read.csv(paste0(stars_base_dir,"CID105906206.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
 max <- validate_real_star(d, 20)
-errors <- rbind(errors, data.frame("star"="CID105906206", "error"=20-max, "n"=dim(d)[1]))
-errors
+errors <- rbind(errors, data.frame("star"="CID105906206", "difference"=20-max, "n"=dim(d)[1]))
 ```
 
 
@@ -886,18 +849,7 @@ errors
 
 
 
-<table>
-<thead><tr><th scope=col>star</th><th scope=col>error</th><th scope=col>n</th></tr></thead>
-<tbody>
-	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
-	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-</tbody>
-</table>
-
-
-
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_33_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_34_2.png)
 
 
 ## HD15082.lis
@@ -908,8 +860,7 @@ d <- read.csv(paste0(stars_base_dir,"HD15082.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
 max <- validate_real_star(d, 80, 30)
-errors <- rbind(errors, data.frame("star"="HD15082", "error"=80-max, "n"=dim(d)[1]))
-errors
+errors <- rbind(errors, data.frame("star"="HD15082", "difference"=80-max, "n"=dim(d)[1]))
 ```
 
 
@@ -931,19 +882,7 @@ errors
 
 
 
-<table>
-<thead><tr><th scope=col>star</th><th scope=col>error</th><th scope=col>n</th></tr></thead>
-<tbody>
-	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
-	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
-</tbody>
-</table>
-
-
-
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_35_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_36_2.png)
 
 
 ## HD159561.lis
@@ -954,8 +893,7 @@ d <- read.csv(paste0(stars_base_dir,"HD159561.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
 max <- validate_real_star(d, 38)
-errors <- rbind(errors, data.frame("star"="HD159561", "error"=38-max, "n"=dim(d)[1]))
-errors
+errors <- rbind(errors, data.frame("star"="HD159561", "difference"=38-max, "n"=dim(d)[1]))
 ```
 
 
@@ -977,20 +915,7 @@ errors
 
 
 
-<table>
-<thead><tr><th scope=col>star</th><th scope=col>error</th><th scope=col>n</th></tr></thead>
-<tbody>
-	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
-	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
-	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
-</tbody>
-</table>
-
-
-
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_37_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_38_2.png)
 
 
 ## HD172189.lis
@@ -1003,8 +928,7 @@ print(paste0("Nrows: ", dim(d)[1]))
 
 
 max <- validate_real_star(d, 19)
-errors <- rbind(errors, data.frame("star"="HD172189", "error"=19-max, "n"=dim(d)[1]))
-errors
+errors <- rbind(errors, data.frame("star"="HD172189", "difference"=19-max, "n"=dim(d)[1]))
 ```
 
 
@@ -1026,21 +950,7 @@ errors
 
 
 
-<table>
-<thead><tr><th scope=col>star</th><th scope=col>error</th><th scope=col>n</th></tr></thead>
-<tbody>
-	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
-	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
-	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
-	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
-</tbody>
-</table>
-
-
-
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_39_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_40_2.png)
 
 
 ## KIC10080943.lis
@@ -1050,9 +960,8 @@ errors
 d <- read.csv(paste0(stars_base_dir,"KIC10080943.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
-max <- validate_real_star(d, 52)
-errors <- rbind(errors, data.frame("star"="KIC10080943", "error"=52-max, "n"=dim(d)[1]))
-#errors
+max <- validate_real_star(d, 52, 200)
+errors <- rbind(errors, data.frame("star"="KIC10080943", "difference"=52-max, "n"=dim(d)[1]))
 ```
 
 
@@ -1074,7 +983,7 @@ errors <- rbind(errors, data.frame("star"="KIC10080943", "error"=52-max, "n"=dim
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_41_2.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_42_2.png)
 
 
 ## kic10661783.lis
@@ -1085,8 +994,7 @@ d <- read.csv(paste0(stars_base_dir,"kic10661783.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
 max <- validate_real_star(d, 39, 30)
-errors <- rbind(errors, data.frame("star"="kic10661783", "error"=39-max, "n"=dim(d)[1]))
-errors
+errors <- rbind(errors, data.frame("star"="kic10661783", "difference"=39-max, "n"=dim(d)[1]))
 ```
 
 
@@ -1108,23 +1016,7 @@ errors
 
 
 
-<table>
-<thead><tr><th scope=col>star</th><th scope=col>error</th><th scope=col>n</th></tr></thead>
-<tbody>
-	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
-	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
-	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
-	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
-	<tr><td>KIC10080943 </td><td> 27         </td><td>321         </td></tr>
-	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
-</tbody>
-</table>
-
-
-
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_43_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_44_2.png)
 
 
 ## KIC3858884.lis
@@ -1134,9 +1026,8 @@ errors
 d <- read.csv(paste0(stars_base_dir,"KIC3858884.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
-max <- validate_real_star(d, 29, 30)
-errors <- rbind(errors, data.frame("star"="KIC3858884", "error"=29-max, "n"=dim(d)[1]))
-errors
+max <- validate_real_star(d, 29)
+errors <- rbind(errors, data.frame("star"="KIC3858884", "difference"=29-max, "n"=dim(d)[1]))
 ```
 
 
@@ -1158,24 +1049,7 @@ errors
 
 
 
-<table>
-<thead><tr><th scope=col>star</th><th scope=col>error</th><th scope=col>n</th></tr></thead>
-<tbody>
-	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
-	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
-	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
-	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
-	<tr><td>KIC10080943 </td><td> 27         </td><td>321         </td></tr>
-	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
-	<tr><td>KIC3858884  </td><td> 11         </td><td>400         </td></tr>
-</tbody>
-</table>
-
-
-
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_45_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_46_2.png)
 
 
 ## kic4544587.lis
@@ -1186,8 +1060,7 @@ d <- read.csv(paste0(stars_base_dir,"kic4544587.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
 max <- validate_real_star(d, 74)
-errors <- rbind(errors, data.frame("star"="kic4544587", "error"=74-max, "n"=dim(d)[1]))
-errors
+errors <- rbind(errors, data.frame("star"="kic4544587", "difference"=74-max, "n"=dim(d)[1]))
 ```
 
 
@@ -1209,25 +1082,7 @@ errors
 
 
 
-<table>
-<thead><tr><th scope=col>star</th><th scope=col>error</th><th scope=col>n</th></tr></thead>
-<tbody>
-	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
-	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
-	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
-	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
-	<tr><td>KIC10080943 </td><td> 27         </td><td>321         </td></tr>
-	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
-	<tr><td>KIC3858884  </td><td> 11         </td><td>400         </td></tr>
-	<tr><td>kic4544587  </td><td>  5         </td><td> 16         </td></tr>
-</tbody>
-</table>
-
-
-
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_47_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_48_2.png)
 
 
 ## KIC8262223.lis
@@ -1238,8 +1093,7 @@ d <- read.csv(paste0(stars_base_dir,"KIC8262223.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
 max <- validate_real_star(d, 77)
-errors <- rbind(errors, data.frame("star"="KIC8262223", "error"=77-max, "n"=dim(d)[1]))
-errors
+errors <- rbind(errors, data.frame("star"="KIC8262223", "difference"=77-max, "n"=dim(d)[1]))
 ```
 
 
@@ -1261,26 +1115,7 @@ errors
 
 
 
-<table>
-<thead><tr><th scope=col>star</th><th scope=col>error</th><th scope=col>n</th></tr></thead>
-<tbody>
-	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
-	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
-	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
-	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
-	<tr><td>KIC10080943 </td><td> 27         </td><td>321         </td></tr>
-	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
-	<tr><td>KIC3858884  </td><td> 11         </td><td>400         </td></tr>
-	<tr><td>kic4544587  </td><td>  5         </td><td> 16         </td></tr>
-	<tr><td>KIC8262223  </td><td> 16         </td><td> 60         </td></tr>
-</tbody>
-</table>
-
-
-
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_49_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_50_2.png)
 
 
 ## KIC9851944.lis
@@ -1290,9 +1125,8 @@ errors
 d <- read.csv(paste0(stars_base_dir,"KIC9851944.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
-max <- validate_real_star(d, 26)
-errors <- rbind(errors, data.frame("star"="KIC9851944", "error"=26-max, "n"=dim(d)[1]))
-errors
+max <- validate_real_star(d, 26, 30)
+errors <- rbind(errors, data.frame("star"="KIC9851944", "difference"=26-max, "n"=dim(d)[1]))
 ```
 
 
@@ -1314,27 +1148,7 @@ errors
 
 
 
-<table>
-<thead><tr><th scope=col>star</th><th scope=col>error</th><th scope=col>n</th></tr></thead>
-<tbody>
-	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
-	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
-	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
-	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
-	<tr><td>KIC10080943 </td><td> 27         </td><td>321         </td></tr>
-	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
-	<tr><td>KIC3858884  </td><td> 11         </td><td>400         </td></tr>
-	<tr><td>kic4544587  </td><td>  5         </td><td> 16         </td></tr>
-	<tr><td>KIC8262223  </td><td> 16         </td><td> 60         </td></tr>
-	<tr><td>KIC9851944  </td><td> -4         </td><td> 52         </td></tr>
-</tbody>
-</table>
-
-
-
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_51_3.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_52_2.png)
 
 
 ## All errors
@@ -1342,39 +1156,68 @@ errors
 
 ```R
 errors
+mean(errors$difference)
+mean((errors$difference)^2)
 ```
 
 
 <table>
-<thead><tr><th scope=col>star</th><th scope=col>error</th><th scope=col>n</th></tr></thead>
+<thead><tr><th scope=col>star</th><th scope=col>difference</th><th scope=col>n</th></tr></thead>
 <tbody>
-	<tr><td>CID100866999</td><td>-48         </td><td>  8         </td></tr>
-	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-17         </td><td> 71         </td></tr>
+	<tr><td>CID100866999</td><td>-38         </td><td>  8         </td></tr>
+	<tr><td>CID105906206</td><td>  2         </td><td>202         </td></tr>
+	<tr><td>HD15082     </td><td>-13         </td><td> 71         </td></tr>
 	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
-	<tr><td>HD172189    </td><td>  0         </td><td> 50         </td></tr>
-	<tr><td>KIC10080943 </td><td> 27         </td><td>321         </td></tr>
-	<tr><td>kic10661783 </td><td>-68         </td><td> 12         </td></tr>
-	<tr><td>KIC3858884  </td><td> 11         </td><td>400         </td></tr>
-	<tr><td>kic4544587  </td><td>  5         </td><td> 16         </td></tr>
-	<tr><td>KIC8262223  </td><td> 16         </td><td> 60         </td></tr>
-	<tr><td>KIC9851944  </td><td> -4         </td><td> 52         </td></tr>
+	<tr><td>HD172189    </td><td>-30         </td><td> 50         </td></tr>
+	<tr><td>KIC10080943 </td><td> 35         </td><td>321         </td></tr>
+	<tr><td>kic10661783 </td><td>-17         </td><td> 12         </td></tr>
+	<tr><td>KIC3858884  </td><td> 12         </td><td>400         </td></tr>
+	<tr><td>kic4544587  </td><td>  6         </td><td> 16         </td></tr>
+	<tr><td>KIC8262223  </td><td> 15         </td><td> 60         </td></tr>
+	<tr><td>KIC9851944  </td><td>-70         </td><td> 52         </td></tr>
 </tbody>
 </table>
 
 
 
 
+-8.54545454545454
+
+
+
+850.181818181818
+
+
+
 ```R
-ggplot(aes(y=abs(error), x=1), data=errors) +
+ggplot(aes(y=abs(difference), x=1), data=errors) +
     geom_point() +
     geom_text(aes(label=paste0(star,", data=(",n,")")),hjust=-0.5, vjust=0) +
-    ggtitle("Validation on delta scuti stars") +
-    ylab("Absolute difference = |paper(dnu) - nn(dnu)|")
+    ggtitle("Dnu Validation on delta scuti stars. Differences between NN and paper results") +
+    ylab("Absolute difference = |paper(dnu) - nn(dnu)|") +
+    theme_bw()
 ```
 
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_54_1.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_55_1.png)
+
+
+
+```R
+ggplot(aes(y=abs(difference), x=n), data=errors) +
+    geom_point()  +
+     stat_smooth(method="lm", se=F) +
+     geom_text(aes(label=paste0(star,", data=(",n,")")),hjust=-0.5, vjust=0) +
+     ggtitle("Relation between difference and number of frequencies") +
+     ylab("Absolute difference = |paper(dnu) - nn(dnu)|") +
+     xlab("Number of frequencies") +
+     theme_bw()
+```
+
+
+
+
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_56_1.png)
 
