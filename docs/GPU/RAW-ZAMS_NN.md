@@ -1,6 +1,6 @@
 
 
-```
+```R
 library(variableStars)
 library(data.table)
 library(ggplot2)
@@ -50,7 +50,7 @@ library(fields)
 ### Read processed files and create big matrix with all rows
 
 
-```
+```R
 setwd("~/Downloads/data2/")
 system("find . -type f -name \"*.log\" -print0 | xargs -0 cat > ALL.data")
 df_all <- data.frame(fread("ALL.data", sep=",", header = F), stringsAsFactors=F)
@@ -78,7 +78,7 @@ dim(df_all)
 ### Experiment parameters
 
 
-```
+```R
 # Resolution for target frequency [0-100]
 input_resolution <- 0.25
 output_resolution <- 1.0
@@ -99,7 +99,7 @@ num_classes <-
 ### Matrix creation from data
 
 
-```
+```R
 rows <- dim(df_all)[1]
 cols <- (dim(df_all)[2] - 2) / 4
 dimensions <- 4 # Number of channels
@@ -110,14 +110,14 @@ ind_data <- seq(from=1,to=rows)
 ```
 
 
-```
+```R
 # Reshape dataframe to matrix slices
 X[ind_data, , 1] <- as.matrix(df_all[ind_data, 1:406])
 X[ind_data, , 2] <- as.matrix(df_all[ind_data, 406:((406 * 2) - 1)])
 X[ind_data, , 3] <- as.matrix(df_all[ind_data, (406 * 2):((406 * 3) - 1)])
 #X[ind_data, , 4] <- as.matrix(df_all[ind_data, (406 * 3):((406 * 4) - 1)])
 X[ind_data, , 4] <- as.matrix(df_all[ind_data, (406 * 3):((406 * 4) - 1)])
-Y <- to_categorical(df_all[ind_data, 1626:1626] / 0.0864, num_classes)
+Y <- to_categorical(df_all[ind_data, 1626:1626] / 0.0864, num_classes) 
 
 dim(X)
 dim(Y)
@@ -143,7 +143,7 @@ dim(Y)
 ### Check that target is not in the trainind data
 
 
-```
+```R
 print(paste0("Check for target 1:"))
 flags <- c()
 for (i in seq(from=1,to=rows)){
@@ -162,54 +162,30 @@ print(table(flags))
     [1] "Check for target 1:"
     flags
      FALSE   TRUE 
-    258929      5 
+    506548      9 
     [1] "Check for target 2:"
-    flags
-     FALSE   TRUE 
-    258711    223 
 
 
 
-```
-ind_remove_no_target <- which(apply(Y,1,sum)==1)
-paste0("Removing ",length(ind_remove_no_target[ind_remove_no_target==TRUE])," rows with NO target")
+```R
+#ind_remove_no_target <- which(apply(Y,1,sum)==1)
+#paste0("Removing ",length(ind_remove_no_target[ind_remove_no_target==TRUE])," rows with NO target")
 
-X <- X[ind_remove_no_target,,]
-Y <- Y[ind_remove_no_target,]
+#X <- X[ind_remove_no_target,,]
+#Y <- Y[ind_remove_no_target,]
 
-dim(X)
-dim(Y)
+#dim(X)
+#dim(Y)
 ```
 
 
-'Removing 1 rows with NO target'
-
-
-
-<ol class=list-inline>
-	<li>506557</li>
-	<li>406</li>
-	<li>4</li>
-</ol>
-
-
-
-
-<ol class=list-inline>
-	<li>506557</li>
-	<li>162</li>
-</ol>
-
-
-
-
-```
+```R
 stopifnot(which(is.na(Y))==FALSE)
 stopifnot(which(is.na(X))==FALSE)
 ```
 
 
-```
+```R
 # Split train/test
 smp_size <- floor(0.98 * nrow(X))
 set.seed(123)
@@ -264,7 +240,7 @@ dim(y_test)
 ### EDA of data
 
 
-```
+```R
 hist(apply(y_test,1,function(x) which(x==1)))
 ```
 
@@ -275,7 +251,7 @@ hist(apply(y_test,1,function(x) which(x==1)))
 ### NN train
 
 
-```
+```R
 top_8_categorical_accuracy <-
   custom_metric("rec_at_8", function(y_true, y_pred) {
     metric_top_k_categorical_accuracy(y_true, y_pred, 8)
@@ -295,7 +271,7 @@ top_2_categorical_accuracy <-
 ```
 
 
-```
+```R
 checkpoint_dir <- "~/Downloads/test/"
 if (T) {
     unlink(checkpoint_dir, recursive = TRUE)
@@ -356,25 +332,25 @@ summary(model) # Plot summary
     ________________________________________________________________________________
     Layer (type)                        Output Shape                    Param #     
     ================================================================================
-    separable_conv1d_9 (SeparableConv1D (None, 403, 8)                  488         
+    separable_conv1d_23 (SeparableConv1 (None, 403, 8)                  488         
     ________________________________________________________________________________
-    max_pooling1d_9 (MaxPooling1D)      (None, 201, 8)                  0           
+    max_pooling1d_23 (MaxPooling1D)     (None, 201, 8)                  0           
     ________________________________________________________________________________
-    dropout_9 (Dropout)                 (None, 201, 8)                  0           
+    dropout_23 (Dropout)                (None, 201, 8)                  0           
     ________________________________________________________________________________
-    batch_normalization_9 (BatchNormali (None, 201, 8)                  32          
+    batch_normalization_23 (BatchNormal (None, 201, 8)                  32          
     ________________________________________________________________________________
-    separable_conv1d_10 (SeparableConv1 (None, 200, 4)                  964         
+    separable_conv1d_24 (SeparableConv1 (None, 200, 4)                  964         
     ________________________________________________________________________________
-    max_pooling1d_10 (MaxPooling1D)     (None, 50, 4)                   0           
+    max_pooling1d_24 (MaxPooling1D)     (None, 50, 4)                   0           
     ________________________________________________________________________________
-    dropout_10 (Dropout)                (None, 50, 4)                   0           
+    dropout_24 (Dropout)                (None, 50, 4)                   0           
     ________________________________________________________________________________
-    batch_normalization_10 (BatchNormal (None, 50, 4)                   16          
+    batch_normalization_24 (BatchNormal (None, 50, 4)                   16          
     ________________________________________________________________________________
-    flatten_5 (Flatten)                 (None, 200)                     0           
+    flatten_12 (Flatten)                (None, 200)                     0           
     ________________________________________________________________________________
-    dense_5 (Dense)                     (None, 162)                     32562       
+    dense_18 (Dense)                    (None, 162)                     32562       
     ================================================================================
     Total params: 34,062
     Trainable params: 34,038
@@ -383,7 +359,7 @@ summary(model) # Plot summary
 
 
 
-```
+```R
 if (T) {
 # Fit model
   history <- model %>% fit(
@@ -400,11 +376,12 @@ if (T) {
 ```
 
 
-```
+```R
 #model %>% load_model_weights_hdf5(
 #  file.path("~/Downloads/checkpointsDnuData2/weights.390-2.26.hdf5")
 #)
 evaluate(model, x_test, y_test)
+
 # evaluate on delta scuti stars
 load("../../docs/GPU/X_scuti.rda")
 load("../../docs/GPU/Y_scuti.rda")
@@ -414,41 +391,28 @@ evaluate(model, X_scuti, Y_scuti)
 
 <dl>
 	<dt>$loss</dt>
-		<dd>2.4871075745397</dd>
-	<dt>$acc</dt>
-		<dd>0.200355309910669</dd>
-	<dt>$rec_at_2</dt>
-		<dd>0.356395578365574</dd>
-	<dt>$rec_at_4</dt>
-		<dd>0.573332017382472</dd>
-	<dt>$recat_6</dt>
-		<dd>0.715455981073669</dd>
-	<dt>$rec_at_8</dt>
-		<dd>0.817508882700667</dd>
+		<dd>12.9747183429841</dd>
+	<dt>$mean_absolute_error</dt>
+		<dd>2.67045329276776</dd>
 </dl>
 
 
 
+    Warning message in readChar(con, 5L, useBytes = TRUE):
+    "cannot open compressed file '../../docs/GPU/X_scuti.rda', probable reason 'No such file or directory'"
 
-<dl>
-	<dt>$loss</dt>
-		<dd>0</dd>
-	<dt>$acc</dt>
-		<dd>0</dd>
-	<dt>$rec_at_2</dt>
-		<dd>0.0909090936183929</dd>
-	<dt>$rec_at_4</dt>
-		<dd>0.0909090936183929</dd>
-	<dt>$recat_6</dt>
-		<dd>0.0909090936183929</dd>
-	<dt>$rec_at_8</dt>
-		<dd>0.0909090936183929</dd>
-</dl>
+
+    Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection
+    Traceback:
+
+
+    1. load("../../docs/GPU/X_scuti.rda")
+
+    2. readChar(con, 5L, useBytes = TRUE)
 
 
 
-
-```
+```R
 plot(history) +
   theme_bw()
 ```
@@ -456,7 +420,7 @@ plot(history) +
 ### Confusion matrix
 
 
-```
+```R
 Y_test_hat <- predict_classes(model, x_test)
 # Calculate confusion matrix
 cm <- table(apply(y_test,1,which.max), Y_test_hat)
@@ -470,15 +434,7 @@ dim(dtCM)
 ```
 
 
-<ol class=list-inline>
-	<li>9464</li>
-	<li>3</li>
-</ol>
-
-
-
-
-```
+```R
 ggplot(data=dtCM, aes(c1, c2, fill = freq)) +
   geom_tile() +
   scale_fill_gradientn(colours=c("#0000FFFF","#FFFFFFFF","#FF0000FF"))+
@@ -488,16 +444,10 @@ ggplot(data=dtCM, aes(c1, c2, fill = freq)) +
   scale_y_discrete(breaks=seq(from=0,to=120,by=4), limits=seq(0,120)) 
 ```
 
-
-
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_23_1.png)
-
-
 ### MSE error acc_at_1
 
 
-```
+```R
 # Output dimension
 classes <- seq(
     from = 0.1,
@@ -510,11 +460,7 @@ hist(((classes[Y_test_hat]) - (classes[apply(y_test,1,function(x) which(x==1))])
 ```
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_25_0.png)
-
-
-
-```
+```R
 select_test <- 2930
 
 y_hats <- predict(model, x_test)
@@ -557,14 +503,10 @@ legend(
 )
 ```
 
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_26_0.png)
-
-
 ### Auxiliar functions for Validation on $\delta$-scuti stars
 
 
-```
+```R
 trunc <-
     function(x, ..., prec = 1)
       base::trunc(x * 10 ^ prec, ...) / 10 ^ prec
@@ -668,20 +610,6 @@ validate_real_star <- function(data, real_dnu, numFrequencies=30) {
     ylab = "Prob / Value"
    )
     
-  points(
-    seq(
-    from = 0.1,
-    to = 14 / 0.0864,
-    by = 1),
-    t(predict(modelDr, X)),
-    lty = 1,
-    pch = 3,
-    ylim = c(0, 1),
-    xlim = c(0, 100),
-    col = "black",
-    xlab = "Frequency",
-    ylab = "Prob / Value"
-   )
   
   lines(cuts_breaks[1:(length(cuts_breaks)-1)], normalized(X[1, , 1]), lty = 1, col = alpha("blue", 0.4))
   lines(cuts_breaks[1:(length(cuts_breaks)-1)], normalized(X[1, , 2]), lty = 1, col = alpha("grey", 0.4))
@@ -706,12 +634,13 @@ validate_real_star <- function(data, real_dnu, numFrequencies=30) {
     return(as.numeric(which.max(t(predict(modelDnu, X)))))
 }
 
+
 ```
 
 # Validation on $\delta$-scuti stars
 
 
-```
+```R
 #Read models
 # Create a 1d convolutional NN
 modelDnu <- keras_model_sequential() %>%
@@ -735,20 +664,9 @@ layer_separable_conv_1d(
 
   layer_flatten() %>%
   layer_dense(units = num_classes, activation = 'softmax')
-# Configure a model for categorical classification.
-modelDnu %>% compile(
-  loss = "categorical_crossentropy",
-  optimizer = optimizer_adadelta(lr = 0.01),
-  metrics = c(
-          "accuracy",
-          top_2_categorical_accuracy,
-          top_4_categorical_accuracy,
-          top_6_categorical_accuracy,
-          top_8_categorical_accuracy
-        )
-)
+
 modelDnu %>% load_model_weights_hdf5(
-  file.path("~/Downloads/test/weights.21-2.46.hdf5")
+  file.path("~/Downloads/test/weights.75-2.51.hdf5")
 )
 
 
@@ -821,7 +739,7 @@ colnames(errors) <- c("star", "difference", "n")
 ## CID100866999.lis
 
 
-```
+```R
 d <- read.csv(paste0(stars_base_dir,"CID100866999.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
@@ -854,7 +772,7 @@ errors <- rbind(errors, data.frame("star"="CID100866999", "difference"=56-max, "
 ## CID105906206.lis
 
 
-```
+```R
 d <- read.csv(paste0(stars_base_dir,"CID105906206.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
@@ -887,7 +805,7 @@ errors <- rbind(errors, data.frame("star"="CID105906206", "difference"=20-max, "
 ## HD15082.lis
 
 
-```
+```R
 d <- read.csv(paste0(stars_base_dir,"HD15082.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
@@ -920,7 +838,7 @@ errors <- rbind(errors, data.frame("star"="HD15082", "difference"=80-max, "n"=di
 ## HD159561.lis
 
 
-```
+```R
 d <- read.csv(paste0(stars_base_dir,"HD159561.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
@@ -953,7 +871,7 @@ errors <- rbind(errors, data.frame("star"="HD159561", "difference"=38-max, "n"=d
 ## HD172189.lis
 
 
-```
+```R
 d <- read.csv(paste0(stars_base_dir,"HD172189.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
@@ -988,7 +906,7 @@ errors <- rbind(errors, data.frame("star"="HD172189", "difference"=19-max, "n"=d
 ## KIC10080943.lis
 
 
-```
+```R
 d <- read.csv(paste0(stars_base_dir,"KIC10080943.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
@@ -1021,7 +939,7 @@ errors <- rbind(errors, data.frame("star"="KIC10080943", "difference"=52-max, "n
 ## kic10661783.lis
 
 
-```
+```R
 d <- read.csv(paste0(stars_base_dir,"kic10661783.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
@@ -1054,7 +972,7 @@ errors <- rbind(errors, data.frame("star"="kic10661783", "difference"=39-max, "n
 ## KIC3858884.lis
 
 
-```
+```R
 d <- read.csv(paste0(stars_base_dir,"KIC3858884.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
@@ -1087,7 +1005,7 @@ errors <- rbind(errors, data.frame("star"="KIC3858884", "difference"=29-max, "n"
 ## kic4544587.lis
 
 
-```
+```R
 d <- read.csv(paste0(stars_base_dir,"kic4544587.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
@@ -1120,7 +1038,7 @@ errors <- rbind(errors, data.frame("star"="kic4544587", "difference"=74-max, "n"
 ## KIC8262223.lis
 
 
-```
+```R
 d <- read.csv(paste0(stars_base_dir,"KIC8262223.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
@@ -1153,7 +1071,7 @@ errors <- rbind(errors, data.frame("star"="KIC8262223", "difference"=77-max, "n"
 ## KIC9851944.lis
 
 
-```
+```R
 d <- read.csv(paste0(stars_base_dir,"KIC9851944.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
@@ -1186,7 +1104,7 @@ errors <- rbind(errors, data.frame("star"="KIC9851944", "difference"=26-max, "n"
 ## All errors
 
 
-```
+```R
 errors
 mean(errors$difference)
 mean((errors$difference)^2)
@@ -1196,32 +1114,32 @@ mean((errors$difference)^2)
 <table>
 <thead><tr><th scope=col>star</th><th scope=col>difference</th><th scope=col>n</th></tr></thead>
 <tbody>
-	<tr><td>CID100866999</td><td>-42         </td><td>  8         </td></tr>
+	<tr><td>CID100866999</td><td>-39         </td><td>  8         </td></tr>
 	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-16         </td><td> 71         </td></tr>
-	<tr><td>HD159561    </td><td>  0         </td><td> 40         </td></tr>
-	<tr><td>HD172189    </td><td> -8         </td><td> 50         </td></tr>
-	<tr><td>KIC10080943 </td><td> 35         </td><td>321         </td></tr>
-	<tr><td>kic10661783 </td><td>  7         </td><td> 12         </td></tr>
+	<tr><td>HD15082     </td><td> -9         </td><td> 71         </td></tr>
+	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
+	<tr><td>HD172189    </td><td>  3         </td><td> 50         </td></tr>
+	<tr><td>KIC10080943 </td><td> 36         </td><td>321         </td></tr>
+	<tr><td>kic10661783 </td><td>-18         </td><td> 12         </td></tr>
 	<tr><td>KIC3858884  </td><td> 12         </td><td>400         </td></tr>
-	<tr><td>kic4544587  </td><td>  7         </td><td> 16         </td></tr>
+	<tr><td>kic4544587  </td><td>  6         </td><td> 16         </td></tr>
 	<tr><td>KIC8262223  </td><td> 19         </td><td> 60         </td></tr>
-	<tr><td>KIC9851944  </td><td> -4         </td><td> 52         </td></tr>
+	<tr><td>KIC9851944  </td><td> 10         </td><td> 52         </td></tr>
 </tbody>
 </table>
 
 
 
 
-1.18181818181818
+2.45454545454545
 
 
 
-357.909090909091
+354.272727272727
 
 
 
-```
+```R
 ggplot(aes(y=abs(difference), x=1), data=errors) +
     geom_point() +
     geom_text(aes(label=paste0(star,", data=(",n,")")),hjust=-0.5, vjust=0) +
@@ -1237,7 +1155,7 @@ ggplot(aes(y=abs(difference), x=1), data=errors) +
 
 
 
-```
+```R
 ggplot(aes(y=abs(difference), x=n), data=errors) +
     geom_point()  +
      stat_smooth(method="lm", se=F) +
