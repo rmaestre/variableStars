@@ -115,7 +115,6 @@ ind_data <- seq(from=1,to=rows)
 X[ind_data, , 1] <- as.matrix(df_all[ind_data, 1:406])
 X[ind_data, , 2] <- as.matrix(df_all[ind_data, 406:((406 * 2) - 1)])
 X[ind_data, , 3] <- as.matrix(df_all[ind_data, (406 * 2):((406 * 3) - 1)])
-#X[ind_data, , 4] <- as.matrix(df_all[ind_data, (406 * 3):((406 * 4) - 1)])
 X[ind_data, , 4] <- as.matrix(df_all[ind_data, (406 * 3):((406 * 4) - 1)])
 Y <- to_categorical(df_all[ind_data, 1626:1626] / 0.0864, num_classes) 
 
@@ -297,16 +296,16 @@ model <- keras_model_sequential() %>%
     depth_multiplier = 10,
     input_shape = c(406, 4)
   ) %>%
-  layer_max_pooling_1d(pool_size = 2) %>%
-  layer_dropout(0.2) %>%
-  layer_batch_normalization() %>%
+  #layer_max_pooling_1d(pool_size = 2) %>%
+  #layer_dropout(0.2) %>%
+  #layer_batch_normalization() %>%
 layer_separable_conv_1d(
     kernel_size = 2,
     filters = 4,
     depth_multiplier = 20
   ) %>%
   layer_max_pooling_1d(pool_size = 4) %>%
-  layer_dropout(0.2) %>%
+  layer_dropout(0.5) %>%
   layer_batch_normalization() %>%
 
   layer_flatten() %>%
@@ -332,29 +331,23 @@ summary(model) # Plot summary
     ________________________________________________________________________________
     Layer (type)                        Output Shape                    Param #     
     ================================================================================
-    separable_conv1d_23 (SeparableConv1 (None, 403, 8)                  488         
+    separable_conv1d_49 (SeparableConv1 (None, 403, 8)                  488         
     ________________________________________________________________________________
-    max_pooling1d_23 (MaxPooling1D)     (None, 201, 8)                  0           
+    separable_conv1d_50 (SeparableConv1 (None, 402, 4)                  964         
     ________________________________________________________________________________
-    dropout_23 (Dropout)                (None, 201, 8)                  0           
+    max_pooling1d_49 (MaxPooling1D)     (None, 100, 4)                  0           
     ________________________________________________________________________________
-    batch_normalization_23 (BatchNormal (None, 201, 8)                  32          
+    dropout_49 (Dropout)                (None, 100, 4)                  0           
     ________________________________________________________________________________
-    separable_conv1d_24 (SeparableConv1 (None, 200, 4)                  964         
+    batch_normalization_49 (BatchNormal (None, 100, 4)                  16          
     ________________________________________________________________________________
-    max_pooling1d_24 (MaxPooling1D)     (None, 50, 4)                   0           
+    flatten_25 (Flatten)                (None, 400)                     0           
     ________________________________________________________________________________
-    dropout_24 (Dropout)                (None, 50, 4)                   0           
-    ________________________________________________________________________________
-    batch_normalization_24 (BatchNormal (None, 50, 4)                   16          
-    ________________________________________________________________________________
-    flatten_12 (Flatten)                (None, 200)                     0           
-    ________________________________________________________________________________
-    dense_18 (Dense)                    (None, 162)                     32562       
+    dense_31 (Dense)                    (None, 162)                     64962       
     ================================================================================
-    Total params: 34,062
-    Trainable params: 34,038
-    Non-trainable params: 24
+    Total params: 66,430
+    Trainable params: 66,422
+    Non-trainable params: 8
     ________________________________________________________________________________
 
 
@@ -391,24 +384,37 @@ evaluate(model, X_scuti, Y_scuti)
 
 <dl>
 	<dt>$loss</dt>
-		<dd>12.9747183429841</dd>
-	<dt>$mean_absolute_error</dt>
-		<dd>2.67045329276776</dd>
+		<dd>2.67567529030765</dd>
+	<dt>$acc</dt>
+		<dd>0.181800236885038</dd>
+	<dt>$rec_at_2</dt>
+		<dd>0.314449269664273</dd>
+	<dt>$rec_at_4</dt>
+		<dd>0.49980260558247</dd>
+	<dt>$recat_6</dt>
+		<dd>0.634919068345523</dd>
+	<dt>$rec_at_8</dt>
+		<dd>0.751776549545993</dd>
 </dl>
 
 
 
-    Warning message in readChar(con, 5L, useBytes = TRUE):
-    "cannot open compressed file '../../docs/GPU/X_scuti.rda', probable reason 'No such file or directory'"
 
+<dl>
+	<dt>$loss</dt>
+		<dd>388.727661132812</dd>
+	<dt>$acc</dt>
+		<dd>0</dd>
+	<dt>$rec_at_2</dt>
+		<dd>0.0909090936183929</dd>
+	<dt>$rec_at_4</dt>
+		<dd>0.0909090936183929</dd>
+	<dt>$recat_6</dt>
+		<dd>0.0909090936183929</dd>
+	<dt>$rec_at_8</dt>
+		<dd>0.0909090936183929</dd>
+</dl>
 
-    Error in readChar(con, 5L, useBytes = TRUE): cannot open the connection
-    Traceback:
-
-
-    1. load("../../docs/GPU/X_scuti.rda")
-
-    2. readChar(con, 5L, useBytes = TRUE)
 
 
 
@@ -416,6 +422,27 @@ evaluate(model, X_scuti, Y_scuti)
 plot(history) +
   theme_bw()
 ```
+
+
+    Error in .External2(C_savehistory, file): no history available to save
+    Traceback:
+
+
+    1. plot(history)
+
+    2. plot.function(history)
+
+    3. curve(expr = x, from = from, to = to, xlim = xlim, ylab = ylab, 
+     .     ...)
+
+    4. eval(expr, envir = ll, enclos = parent.frame())
+
+    5. eval(expr, envir = ll, enclos = parent.frame())
+
+    6. x(x)
+
+    7. savehistory(file1)
+
 
 ### Confusion matrix
 
@@ -434,6 +461,14 @@ dim(dtCM)
 ```
 
 
+<ol class=list-inline>
+	<li>8888</li>
+	<li>3</li>
+</ol>
+
+
+
+
 ```R
 ggplot(data=dtCM, aes(c1, c2, fill = freq)) +
   geom_tile() +
@@ -443,6 +478,12 @@ ggplot(data=dtCM, aes(c1, c2, fill = freq)) +
   scale_x_discrete(breaks=seq(from=0,to=120,by=4), limits=seq(0,120)) +
   scale_y_discrete(breaks=seq(from=0,to=120,by=4), limits=seq(0,120)) 
 ```
+
+
+
+
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_23_1.png)
+
 
 ### MSE error acc_at_1
 
@@ -458,6 +499,10 @@ classes <- seq(
 
 hist(((classes[Y_test_hat]) - (classes[apply(y_test,1,function(x) which(x==1))])), breaks=100)
 ```
+
+
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_25_0.png)
+
 
 
 ```R
@@ -502,6 +547,10 @@ legend(
   col = c("blue", "grey", "orange")
 )
 ```
+
+
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_26_0.png)
+
 
 ### Auxiliar functions for Validation on $\delta$-scuti stars
 
@@ -593,6 +642,9 @@ validate_real_star <- function(data, real_dnu, numFrequencies=30) {
   X[1, , 3] <- cross_3D
   X[1, , 4] <- raw_1D
 
+  print(paste0("Max hist diff:",max(X[1, , 2])))
+  print(paste0("Mas acutocorre:",max(X[1, , 3])))
+  print(paste0("Max raw:",max(X[1, , 4])))
 
 
   plot(
@@ -650,23 +702,23 @@ modelDnu <- keras_model_sequential() %>%
     depth_multiplier = 10,
     input_shape = c(406, 4)
   ) %>%
-  layer_max_pooling_1d(pool_size = 2) %>%
-  layer_dropout(0.2) %>%
-  layer_batch_normalization() %>%
+  #layer_max_pooling_1d(pool_size = 2) %>%
+  #layer_dropout(0.2) %>%
+  #layer_batch_normalization() %>%
 layer_separable_conv_1d(
     kernel_size = 2,
     filters = 4,
     depth_multiplier = 20
   ) %>%
   layer_max_pooling_1d(pool_size = 4) %>%
-  layer_dropout(0.2) %>%
+  layer_dropout(0.5) %>%
   layer_batch_normalization() %>%
 
   layer_flatten() %>%
   layer_dense(units = num_classes, activation = 'softmax')
 
 modelDnu %>% load_model_weights_hdf5(
-  file.path("~/Downloads/test/weights.75-2.51.hdf5")
+  file.path("~/Downloads/test/weights.30-2.71.hdf5")
 )
 
 
@@ -763,6 +815,9 @@ errors <- rbind(errors, data.frame("star"="CID100866999", "difference"=56-max, "
 
 
     [1] "Nrows: 8"
+    [1] "Max hist diff:4"
+    [1] "Mas acutocorre:1"
+    [1] "Max raw:11.623"
 
 
 
@@ -796,6 +851,9 @@ errors <- rbind(errors, data.frame("star"="CID105906206", "difference"=20-max, "
 
 
     [1] "Nrows: 202"
+    [1] "Max hist diff:7"
+    [1] "Mas acutocorre:1"
+    [1] "Max raw:2.552"
 
 
 
@@ -829,6 +887,9 @@ errors <- rbind(errors, data.frame("star"="HD15082", "difference"=80-max, "n"=di
 
 
     [1] "Nrows: 71"
+    [1] "Max hist diff:6"
+    [1] "Mas acutocorre:1"
+    [1] "Max raw:5.419873443"
 
 
 
@@ -862,6 +923,9 @@ errors <- rbind(errors, data.frame("star"="HD159561", "difference"=38-max, "n"=d
 
 
     [1] "Nrows: 40"
+    [1] "Max hist diff:2"
+    [1] "Mas acutocorre:1"
+    [1] "Max raw:0.655"
 
 
 
@@ -897,6 +961,9 @@ errors <- rbind(errors, data.frame("star"="HD172189", "difference"=19-max, "n"=d
 
 
     [1] "Nrows: 50"
+    [1] "Max hist diff:3"
+    [1] "Mas acutocorre:1"
+    [1] "Max raw:0.00124074074074074"
 
 
 
@@ -930,6 +997,9 @@ errors <- rbind(errors, data.frame("star"="KIC10080943", "difference"=52-max, "n
 
 
     [1] "Nrows: 321"
+    [1] "Max hist diff:265"
+    [1] "Mas acutocorre:1"
+    [1] "Max raw:1360.9"
 
 
 
@@ -963,6 +1033,9 @@ errors <- rbind(errors, data.frame("star"="kic10661783", "difference"=39-max, "n
 
 
     [1] "Nrows: 12"
+    [1] "Max hist diff:1"
+    [1] "Mas acutocorre:1"
+    [1] "Max raw:3.56"
 
 
 
@@ -996,6 +1069,9 @@ errors <- rbind(errors, data.frame("star"="KIC3858884", "difference"=29-max, "n"
 
 
     [1] "Nrows: 400"
+    [1] "Max hist diff:14"
+    [1] "Mas acutocorre:1"
+    [1] "Max raw:10.15"
 
 
 
@@ -1029,6 +1105,9 @@ errors <- rbind(errors, data.frame("star"="kic4544587", "difference"=74-max, "n"
 
 
     [1] "Nrows: 16"
+    [1] "Max hist diff:5"
+    [1] "Mas acutocorre:1"
+    [1] "Max raw:0.329"
 
 
 
@@ -1062,6 +1141,9 @@ errors <- rbind(errors, data.frame("star"="KIC8262223", "difference"=77-max, "n"
 
 
     [1] "Nrows: 60"
+    [1] "Max hist diff:7"
+    [1] "Mas acutocorre:1"
+    [1] "Max raw:1.319"
 
 
 
@@ -1095,6 +1177,9 @@ errors <- rbind(errors, data.frame("star"="KIC9851944", "difference"=26-max, "n"
 
 
     [1] "Nrows: 52"
+    [1] "Max hist diff:5"
+    [1] "Mas acutocorre:1"
+    [1] "Max raw:0.653"
 
 
 
@@ -1114,28 +1199,28 @@ mean((errors$difference)^2)
 <table>
 <thead><tr><th scope=col>star</th><th scope=col>difference</th><th scope=col>n</th></tr></thead>
 <tbody>
-	<tr><td>CID100866999</td><td>-39         </td><td>  8         </td></tr>
-	<tr><td>CID105906206</td><td>  3         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td> -9         </td><td> 71         </td></tr>
+	<tr><td>CID100866999</td><td> -3         </td><td>  8         </td></tr>
+	<tr><td>CID105906206</td><td>  1         </td><td>202         </td></tr>
+	<tr><td>HD15082     </td><td>-11         </td><td> 71         </td></tr>
 	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
-	<tr><td>HD172189    </td><td>  3         </td><td> 50         </td></tr>
-	<tr><td>KIC10080943 </td><td> 36         </td><td>321         </td></tr>
-	<tr><td>kic10661783 </td><td>-18         </td><td> 12         </td></tr>
-	<tr><td>KIC3858884  </td><td> 12         </td><td>400         </td></tr>
+	<tr><td>HD172189    </td><td> -9         </td><td> 50         </td></tr>
+	<tr><td>KIC10080943 </td><td> 33         </td><td>321         </td></tr>
+	<tr><td>kic10661783 </td><td>-17         </td><td> 12         </td></tr>
+	<tr><td>KIC3858884  </td><td> 11         </td><td>400         </td></tr>
 	<tr><td>kic4544587  </td><td>  6         </td><td> 16         </td></tr>
-	<tr><td>KIC8262223  </td><td> 19         </td><td> 60         </td></tr>
-	<tr><td>KIC9851944  </td><td> 10         </td><td> 52         </td></tr>
+	<tr><td>KIC8262223  </td><td> 24         </td><td> 60         </td></tr>
+	<tr><td>KIC9851944  </td><td>  1         </td><td> 52         </td></tr>
 </tbody>
 </table>
 
 
 
 
-2.45454545454545
+3.63636363636364
 
 
 
-354.272727272727
+212.727272727273
 
 
 
