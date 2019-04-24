@@ -1,4 +1,20 @@
 
+# Aplication of Neural Networks (NN) for infering both the large separation ($\Delta u$) and rotational splitting ($\delta r$) with an application to $\delta$ Scuti stars
+
+This notebook provides the full methodology to:
+
+1)
+- Read data processed from 1D-rotating models computed with CESTAM code for a wide range of masses, rotation velocities (slow-to-moderate), and metallicities, representative of A-F star.
+- Format and pepare the data for feed the NN
+- Run a trainning process
+- Validate the NN performance by using several metrics: accuracy@N, absolute errors, porcentual errors.
+
+
+2)
+- Read and preprocess data from $\delta$ scuti stars
+- Apply the trained NN to infere values from $\Delta u$ and $\delta r$
+- Validate the produced residuals
+
 
 ```R
 library(variableStars)
@@ -7,7 +23,6 @@ library(ggplot2)
 library(RColorBrewer)
 library(plotly)
 library(keras)
-library(plotly)
 library(abind)
 library(fields)
 ```
@@ -47,11 +62,29 @@ library(fields)
      a vignette and other supplements. 
 
 
+### Auxiliar functions
+
+
+```R
+trunc <-
+    function(x, ..., prec = 1)
+      base::trunc(x * 10 ^ prec, ...) / 10 ^ prec
+  
+  
+  flat <- function(x) {
+    return(paste0(trunc(c(x), prec = 4), collapse = ","))
+  }
+
+normalized <- function(x) {
+        (x - min(x)) / (max(x) - min(x))
+      }
+```
+
 ### Read processed files and create big matrix with all rows
 
 
 ```R
-setwd("~/Downloads/data2/")
+setwd("~/Downloads/data/")
 system("find . -type f -name \"*.log\" -print0 | xargs -0 cat > ALL.data")
 df_all <- data.frame(fread("ALL.data", sep=",", header = F), stringsAsFactors=F)
 dim(df_all)
@@ -61,7 +94,7 @@ dim(df_all)
 
 
 <ol class=list-inline>
-	<li>506823</li>
+	<li>379464</li>
 	<li>1626</li>
 </ol>
 
@@ -69,13 +102,13 @@ dim(df_all)
 
 
 <ol class=list-inline>
-	<li>506557</li>
+	<li>379294</li>
 	<li>1626</li>
 </ol>
 
 
 
-### Experiment parameters
+### Global Parameters 
 
 
 ```R
@@ -87,22 +120,206 @@ output_resolution <- 1.0
 cuts_breaks <- c(-Inf, seq(0, 101, input_resolution), Inf)
 input_dim <- length(cuts_breaks) - 1
 
-# Output dimension
-num_classes <-
-  length(seq(
-    from = 0.1,
+classses <- seq(
+    from = 0.0,
     to = 14 / 0.0864,
     by = output_resolution
-  )) # Buckets of possible classes
+  )
+
+# Output dimension
+num_classes <-
+  length(classses) # Buckets of possible classes
+
+print("Output classes (Dnu or dr): ")
+classses
+print(num_classes)
 ```
+
+    [1] "Output classes (Dnu or dr): "
+
+
+
+<ol class=list-inline>
+	<li>0</li>
+	<li>1</li>
+	<li>2</li>
+	<li>3</li>
+	<li>4</li>
+	<li>5</li>
+	<li>6</li>
+	<li>7</li>
+	<li>8</li>
+	<li>9</li>
+	<li>10</li>
+	<li>11</li>
+	<li>12</li>
+	<li>13</li>
+	<li>14</li>
+	<li>15</li>
+	<li>16</li>
+	<li>17</li>
+	<li>18</li>
+	<li>19</li>
+	<li>20</li>
+	<li>21</li>
+	<li>22</li>
+	<li>23</li>
+	<li>24</li>
+	<li>25</li>
+	<li>26</li>
+	<li>27</li>
+	<li>28</li>
+	<li>29</li>
+	<li>30</li>
+	<li>31</li>
+	<li>32</li>
+	<li>33</li>
+	<li>34</li>
+	<li>35</li>
+	<li>36</li>
+	<li>37</li>
+	<li>38</li>
+	<li>39</li>
+	<li>40</li>
+	<li>41</li>
+	<li>42</li>
+	<li>43</li>
+	<li>44</li>
+	<li>45</li>
+	<li>46</li>
+	<li>47</li>
+	<li>48</li>
+	<li>49</li>
+	<li>50</li>
+	<li>51</li>
+	<li>52</li>
+	<li>53</li>
+	<li>54</li>
+	<li>55</li>
+	<li>56</li>
+	<li>57</li>
+	<li>58</li>
+	<li>59</li>
+	<li>60</li>
+	<li>61</li>
+	<li>62</li>
+	<li>63</li>
+	<li>64</li>
+	<li>65</li>
+	<li>66</li>
+	<li>67</li>
+	<li>68</li>
+	<li>69</li>
+	<li>70</li>
+	<li>71</li>
+	<li>72</li>
+	<li>73</li>
+	<li>74</li>
+	<li>75</li>
+	<li>76</li>
+	<li>77</li>
+	<li>78</li>
+	<li>79</li>
+	<li>80</li>
+	<li>81</li>
+	<li>82</li>
+	<li>83</li>
+	<li>84</li>
+	<li>85</li>
+	<li>86</li>
+	<li>87</li>
+	<li>88</li>
+	<li>89</li>
+	<li>90</li>
+	<li>91</li>
+	<li>92</li>
+	<li>93</li>
+	<li>94</li>
+	<li>95</li>
+	<li>96</li>
+	<li>97</li>
+	<li>98</li>
+	<li>99</li>
+	<li>100</li>
+	<li>101</li>
+	<li>102</li>
+	<li>103</li>
+	<li>104</li>
+	<li>105</li>
+	<li>106</li>
+	<li>107</li>
+	<li>108</li>
+	<li>109</li>
+	<li>110</li>
+	<li>111</li>
+	<li>112</li>
+	<li>113</li>
+	<li>114</li>
+	<li>115</li>
+	<li>116</li>
+	<li>117</li>
+	<li>118</li>
+	<li>119</li>
+	<li>120</li>
+	<li>121</li>
+	<li>122</li>
+	<li>123</li>
+	<li>124</li>
+	<li>125</li>
+	<li>126</li>
+	<li>127</li>
+	<li>128</li>
+	<li>129</li>
+	<li>130</li>
+	<li>131</li>
+	<li>132</li>
+	<li>133</li>
+	<li>134</li>
+	<li>135</li>
+	<li>136</li>
+	<li>137</li>
+	<li>138</li>
+	<li>139</li>
+	<li>140</li>
+	<li>141</li>
+	<li>142</li>
+	<li>143</li>
+	<li>144</li>
+	<li>145</li>
+	<li>146</li>
+	<li>147</li>
+	<li>148</li>
+	<li>149</li>
+	<li>150</li>
+	<li>151</li>
+	<li>152</li>
+	<li>153</li>
+	<li>154</li>
+	<li>155</li>
+	<li>156</li>
+	<li>157</li>
+	<li>158</li>
+	<li>159</li>
+	<li>160</li>
+	<li>161</li>
+	<li>162</li>
+</ol>
+
+
+
+    [1] 163
+
 
 ### Matrix creation from data
 
 
 ```R
+# Dataset shape
 rows <- dim(df_all)[1]
 cols <- (dim(df_all)[2] - 2) / 4
-dimensions <- 4 # Number of channels
+
+# Number of channels
+dimensions <- 4
 X <- array(0, c(rows, cols, dimensions))
 # Y train is a 1D matrix with rows and targets
 Y <- matrix(0, nrow = rows, ncol = num_classes)
@@ -113,30 +330,48 @@ ind_data <- seq(from=1,to=rows)
 ```R
 # Reshape dataframe to matrix slices
 X[ind_data, , 1] <- as.matrix(df_all[ind_data, 1:406])
-X[ind_data, , 2] <- as.matrix(df_all[ind_data, 406:((406 * 2) - 1)])
+X[ind_data, , 2] <- as.matrix(df_all[ind_data, 406:((406 * 2) - 1)]) 
 X[ind_data, , 3] <- as.matrix(df_all[ind_data, (406 * 2):((406 * 3) - 1)])
-X[ind_data, , 4] <- as.matrix(df_all[ind_data, (406 * 3):((406 * 4) - 1)])
-Y <- to_categorical(df_all[ind_data, 1626:1626] / 0.0864, num_classes) 
+X[ind_data, , 4] <- as.matrix(df_all[ind_data, (406 * 3):((406 * 4) - 1)]) / 0.0864
+```
 
-dim(X)
-dim(Y)
+#### Select target ($\Delta u$ or $\delta r$) and covert as one-hot encoding
+
+- Index = 1626 : Correspond to $\Delta u$
+- Index = 1625 : Correspond to $\delta r$
+
+
+```R
+Y <- to_categorical(df_all[ind_data, 1626:1626] / 0.0864 , num_classes)
+```
+
+#### Data normalization
+
+
+```R
+for (i in ind_data){
+    X[i, , 1] <- normalized(t(X[i, , 1]))
+}
+for (i in ind_data){
+    X[i, , 2] <- normalized(t(X[i, , 2]))
+}
+for (i in ind_data){
+    X[i, , 3] <- normalized(t(X[i, , 3]))
+}
+for (i in ind_data){
+    X[i, , 4] <- normalized(t(X[i, , 4]))
+}
+```
+
+### Histogram for target
+
+
+```R
+hist(apply(Y,1,function(x) which(x==1)), main="Histogram for target (Dnu or dr)" , xlab = "Target (Dnu or dr)")
 ```
 
 
-<ol class=list-inline>
-	<li>506557</li>
-	<li>406</li>
-	<li>4</li>
-</ol>
-
-
-
-
-<ol class=list-inline>
-	<li>506557</li>
-	<li>162</li>
-</ol>
-
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_16_0.png)
 
 
 ### Check that target is not in the trainind data
@@ -160,22 +395,13 @@ print(table(flags))
 
     [1] "Check for target 1:"
     flags
-     FALSE   TRUE 
-    506548      9 
+     FALSE 
+    379294 
     [1] "Check for target 2:"
+    flags
+     FALSE   TRUE 
+    379183    111 
 
-
-
-```R
-#ind_remove_no_target <- which(apply(Y,1,sum)==1)
-#paste0("Removing ",length(ind_remove_no_target[ind_remove_no_target==TRUE])," rows with NO target")
-
-#X <- X[ind_remove_no_target,,]
-#Y <- Y[ind_remove_no_target,]
-
-#dim(X)
-#dim(Y)
-```
 
 
 ```R
@@ -183,10 +409,12 @@ stopifnot(which(is.na(Y))==FALSE)
 stopifnot(which(is.na(X))==FALSE)
 ```
 
+### Split train and test
+
 
 ```R
 # Split train/test
-smp_size <- floor(0.98 * nrow(X))
+smp_size <- floor(0.9 * nrow(X))
 set.seed(123)
 ind <- sample(seq_len(nrow(X)), size = smp_size)
 
@@ -204,7 +432,7 @@ dim(y_test)
 
 
 <ol class=list-inline>
-	<li>496425</li>
+	<li>341364</li>
 	<li>406</li>
 	<li>4</li>
 </ol>
@@ -213,15 +441,15 @@ dim(y_test)
 
 
 <ol class=list-inline>
-	<li>496425</li>
-	<li>162</li>
+	<li>341364</li>
+	<li>163</li>
 </ol>
 
 
 
 
 <ol class=list-inline>
-	<li>10132</li>
+	<li>37930</li>
 	<li>406</li>
 	<li>4</li>
 </ol>
@@ -230,24 +458,15 @@ dim(y_test)
 
 
 <ol class=list-inline>
-	<li>10132</li>
-	<li>162</li>
+	<li>37930</li>
+	<li>163</li>
 </ol>
 
 
 
-### EDA of data
+# Deepwise separable convolution NN
 
-
-```R
-hist(apply(y_test,1,function(x) which(x==1)))
-```
-
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_14_0.png)
-
-
-### NN train
+### Accuray metrics (from the classication point of view)
 
 
 ```R
@@ -269,6 +488,8 @@ top_2_categorical_accuracy <-
   })
 ```
 
+### Create model and train's weights checkpoints
+
 
 ```R
 checkpoint_dir <- "~/Downloads/test/"
@@ -286,7 +507,6 @@ cp_callback <- callback_model_checkpoint(
   verbose = 1
 )
 }
-    
 
 # Create a 1d convolutional NN
 model <- keras_model_sequential() %>%
@@ -294,19 +514,10 @@ model <- keras_model_sequential() %>%
     kernel_size = 4,
     filters = 8,
     depth_multiplier = 10,
-    input_shape = c(406, 4)
+    input_shape = c(406,4)
   ) %>%
-  #layer_max_pooling_1d(pool_size = 2) %>%
-  #layer_dropout(0.2) %>%
-  #layer_batch_normalization() %>%
-layer_separable_conv_1d(
-    kernel_size = 2,
-    filters = 4,
-    depth_multiplier = 20
-  ) %>%
-  layer_max_pooling_1d(pool_size = 4) %>%
-  layer_dropout(0.5) %>%
-  layer_batch_normalization() %>%
+  layer_max_pooling_1d(pool_size = 2) %>%
+  layer_dropout(0.3) %>%
 
   layer_flatten() %>%
   layer_dense(units = num_classes, activation = 'softmax')
@@ -331,25 +542,23 @@ summary(model) # Plot summary
     ________________________________________________________________________________
     Layer (type)                        Output Shape                    Param #     
     ================================================================================
-    separable_conv1d_49 (SeparableConv1 (None, 403, 8)                  488         
+    separable_conv1d_1 (SeparableConv1D (None, 403, 8)                  488         
     ________________________________________________________________________________
-    separable_conv1d_50 (SeparableConv1 (None, 402, 4)                  964         
+    max_pooling1d_1 (MaxPooling1D)      (None, 201, 8)                  0           
     ________________________________________________________________________________
-    max_pooling1d_49 (MaxPooling1D)     (None, 100, 4)                  0           
+    dropout_1 (Dropout)                 (None, 201, 8)                  0           
     ________________________________________________________________________________
-    dropout_49 (Dropout)                (None, 100, 4)                  0           
+    flatten_1 (Flatten)                 (None, 1608)                    0           
     ________________________________________________________________________________
-    batch_normalization_49 (BatchNormal (None, 100, 4)                  16          
-    ________________________________________________________________________________
-    flatten_25 (Flatten)                (None, 400)                     0           
-    ________________________________________________________________________________
-    dense_31 (Dense)                    (None, 162)                     64962       
+    dense_1 (Dense)                     (None, 163)                     262267      
     ================================================================================
-    Total params: 66,430
-    Trainable params: 66,422
-    Non-trainable params: 8
+    Total params: 262,755
+    Trainable params: 262,755
+    Non-trainable params: 0
     ________________________________________________________________________________
 
+
+### Run train
 
 
 ```R
@@ -358,7 +567,7 @@ if (T) {
   history <- model %>% fit(
     x_train,
     y_train,
-    epochs = 700,
+    epochs = 200,
     batch_size =  250,
     validation_split = 0.1,
     shuffle = T,
@@ -368,54 +577,33 @@ if (T) {
 }
 ```
 
+### Save model and evaluation on test
+
 
 ```R
-#model %>% load_model_weights_hdf5(
-#  file.path("~/Downloads/checkpointsDnuData2/weights.390-2.26.hdf5")
-#)
+#save_model_hdf5(model, "~/Downloads/model_Dnu.h5")
 evaluate(model, x_test, y_test)
-
-# evaluate on delta scuti stars
-load("../../docs/GPU/X_scuti.rda")
-load("../../docs/GPU/Y_scuti.rda")
-evaluate(model, X_scuti, Y_scuti)
 ```
 
 
 <dl>
 	<dt>$loss</dt>
-		<dd>2.67567529030765</dd>
+		<dd>2.24245120876859</dd>
 	<dt>$acc</dt>
-		<dd>0.181800236885038</dd>
+		<dd>0.262457157922489</dd>
 	<dt>$rec_at_2</dt>
-		<dd>0.314449269664273</dd>
+		<dd>0.449907724752987</dd>
 	<dt>$rec_at_4</dt>
-		<dd>0.49980260558247</dd>
+		<dd>0.668020036903812</dd>
 	<dt>$recat_6</dt>
-		<dd>0.634919068345523</dd>
+		<dd>0.791220669648341</dd>
 	<dt>$rec_at_8</dt>
-		<dd>0.751776549545993</dd>
+		<dd>0.865910888472491</dd>
 </dl>
 
 
 
-
-<dl>
-	<dt>$loss</dt>
-		<dd>388.727661132812</dd>
-	<dt>$acc</dt>
-		<dd>0</dd>
-	<dt>$rec_at_2</dt>
-		<dd>0.0909090936183929</dd>
-	<dt>$rec_at_4</dt>
-		<dd>0.0909090936183929</dd>
-	<dt>$recat_6</dt>
-		<dd>0.0909090936183929</dd>
-	<dt>$rec_at_8</dt>
-		<dd>0.0909090936183929</dd>
-</dl>
-
-
+### Plot metrics history
 
 
 ```R
@@ -424,24 +612,9 @@ plot(history) +
 ```
 
 
-    Error in .External2(C_savehistory, file): no history available to save
-    Traceback:
 
 
-    1. plot(history)
-
-    2. plot.function(history)
-
-    3. curve(expr = x, from = from, to = to, xlim = xlim, ylab = ylab, 
-     .     ...)
-
-    4. eval(expr, envir = ll, enclos = parent.frame())
-
-    5. eval(expr, envir = ll, enclos = parent.frame())
-
-    6. x(x)
-
-    7. savehistory(file1)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_32_1.png)
 
 
 ### Confusion matrix
@@ -462,7 +635,7 @@ dim(dtCM)
 
 
 <ol class=list-inline>
-	<li>8888</li>
+	<li>10918</li>
 	<li>3</li>
 </ol>
 
@@ -472,41 +645,68 @@ dim(dtCM)
 ```R
 ggplot(data=dtCM, aes(c1, c2, fill = freq)) +
   geom_tile() +
-  scale_fill_gradientn(colours=c("#0000FFFF","#FFFFFFFF","#FF0000FF"))+
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
-  #scale_fill_gradient(breaks=seq(from=-.5, to=4, by=.2))
-  scale_x_discrete(breaks=seq(from=0,to=120,by=4), limits=seq(0,120)) +
-  scale_y_discrete(breaks=seq(from=0,to=120,by=4), limits=seq(0,120)) 
+  xlab("Real class") +
+  ylab("NN class inference") +
+  theme_bw()
 ```
 
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_23_1.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_35_1.png)
 
 
-### MSE error acc_at_1
+# Performance metrics with acc@1
 
 
 ```R
 # Output dimension
-classes <- seq(
-    from = 0.1,
-    to = 14 / 0.0864,
-    by = output_resolution
-  )
-
-
-hist(((classes[Y_test_hat]) - (classes[apply(y_test,1,function(x) which(x==1))])), breaks=100)
+y <- classses[Y_test_hat]
+y_hat <- classses[apply(y_test,1,function(x) which(x==1))]
 ```
 
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_25_0.png)
-
+### Absolute errors at acc@1
 
 
 ```R
-select_test <- 2930
+resi <- ((classses[Y_test_hat]) - (classses[apply(y_test,1,function(x) which(x==1))]))
+summary(resi)
+hist(resi, breaks=100, xlim = c(-50,50), xlab = "absolute errors", main="Absolute Errors Histogram")
+```
+
+
+       Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+    -84.000  -3.000  -1.000  -1.381   0.000  63.000 
+
+
+
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_39_1.png)
+
+
+### Percentual errors with acc@1
+
+
+```R
+resi <- ((y - y_hat)/y) * 100      
+summary(resi)
+hist(resi, breaks=100,, xlim = c(-50,50), xlab = "percentual errors", main="Percentual Errors Histogram")
+```
+
+
+        Min.  1st Qu.   Median     Mean  3rd Qu.     Max. 
+    -560.000   -6.329   -2.410   -3.592    0.000   73.750 
+
+
+
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_41_1.png)
+
+
+### Visual proof on given data test
+
+
+```R
+select_test <- 100
 
 y_hats <- predict(model, x_test)
 
@@ -524,7 +724,7 @@ plot(
 lines(x_test[select_test, , 1], lty = 1, col = "blue")
 lines(x_test[select_test, , 2], lty = 2, col = "grey")
 lines(x_test[select_test, , 3], lty = 3, col = "orange")
-
+lines(x_test[select_test, , 4], lty = 3, col = "brown")
 
 abline(
   v = which(y_test[select_test, ]==1)[1],
@@ -533,45 +733,29 @@ abline(
   lty = 2
 )
 
-abline(
-  v = which(y_test[select_test, ]==1)[2],
-  col = "red",
-  lwd = 3,
-  lty = 2
-)
 
 legend(
   "topright",
-  c("FT", "Diffs", "Autocorrelation"),
+  c("FT", "Diffs", "Autocorrelation", "Raw data"),
   lty = c(1, 2, 3, 4),
-  col = c("blue", "grey", "orange")
+  col = c("blue", "grey", "orange", "brown")
 )
 ```
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_26_0.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_43_0.png)
 
 
-### Auxiliar functions for Validation on $\delta$-scuti stars
+# Validation on $\delta$-scuti stars
+
+### Auxiliar functions
 
 
 ```R
-trunc <-
-    function(x, ..., prec = 1)
-      base::trunc(x * 10 ^ prec, ...) / 10 ^ prec
-  
-  
-  flat <- function(x) {
-    return(paste0(trunc(c(x), prec = 4), collapse = ","))
-  }
-
-normalized <- function(x) {
-        (x - min(x)) / (max(x) - min(x))
-      }
-
-validate_real_star <- function(data, real_dnu, numFrequencies=30) {
+validate_real_star <- function(data, real_dnu, real_dr, numFrequencies=30) {
 
 
+    
   # Execute experiment
   result <- process(
     frequency = data$V1,
@@ -630,26 +814,26 @@ validate_real_star <- function(data, real_dnu, numFrequencies=30) {
     
 
   rows <- dim(df_all)[1]
-  cols <- (dim(df_all)[2] - 2) / 4
   dimensions <- 4 # Number of channels
-  X <- array(0, c(1, cols, 4))
+  cols <- (dim(df_all)[2] - 2) / 4
+  X <- array(0, c(1, cols, dimensions))
   # Y train is a 1D matrix with rows and targets
   Y <- matrix(0, nrow = 1, ncol = num_classes)
   ind_data <- seq(from = 1, to = rows)
-  
-  X[1, , 1] <- ft_1D
-  X[1, , 2] <- diff_2D
-  X[1, , 3] <- cross_3D
-  X[1, , 4] <- raw_1D
+    
+    
+  X[1, , 1] <- normalized(ft_1D)
+  X[1, , 2] <- normalized(diff_2D)
+  X[1, , 3] <- normalized(cross_3D)
+  X[1, , 4] <- normalized(raw_1D)
 
   print(paste0("Max hist diff:",max(X[1, , 2])))
   print(paste0("Mas acutocorre:",max(X[1, , 3])))
-  print(paste0("Max raw:",max(X[1, , 4])))
-
+  #print(paste0("Max raw:",max(X[1, , 4])))
 
   plot(
     seq(
-    from = 0.1,
+    from = 0.0,
     to = 14 / 0.0864,
     by = 1),
     t(predict(modelDnu, X)),
@@ -675,6 +859,13 @@ validate_real_star <- function(data, real_dnu, numFrequencies=30) {
    lty = 2
   )
     
+abline(
+   v = real_dr,
+   col = "blue",
+   lwd = 3,
+   lty = 2
+  )
+    
   legend(
     "topright",
     c("FT", "Diffs", "Autocorrelation", "Raw", "NN-Dnu", "NN-dr"),
@@ -689,7 +880,7 @@ validate_real_star <- function(data, real_dnu, numFrequencies=30) {
 
 ```
 
-# Validation on $\delta$-scuti stars
+### Load best model and weigths
 
 
 ```R
@@ -700,68 +891,23 @@ modelDnu <- keras_model_sequential() %>%
     kernel_size = 4,
     filters = 8,
     depth_multiplier = 10,
-    input_shape = c(406, 4)
+    input_shape = c(406,4)
   ) %>%
-  #layer_max_pooling_1d(pool_size = 2) %>%
-  #layer_dropout(0.2) %>%
-  #layer_batch_normalization() %>%
-layer_separable_conv_1d(
-    kernel_size = 2,
-    filters = 4,
-    depth_multiplier = 20
-  ) %>%
-  layer_max_pooling_1d(pool_size = 4) %>%
-  layer_dropout(0.5) %>%
-  layer_batch_normalization() %>%
+  layer_max_pooling_1d(pool_size = 2) %>%
+  layer_dropout(0.3) %>%
 
   layer_flatten() %>%
   layer_dense(units = num_classes, activation = 'softmax')
 
 modelDnu %>% load_model_weights_hdf5(
-  file.path("~/Downloads/test/weights.30-2.71.hdf5")
+  file.path("~/Downloads/test/weights.200-2.24.hdf5")
 )
+```
+
+### Read delta scuti stars data
 
 
-
-
-modelDr <- keras_model_sequential() %>%
-  layer_separable_conv_1d(
-    kernel_size = 4,
-    filters = 8,
-    depth_multiplier = 10,
-    input_shape = c(406, 4)
-  ) %>%
-  layer_max_pooling_1d(pool_size = 2) %>%
-  layer_dropout(0.2) %>%
-  layer_batch_normalization() %>%
-layer_separable_conv_1d(
-    kernel_size = 4,
-    filters = 8,
-    depth_multiplier = 10
-  ) %>%
-  layer_max_pooling_1d(pool_size = 2) %>%
-  layer_dropout(0.2) %>%
-  layer_batch_normalization() %>%
-  layer_flatten() %>%
-  layer_dense(units = num_classes, activation = 'softmax')
-# Configure a model for categorical classification.
-modelDr %>% compile(
-  loss = "categorical_crossentropy",
-  optimizer = optimizer_adadelta(lr = 0.01),
-  metrics = c(
-          "accuracy",
-          top_2_categorical_accuracy,
-          top_4_categorical_accuracy,
-          top_6_categorical_accuracy,
-          top_8_categorical_accuracy
-        )
-)
-modelDr %>% load_model_weights_hdf5(
-  file.path("~/Downloads/checkpointsDrData2/weights.80-1.76.hdf5")
-)
-
-
-
+```R
 # Read file stars
 stars_base_dir <- "~/Projects/variableStars/data/deltaScuti/"
 setwd(stars_base_dir)
@@ -770,9 +916,8 @@ for (file in list.files()) {
     #data <- read.csv(file, sep="", header=F)
     #validate_real_star(data)
 }
-errors <- data.frame(matrix(ncol=3, nrow=0))
-colnames(errors) <- c("star", "difference", "n")
-#errors
+errors <- data.frame(matrix(ncol=6, nrow=0))
+colnames(errors) <- c("star", "NN", "value", "error", "error_percentual", "n")
 ```
 
     [1] "CID100866999.lis"
@@ -792,12 +937,22 @@ colnames(errors) <- c("star", "difference", "n")
 
 
 ```R
+# Quitar las frecuencias < 5 ciclos por día.
 d <- read.csv(paste0(stars_base_dir,"CID100866999.lis"), sep="", header=F)
-head(d)
 print(paste0("Nrows: ", dim(d)[1]))
-max <- validate_real_star(d, 56)
-errors <- rbind(errors, data.frame("star"="CID100866999", "difference"=56-max, "n"=dim(d)[1]))
+head(d)
+max <- validate_real_star(d, 56, 0) # There is no information about dr
+errors <- rbind(errors, data.frame("star"="CID100866999", 
+                                   "NN"=max,
+                                   "value"=56,
+                                   "error"=56-max, 
+                                   "error_percentual"=((56-max)/(56))*100, 
+                                   "n"=dim(d)[1]))
+print(errors)
 ```
+
+    [1] "Nrows: 8"
+
 
 
 <table>
@@ -814,14 +969,14 @@ errors <- rbind(errors, data.frame("star"="CID100866999", "difference"=56-max, "
 
 
 
-    [1] "Nrows: 8"
-    [1] "Max hist diff:4"
+    [1] "Max hist diff:1"
     [1] "Mas acutocorre:1"
-    [1] "Max raw:11.623"
+              star  NN value error error_percentual n
+    1 CID100866999 100    56   -44        -78.57143 8
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_32_2.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_52_3.png)
 
 
 ## CID105906206.lis
@@ -831,8 +986,14 @@ errors <- rbind(errors, data.frame("star"="CID100866999", "difference"=56-max, "
 d <- read.csv(paste0(stars_base_dir,"CID105906206.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
-max <- validate_real_star(d, 20)
-errors <- rbind(errors, data.frame("star"="CID105906206", "difference"=20-max, "n"=dim(d)[1]))
+max <- validate_real_star(d, 20, 2.61)
+errors <- rbind(errors, data.frame("star"="CID105906206", 
+                                   "NN"=max,
+                                   "value"=20,
+                                   "error"=20-max, 
+                                   "error_percentual"=((20-max)/20)*100, 
+                                   "n"=dim(d)[1]))
+print(errors)
 ```
 
 
@@ -851,13 +1012,15 @@ errors <- rbind(errors, data.frame("star"="CID105906206", "difference"=20-max, "
 
 
     [1] "Nrows: 202"
-    [1] "Max hist diff:7"
+    [1] "Max hist diff:1"
     [1] "Mas acutocorre:1"
-    [1] "Max raw:2.552"
+              star  NN value error error_percentual   n
+    1 CID100866999 100    56   -44        -78.57143   8
+    2 CID105906206  17    20     3         15.00000 202
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_34_2.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_54_2.png)
 
 
 ## HD15082.lis
@@ -867,8 +1030,14 @@ errors <- rbind(errors, data.frame("star"="CID105906206", "difference"=20-max, "
 d <- read.csv(paste0(stars_base_dir,"HD15082.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
-max <- validate_real_star(d, 80, 30)
-errors <- rbind(errors, data.frame("star"="HD15082", "difference"=80-max, "n"=dim(d)[1]))
+max <- validate_real_star(d, 80, 14)
+errors <- rbind(errors, data.frame("star"="HD15082", 
+                                   "NN"=max,
+                                   "value"=80,
+                                   "error"=80-max, 
+                                   "error_percentual"=((80-max)/80)*100, 
+                                   "n"=dim(d)[1]))
+print(errors)
 ```
 
 
@@ -887,13 +1056,16 @@ errors <- rbind(errors, data.frame("star"="HD15082", "difference"=80-max, "n"=di
 
 
     [1] "Nrows: 71"
-    [1] "Max hist diff:6"
+    [1] "Max hist diff:1"
     [1] "Mas acutocorre:1"
-    [1] "Max raw:5.419873443"
+              star  NN value error error_percentual   n
+    1 CID100866999 100    56   -44        -78.57143   8
+    2 CID105906206  17    20     3         15.00000 202
+    3      HD15082 101    80   -21        -26.25000  71
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_36_2.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_56_2.png)
 
 
 ## HD159561.lis
@@ -903,8 +1075,14 @@ errors <- rbind(errors, data.frame("star"="HD15082", "difference"=80-max, "n"=di
 d <- read.csv(paste0(stars_base_dir,"HD159561.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
-max <- validate_real_star(d, 38)
-errors <- rbind(errors, data.frame("star"="HD159561", "difference"=38-max, "n"=dim(d)[1]))
+max <- validate_real_star(d, 38, 19)
+errors <- rbind(errors, data.frame("star"="HD159561", 
+                                   "NN"=max,
+                                   "value"=38,
+                                   "error"=38-max, 
+                                   "error_percentual"=((38-max)/38)*100, 
+                                   "n"=dim(d)[1]))
+print(errors)
 ```
 
 
@@ -923,13 +1101,17 @@ errors <- rbind(errors, data.frame("star"="HD159561", "difference"=38-max, "n"=d
 
 
     [1] "Nrows: 40"
-    [1] "Max hist diff:2"
+    [1] "Max hist diff:1"
     [1] "Mas acutocorre:1"
-    [1] "Max raw:0.655"
+              star  NN value error error_percentual   n
+    1 CID100866999 100    56   -44       -78.571429   8
+    2 CID105906206  17    20     3        15.000000 202
+    3      HD15082 101    80   -21       -26.250000  71
+    4     HD159561  35    38     3         7.894737  40
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_38_2.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_58_2.png)
 
 
 ## HD172189.lis
@@ -941,8 +1123,14 @@ head(d)
 print(paste0("Nrows: ", dim(d)[1]))
 
 
-max <- validate_real_star(d, 19)
-errors <- rbind(errors, data.frame("star"="HD172189", "difference"=19-max, "n"=dim(d)[1]))
+max <- validate_real_star(d, 19, 4.6)
+errors <- rbind(errors, data.frame("star"="HD172189", 
+                                   "NN"=max,
+                                   "value"=19,
+                                   "error"=19-max, 
+                                   "error_percentual"=((19-max)/19)*100, 
+                                   "n"=dim(d)[1]))
+print(errors)
 ```
 
 
@@ -961,13 +1149,18 @@ errors <- rbind(errors, data.frame("star"="HD172189", "difference"=19-max, "n"=d
 
 
     [1] "Nrows: 50"
-    [1] "Max hist diff:3"
+    [1] "Max hist diff:1"
     [1] "Mas acutocorre:1"
-    [1] "Max raw:0.00124074074074074"
+              star  NN value error error_percentual   n
+    1 CID100866999 100    56   -44       -78.571429   8
+    2 CID105906206  17    20     3        15.000000 202
+    3      HD15082 101    80   -21       -26.250000  71
+    4     HD159561  35    38     3         7.894737  40
+    5     HD172189  16    19     3        15.789474  50
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_40_2.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_60_2.png)
 
 
 ## KIC10080943.lis
@@ -977,8 +1170,14 @@ errors <- rbind(errors, data.frame("star"="HD172189", "difference"=19-max, "n"=d
 d <- read.csv(paste0(stars_base_dir,"KIC10080943.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
-max <- validate_real_star(d, 52, 200)
-errors <- rbind(errors, data.frame("star"="KIC10080943", "difference"=52-max, "n"=dim(d)[1]))
+max <- validate_real_star(d, 52, 1.7)
+errors <- rbind(errors, data.frame("star"="KIC10080943", 
+                                   "NN"=max,
+                                   "value"=52,
+                                   "error"=52-max, 
+                                   "error_percentual"=(abs(52-max)/52)*100, 
+                                   "n"=dim(d)[1]))
+print(errors)
 ```
 
 
@@ -997,13 +1196,19 @@ errors <- rbind(errors, data.frame("star"="KIC10080943", "difference"=52-max, "n
 
 
     [1] "Nrows: 321"
-    [1] "Max hist diff:265"
+    [1] "Max hist diff:1"
     [1] "Mas acutocorre:1"
-    [1] "Max raw:1360.9"
+              star  NN value error error_percentual   n
+    1 CID100866999 100    56   -44       -78.571429   8
+    2 CID105906206  17    20     3        15.000000 202
+    3      HD15082 101    80   -21       -26.250000  71
+    4     HD159561  35    38     3         7.894737  40
+    5     HD172189  16    19     3        15.789474  50
+    6  KIC10080943  17    52    35        67.307692 321
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_42_2.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_62_2.png)
 
 
 ## kic10661783.lis
@@ -1013,8 +1218,14 @@ errors <- rbind(errors, data.frame("star"="KIC10080943", "difference"=52-max, "n
 d <- read.csv(paste0(stars_base_dir,"kic10661783.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
-max <- validate_real_star(d, 39, 30)
-errors <- rbind(errors, data.frame("star"="kic10661783", "difference"=39-max, "n"=dim(d)[1]))
+max <- validate_real_star(d, 39, 7)
+errors <- rbind(errors, data.frame("star"="kic10661783", 
+                                   "NN"=max,
+                                   "value"=39,
+                                   "error"=39-max, 
+                                   "error_percentual"=(abs(39-max)/39)*100, 
+                                   "n"=dim(d)[1]))
+print(errors)
 ```
 
 
@@ -1035,11 +1246,18 @@ errors <- rbind(errors, data.frame("star"="kic10661783", "difference"=39-max, "n
     [1] "Nrows: 12"
     [1] "Max hist diff:1"
     [1] "Mas acutocorre:1"
-    [1] "Max raw:3.56"
+              star  NN value error error_percentual   n
+    1 CID100866999 100    56   -44       -78.571429   8
+    2 CID105906206  17    20     3        15.000000 202
+    3      HD15082 101    80   -21       -26.250000  71
+    4     HD159561  35    38     3         7.894737  40
+    5     HD172189  16    19     3        15.789474  50
+    6  KIC10080943  17    52    35        67.307692 321
+    7  kic10661783  95    39   -56       143.589744  12
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_44_2.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_64_2.png)
 
 
 ## KIC3858884.lis
@@ -1049,8 +1267,14 @@ errors <- rbind(errors, data.frame("star"="kic10661783", "difference"=39-max, "n
 d <- read.csv(paste0(stars_base_dir,"KIC3858884.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
-max <- validate_real_star(d, 29)
-errors <- rbind(errors, data.frame("star"="KIC3858884", "difference"=29-max, "n"=dim(d)[1]))
+max <- validate_real_star(d, 29, 1.9)
+errors <- rbind(errors, data.frame("star"="KIC3858884", 
+                                   "NN"=max,
+                                   "value"=29,
+                                   "error"=29-max, 
+                                   "error_percentual"=((29-max)/29)*100, 
+                                   "n"=dim(d)[1]))
+print(errors)
 ```
 
 
@@ -1069,13 +1293,21 @@ errors <- rbind(errors, data.frame("star"="KIC3858884", "difference"=29-max, "n"
 
 
     [1] "Nrows: 400"
-    [1] "Max hist diff:14"
+    [1] "Max hist diff:1"
     [1] "Mas acutocorre:1"
-    [1] "Max raw:10.15"
+              star  NN value error error_percentual   n
+    1 CID100866999 100    56   -44       -78.571429   8
+    2 CID105906206  17    20     3        15.000000 202
+    3      HD15082 101    80   -21       -26.250000  71
+    4     HD159561  35    38     3         7.894737  40
+    5     HD172189  16    19     3        15.789474  50
+    6  KIC10080943  17    52    35        67.307692 321
+    7  kic10661783  95    39   -56       143.589744  12
+    8   KIC3858884  17    29    12        41.379310 400
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_46_2.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_66_2.png)
 
 
 ## kic4544587.lis
@@ -1085,8 +1317,14 @@ errors <- rbind(errors, data.frame("star"="KIC3858884", "difference"=29-max, "n"
 d <- read.csv(paste0(stars_base_dir,"kic4544587.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
-max <- validate_real_star(d, 74)
-errors <- rbind(errors, data.frame("star"="kic4544587", "difference"=74-max, "n"=dim(d)[1]))
+max <- validate_real_star(d, 74, 11)
+errors <- rbind(errors, data.frame("star"="kic4544587", 
+                                   "NN"=max,
+                                   "value"=74,
+                                   "error"=74-max, 
+                                   "error_percentual"=(abs(74-max)/74)*100, 
+                                   "n"=dim(d)[1]))
+print(errors)
 ```
 
 
@@ -1105,13 +1343,22 @@ errors <- rbind(errors, data.frame("star"="kic4544587", "difference"=74-max, "n"
 
 
     [1] "Nrows: 16"
-    [1] "Max hist diff:5"
+    [1] "Max hist diff:1"
     [1] "Mas acutocorre:1"
-    [1] "Max raw:0.329"
+              star  NN value error error_percentual   n
+    1 CID100866999 100    56   -44       -78.571429   8
+    2 CID105906206  17    20     3        15.000000 202
+    3      HD15082 101    80   -21       -26.250000  71
+    4     HD159561  35    38     3         7.894737  40
+    5     HD172189  16    19     3        15.789474  50
+    6  KIC10080943  17    52    35        67.307692 321
+    7  kic10661783  95    39   -56       143.589744  12
+    8   KIC3858884  17    29    12        41.379310 400
+    9   kic4544587  71    74     3         4.054054  16
 
 
 
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_48_2.png)
+![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_68_2.png)
 
 
 ## KIC8262223.lis
@@ -1121,8 +1368,14 @@ errors <- rbind(errors, data.frame("star"="kic4544587", "difference"=74-max, "n"
 d <- read.csv(paste0(stars_base_dir,"KIC8262223.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
-max <- validate_real_star(d, 77)
-errors <- rbind(errors, data.frame("star"="KIC8262223", "difference"=77-max, "n"=dim(d)[1]))
+max <- validate_real_star(d, 77, 7.2)
+errors <- rbind(errors, data.frame("star"="KIC8262223", 
+                                   "NN"=max,
+                                   "value"=77,
+                                   "error"=77-max, 
+                                   "error_percentual"=(abs(77-max)/77)*100, 
+                                   "n"=dim(d)[1]))
+print(errors)
 ```
 
 
@@ -1141,13 +1394,6 @@ errors <- rbind(errors, data.frame("star"="KIC8262223", "difference"=77-max, "n"
 
 
     [1] "Nrows: 60"
-    [1] "Max hist diff:7"
-    [1] "Mas acutocorre:1"
-    [1] "Max raw:1.319"
-
-
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_50_2.png)
 
 
 ## KIC9851944.lis
@@ -1157,75 +1403,26 @@ errors <- rbind(errors, data.frame("star"="KIC8262223", "difference"=77-max, "n"
 d <- read.csv(paste0(stars_base_dir,"KIC9851944.lis"), sep="", header=F)
 head(d)
 print(paste0("Nrows: ", dim(d)[1]))
-max <- validate_real_star(d, 26, 30)
-errors <- rbind(errors, data.frame("star"="KIC9851944", "difference"=26-max, "n"=dim(d)[1]))
+max <- validate_real_star(d, 26, 5.3)
+errors <- rbind(errors, data.frame("star"="KIC9851944.lis", 
+                                   "NN"=max,
+                                   "value"=26,
+                                   "error"=26-max, 
+                                   "error_percentual"=(abs(26-max)/26)*100, 
+                                   "n"=dim(d)[1]))
+print(errors)
 ```
-
-
-<table>
-<thead><tr><th scope=col>V1</th><th scope=col>V2</th></tr></thead>
-<tbody>
-	<tr><td>10.399692</td><td>0.6530   </td></tr>
-	<tr><td>10.176019</td><td>0.5480   </td></tr>
-	<tr><td>11.890476</td><td>0.4540   </td></tr>
-	<tr><td> 5.097099</td><td>0.4046   </td></tr>
-	<tr><td>11.018543</td><td>0.2290   </td></tr>
-	<tr><td>12.814916</td><td>0.2232   </td></tr>
-</tbody>
-</table>
-
-
-
-    [1] "Nrows: 52"
-    [1] "Max hist diff:5"
-    [1] "Mas acutocorre:1"
-    [1] "Max raw:0.653"
-
-
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_52_2.png)
-
 
 ## All errors
 
 
 ```R
 errors
-mean(errors$difference)
-mean((errors$difference)^2)
 ```
 
 
-<table>
-<thead><tr><th scope=col>star</th><th scope=col>difference</th><th scope=col>n</th></tr></thead>
-<tbody>
-	<tr><td>CID100866999</td><td> -3         </td><td>  8         </td></tr>
-	<tr><td>CID105906206</td><td>  1         </td><td>202         </td></tr>
-	<tr><td>HD15082     </td><td>-11         </td><td> 71         </td></tr>
-	<tr><td>HD159561    </td><td>  4         </td><td> 40         </td></tr>
-	<tr><td>HD172189    </td><td> -9         </td><td> 50         </td></tr>
-	<tr><td>KIC10080943 </td><td> 33         </td><td>321         </td></tr>
-	<tr><td>kic10661783 </td><td>-17         </td><td> 12         </td></tr>
-	<tr><td>KIC3858884  </td><td> 11         </td><td>400         </td></tr>
-	<tr><td>kic4544587  </td><td>  6         </td><td> 16         </td></tr>
-	<tr><td>KIC8262223  </td><td> 24         </td><td> 60         </td></tr>
-	<tr><td>KIC9851944  </td><td>  1         </td><td> 52         </td></tr>
-</tbody>
-</table>
-
-
-
-
-3.63636363636364
-
-
-
-212.727272727273
-
-
-
 ```R
-ggplot(aes(y=abs(difference), x=1), data=errors) +
+ggplot(aes(y=abs(error), x=1), data=errors) +
     geom_point() +
     geom_text(aes(label=paste0(star,", data=(",n,")")),hjust=-0.5, vjust=0) +
     ggtitle("Dnu Validation on delta scuti stars. Differences between NN and paper results") +
@@ -1234,14 +1431,8 @@ ggplot(aes(y=abs(difference), x=1), data=errors) +
 ```
 
 
-
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_55_1.png)
-
-
-
 ```R
-ggplot(aes(y=abs(difference), x=n), data=errors) +
+ggplot(aes(y=abs(error), x=n), data=errors) +
     geom_point()  +
      stat_smooth(method="lm", se=F) +
      geom_text(aes(label=paste0(star,", data=(",n,")")),hjust=-0.5, vjust=0) +
@@ -1250,9 +1441,3 @@ ggplot(aes(y=abs(difference), x=n), data=errors) +
      xlab("Number of frequencies") +
      theme_bw()
 ```
-
-
-
-
-![png](RAW-ZAMS_NN_files/RAW-ZAMS_NN_56_1.png)
-
