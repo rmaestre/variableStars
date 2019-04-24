@@ -98,6 +98,6 @@ result <- process(
 Deep Neural Networks
 --------------------
 
-This package is also used as feature engineering in [Deep Neural Network application to *Dnu* and *dr* estimation](https://github.com/rmaestre/variableStars/blob/master/docs/NN-dnudr.md).
+This package is also used as feature engineering in [Deep Neural Network application to *Dnu* and *dr* estimation](https://github.com/rmaestre/asteroseismologyNN).
 
 <img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/nn-approach.png" data-canonical-src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/nn-approach.png" width="400" />
