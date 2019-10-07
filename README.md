@@ -26,7 +26,7 @@ library(devtools)
 install_github("rmaestre/variableStars")
 ```
 
-# Note for Windows users
+#### \*\* Note for Windows users \*\*
 
 We strongly recommend to use [The Microsoft R Open & MKL R
 distribution](https://mran.microsoft.com/open) as R distribution.
@@ -39,14 +39,14 @@ the **src** project folder with the next content:
     PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) 
     PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
 
-An UI for experimentation with synthetic data is provided:
+## An UI for experimentation with synthetic data is provided
 
 ``` r
 library(variableStars)
 runUISynthetic()
 ```
 
-<https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/ui.png>
+<img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/ui.png" data-canonical-src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/ui.png" width="300" />
 
 ## Example of use on a pulsar data
 
@@ -119,6 +119,6 @@ result <- process(
 
 This package is also used as feature engineering in [Deep Neural Network
 application to *Dnu* and *dr*
-estimation](https://github.com/rmaestre/variableStars/blob/master/docs/NN-dnudr.md).
+estimation](https://github.com/rmaestre/astroseismologyNN).
 
 <img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/nn-approach.png" data-canonical-src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/nn-approach.png" width="400" />
