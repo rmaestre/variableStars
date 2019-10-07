@@ -28,8 +28,21 @@ library(devtools)
 install_github("rmaestre/variableStars")
 ```
 
+Note for Windows users
+======================
+We strongly recommend to use [The Microsoft R Open & MKL R distribution](https://mran.microsoft.com/open) as R distribution.
 
-A UI for experimentation with synthetic data is provided:
+Also, **please** do not forgive to include the file ```Makevars.win``` into the **src** project folder with the next content:
+
+```
+CXX_STD = CXX11
+
+PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) 
+PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+```
+
+
+An UI for experimentation with synthetic data is provided:
 
 ``` r
 library(variableStars)

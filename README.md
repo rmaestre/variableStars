@@ -1,21 +1,24 @@
 
-[![Build Status](https://travis-ci.org/rmaestre/variableStars.svg?branch=master)](https://travis-ci.org/rmaestre/variableStars)
+[![Build
+Status](https://travis-ci.org/rmaestre/variableStars.svg?branch=master)](https://travis-ci.org/rmaestre/variableStars)
 
-Introduction
-------------
+## Introduction
 
-Variable Star package provides the main funtions to analized patterns on the [oscilation modes of variable stars](https://en.wikipedia.org/wiki/Asteroseismology).
+Variable Star package provides the main funtions to analized patterns on
+the [oscilation modes of variable
+stars](https://en.wikipedia.org/wiki/Asteroseismology).
 
 <img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/oscilationModes.png" data-canonical-src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/oscilationModes.png" width="200" />
 
 All the code is based on these two papers:
 
--   [Asteroseismic analysis of the CoRoT *δ* Scuti star HD 174936](https://www.aanda.org/articles/aa/full_html/2009/40/aa11932-09/aa11932-09.html)
+  - [Asteroseismic analysis of the CoRoT *δ* Scuti star HD
+    174936](https://www.aanda.org/articles/aa/full_html/2009/40/aa11932-09/aa11932-09.html)
 
--   [An in-depth study of HD 174966 with CoRoT photometry and HARPS spectroscopy](https://www.aanda.org/articles/aa/full_html/2013/11/aa20256-12/aa20256-12.html)
+  - [An in-depth study of HD 174966 with CoRoT photometry and HARPS
+    spectroscopy](https://www.aanda.org/articles/aa/full_html/2013/11/aa20256-12/aa20256-12.html)
 
-Installation
-------------
+## Installation
 
 ``` r
 install.packages("devtools")
@@ -23,31 +26,48 @@ library(devtools)
 install_github("rmaestre/variableStars")
 ```
 
-A UI for experimentation with synthetic data is provided:
+# Note for Windows users
+
+We strongly recommend to use [The Microsoft R Open & MKL R
+distribution](https://mran.microsoft.com/open) as R distribution.
+
+Also, **please** do not forgive to include the file `Makevars.win` into
+the **src** project folder with the next content:
+
+    CXX_STD = CXX11
+    
+    PKG_CXXFLAGS = $(SHLIB_OPENMP_CXXFLAGS) 
+    PKG_LIBS = $(SHLIB_OPENMP_CXXFLAGS) $(LAPACK_LIBS) $(BLAS_LIBS) $(FLIBS)
+
+An UI for experimentation with synthetic data is provided:
 
 ``` r
 library(variableStars)
 runUISynthetic()
 ```
 
-[![UI](https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/ui.png)](https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/ui.png)
+<https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/ui.png>
 
-Example of use on a pulsar data
--------------------------------
+## Example of use on a pulsar data
 
-Please, find [here](docs/Experiment_-_HD174936.md) or [here](docs/Experiment_-_HD174966.md) the main execution of the complete package procedure.
+Please, find [here](docs/Experiment_-_HD174936.md) or
+[here](docs/Experiment_-_HD174966.md) the main execution of the complete
+package procedure.
 
-Main Workflow
--------------
+## Main Workflow
 
 <img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/diagrams.png" data-canonical-src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/diagrams.png" width="500" />
 
-(The pulsar in the Crab Nebula is composed by images taken by Hubble (red) and Chandra X-Ray(blue))
+(The pulsar in the Crab Nebula is composed by images taken by Hubble
+(red) and Chandra X-Ray(blue))
 
-Implementation
---------------
+## Implementation
 
-All core funcionalities are programmed [in C++ using RcppArmadillo integrated through Rcpp](https://github.com/rmaestre/variableStars/blob/master/src/tools.cpp). An example of function to calculate all differences between pair of element using Armadillo C++ library, iterators and std operattions:
+All core funcionalities are programmed [in C++ using RcppArmadillo
+integrated through
+Rcpp](https://github.com/rmaestre/variableStars/blob/master/src/tools.cpp).
+An example of function to calculate all differences between pair of
+element using Armadillo C++ library, iterators and std operattions:
 
 ``` c
   // Calculate all frequences differences
@@ -95,7 +115,10 @@ result <- process(
 )
 ```
 
-Deep Neural Networks
---------------------
+## Deep Neural Networks
 
-This package is also used as feature engineering in [Deep Neural Network application to *Dnu* and *dr* estimation](https://github.com/rmaestre/astroseismologyNN/).
+This package is also used as feature engineering in [Deep Neural Network
+application to *Dnu* and *dr*
+estimation](https://github.com/rmaestre/variableStars/blob/master/docs/NN-dnudr.md).
+
+<img src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/nn-approach.png" data-canonical-src="https://raw.githubusercontent.com/rmaestre/variableStars/master/docs/figures/nn-approach.png" width="400" />
