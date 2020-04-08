@@ -7,10 +7,10 @@ test_that("differences returns an error with an empty vector", {
 test_that("differences returns numbers but not zeros", {
   for (i in seq(1, 100)) {
     x <- sample(seq(from = 0,
-                 to = 100,
-                 by = 1),
-             size = round(runif(1, min = 10, max = 40)),
-             replace = TRUE)
+                    to = 100,
+                    by = 1),
+                size = round(runif(1, min = 10, max = 40)),
+                replace = TRUE)
     # Check same length
     expect_equal(sum(differences(x) == 0), 0)
   }
@@ -34,7 +34,7 @@ test_that("differences returns the exact abs difference between two numbers",
               numberA <- round(runif(1, min = -1000, max = 1000))
               numberB <- round(runif(1, min = -1000, max = 1000))
               # Check same length
-              if (numberA != numberB){
+              if (numberA != numberB) {
                 expect_equal(differences(c(numberA, numberB))[1], abs(numberA - numberB))
               }
             }
@@ -95,7 +95,7 @@ test_that("adjacentDifferences returns one element less than the input",
                        replace = TRUE)
               # Check same output
               expect_lt(length(adjacentDifferences(x)), length(x))
-              expect_equal(length(adjacentDifferences(x))+1, length(x))
+              expect_equal(length(adjacentDifferences(x)) + 1, length(x))
             }
           })
 
@@ -146,3 +146,15 @@ test_that("findPeaks returns at least one peak and sorted on random data",
               expect_true(all(diff(peaks) > 0))
             }
           })
+
+context("Dnu and rho calculation")
+
+test_that("Check Dnu calculation from rho", {
+  expect_equal(getRhoFromDnu(23.4, 0)$rho, 0.0597005, tolerance = 1e-6)
+  expect_equal(getRhoFromDnu(23.4, 0)$e_rho, 0.00570128, tolerance = 1e-6)
+})
+
+test_that("Check Rho calculation from Dnu", {
+  expect_equal(getDnuFromRho(0.0597005, 0)$dnu, 23.4, tolerance = 1e-6)
+  expect_equal(getDnuFromRho(23.4, 0)$dnu_err, 47.86446, tolerance = 1e-6)
+})
