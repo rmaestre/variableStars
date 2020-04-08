@@ -159,8 +159,8 @@ plot_spectrum_ggplot <- function(min, max, dt) {
 
 #' @export
 plot_histogram_ggplot <- function(dt) {
-  p <- ggplot(aes(x = bins, y = values), data = dt) +
-    geom_bar(stat = "identity") +
+  p <- ggplot(aes(x = bins, ymax = values, ymin = 0), data = dt) +
+    geom_linerange()+
     ggtitle("Histogram of differences") +
     xlab(expression(paste("Differences (", mu, "hz)"))) +
     ylab("Frecuency") +
